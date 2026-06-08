@@ -10,87 +10,122 @@
   body {
     min-height: 100vh;
     background: #e8f5e9;
+    background-image:
+      linear-gradient(rgba(165,214,167,0.25) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(165,214,167,0.25) 1px, transparent 1px);
+    background-size: 36px 36px;
     font-family: "Segoe Print", "Bradley Hand ITC", "Comic Sans MS", cursive;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* ── Fixed top bar ── */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 9999;
+    background: rgba(220, 242, 220, 0.94);
+    backdrop-filter: blur(8px);
+    border-bottom: 2.5px solid #a5d6a7;
+    padding: 10px 28px;
     display: flex;
-    justify-content: center;
-    padding: 80px 16px 80px;
+    align-items: center;
+    gap: 16px;
   }
 
-  .container {
-    width: 100%;
-    max-width: 580px;
-  }
-
-  h1 {
+  .topbar-title {
     color: #1b5e20;
-    font-size: 2.8rem;
-    letter-spacing: 0.04em;
-    text-align: center;
-    margin-bottom: 36px;
+    font-size: 1.35rem;
+    white-space: nowrap;
     user-select: none;
+    letter-spacing: 0.02em;
   }
 
-  /* ── Main input — looks like a ruled line ── */
-  .input-row {
-    width: 100%;
-  }
-
-  .input-row input {
-    width: 100%;
-    padding: 10px 4px;
+  .topbar input {
+    flex: 1;
+    max-width: 480px;
+    padding: 6px 2px;
     border: none;
-    border-bottom: 2.5px solid #81c784;
+    border-bottom: 2px solid #81c784;
     background: transparent;
     color: #1b5e20;
     font-family: inherit;
-    font-size: 1.15rem;
+    font-size: 1rem;
     outline: none;
     transition: border-color 0.2s;
   }
 
-  .input-row input:focus { border-bottom-color: #2e7d32; }
-  .input-row input::placeholder { color: #a5d6a7; }
+  .topbar input:focus { border-bottom-color: #2e7d32; }
+  .topbar input::placeholder { color: #a5d6a7; }
 
-  /* ── Main list ── */
-  #main-list {
-    list-style: none;
-    margin-top: 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  /* ── Item card ── */
-  .item {
+  /* ── Sticky note ── */
+  .note {
+    position: absolute;
+    width: 230px;
     background: #f4fbf4;
     border: 2.5px solid #81c784;
-    border-radius: 12px;
-    padding: 0;
-    overflow: hidden;
-    box-shadow: 2px 3px 0px #b2dfb2;
+    border-radius: 3px 12px 12px 3px;
+    box-shadow: 4px 5px 12px rgba(0,0,0,0.14), 1px 2px 0 #b2dfb2;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    transition: box-shadow 0.15s;
   }
 
-  /* ── Item top row ── */
-  .item-row {
+  .note:hover {
+    box-shadow: 6px 8px 18px rgba(0,0,0,0.18), 1px 2px 0 #b2dfb2;
+  }
+
+  /* Coloured drag tab at top */
+  .note-tab {
+    background: #81c784;
+    border-radius: 1px 10px 0 0;
+    height: 22px;
+    cursor: grab;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 14px 14px 14px 18px;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
-  /* ── Label with strike overlay ── */
-  .item-label {
-    position: relative;
+  .note-tab:active { cursor: grabbing; }
+
+  /* Three subtle dots to hint draggability */
+  .note-tab::before {
+    content: '· · ·';
+    color: rgba(27,94,32,0.45);
+    font-size: 1rem;
+    letter-spacing: 4px;
+    line-height: 1;
+    font-family: sans-serif;
+  }
+
+  /* ── Note content ── */
+  .note-content {
+    padding: 10px 10px 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .note-main-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .note-label {
     flex: 1;
+    position: relative;
     cursor: pointer;
-    user-select: none;
   }
 
-  .item-text {
+  .note-text {
     display: block;
     color: #1b5e20;
-    font-size: 1.1rem;
-    line-height: 1.4;
+    font-size: 1rem;
+    line-height: 1.35;
+    word-break: break-word;
     transition: color 0.4s ease;
   }
 
@@ -101,20 +136,24 @@
     transform: translateY(-50%);
     height: 2.5px;
     width: 0;
-    background: #388e3c;
+    background: #2e7d32;
     border-radius: 2px;
     pointer-events: none;
   }
 
-  .struck > .item-row > .item-label .strike-line,
-  .sub-item.struck > .sub-item-row > .item-label .strike-line {
-    animation: draw-strike 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  /* Animate strike on .note.struck (main task) */
+  .note.struck .note-label .strike-line {
+    animation: draw-strike 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
   }
 
-  .struck > .item-row > .item-label .item-text,
-  .sub-item.struck > .sub-item-row > .item-label .item-text {
+  .note.struck .note-label .note-text {
     color: #a5d6a7;
-    transition: color 0.4s ease;
+  }
+
+  /* Sub-item strike */
+  .sub-item.struck .sub-label .sub-text { color: #a5d6a7; }
+  .sub-item.struck .sub-label .strike-line {
+    animation: draw-strike 0.45s cubic-bezier(0.4,0,0.2,1) forwards;
   }
 
   @keyframes draw-strike {
@@ -122,290 +161,355 @@
     to   { width: 100%; }
   }
 
-  /* ── Action buttons ── */
-  .item-actions {
+  /* ── Note action buttons ── */
+  .note-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .btn-sub, .btn-del {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
+    justify-content: center;
+    font-size: 0.78rem;
+    transition: background 0.15s;
+    font-family: inherit;
+    background: transparent;
   }
 
   .btn-sub {
-    width: 28px;
-    height: 28px;
-    background: #c8e6c9;
-    border: 2px solid #81c784;
-    border-radius: 7px;
+    border-color: #a5d6a7;
     color: #2e7d32;
-    font-size: 1.1rem;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.15s;
-    user-select: none;
-    flex-shrink: 0;
-    font-family: inherit;
+    font-size: 1rem;
   }
 
-  .btn-sub:hover { background: #a5d6a7; }
+  .btn-sub:hover { background: #c8e6c9; }
 
-  .btn-delete {
-    width: 28px;
-    height: 28px;
-    background: transparent;
-    border: 2px solid #ef9a9a;
-    border-radius: 7px;
+  .btn-del {
+    border-color: #ef9a9a;
     color: #c62828;
-    font-size: 0.85rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.15s;
-    user-select: none;
-    flex-shrink: 0;
   }
 
-  .btn-delete:hover { background: #ffebee; }
+  .btn-del:hover { background: #ffebee; }
 
   .hidden { display: none !important; }
 
-  /* ── Sub-item input row ── */
-  .sub-input-row {
-    padding: 0 14px 12px 36px;
+  /* ── Sub-item input ── */
+  .sub-input-wrap {
+    border-bottom: 1.5px solid #a5d6a7;
+    margin: 0 2px 4px;
   }
 
-  .sub-input-row input {
+  .sub-input-wrap input {
     width: 100%;
-    padding: 6px 4px;
+    padding: 4px 2px;
     border: none;
-    border-bottom: 2px solid #a5d6a7;
     background: transparent;
     color: #1b5e20;
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: 0.82rem;
     outline: none;
-    transition: border-color 0.2s;
   }
 
-  .sub-input-row input:focus { border-bottom-color: #2e7d32; }
-  .sub-input-row input::placeholder { color: #b2dfb2; }
+  .sub-input-wrap input::placeholder { color: #b2dfb2; }
 
-  /* ── Sub-item list ── */
-  .sub-list {
-    list-style: none;
-    padding: 0 10px 10px 34px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
+  /* ── Sub items ── */
+  .sub-list { display: flex; flex-direction: column; gap: 4px; }
 
   .sub-item {
-    background: #edf7ed;
-    border: 2px solid #a5d6a7;
-    border-radius: 8px;
-    box-shadow: 1px 2px 0px #c8e6c9;
-  }
-
-  .sub-item-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 9px 10px 9px 14px;
+    gap: 5px;
+    padding: 5px 8px;
+    background: #edf7ed;
+    border: 2px solid #a5d6a7;
+    border-radius: 6px;
+    cursor: default;
   }
 
-  .sub-item-row .item-label { cursor: pointer; }
+  .sub-label {
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+  }
 
-  .sub-item-row .item-text { font-size: 0.98rem; }
+  .sub-text {
+    display: block;
+    color: #1b5e20;
+    font-size: 0.82rem;
+    line-height: 1.3;
+    word-break: break-word;
+    transition: color 0.4s ease;
+  }
+
+  .sub-del {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1.5px solid #ef9a9a;
+    background: transparent;
+    color: #c62828;
+    font-size: 0.65rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .sub-del:hover { background: #ffebee; }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>To-Do</h1>
-
-  <div class="input-row">
-    <input id="main-input" type="text" placeholder="Write a task and press Enter…" autocomplete="off" />
-  </div>
-
-  <ul id="main-list"></ul>
+<div class="topbar">
+  <span class="topbar-title">To&#8209;Do</span>
+  <input id="main-input" type="text" placeholder="Write a task and press Enter…" autocomplete="off" />
 </div>
 
 <script>
+// ── DATA ───────────────────────────────────────────────────────────────────
+
+let tasks = [];
+let ctr = Date.now();
+const uid = () => (++ctr).toString(36);
+
+function save() {
+  localStorage.setItem('todo_v3', JSON.stringify({ tasks, ctr }));
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem('todo_v3');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    tasks = d.tasks || [];
+    ctr = d.ctr || ctr;
+    let maxZ = 1;
+    tasks.forEach(t => { if (t.z > maxZ) maxZ = t.z; });
+    zTop = maxZ;
+    tasks.forEach(t => buildNote(t));
+  } catch(_) {}
+}
+
 // ── AUDIO ──────────────────────────────────────────────────────────────────
 
-function playPenSound(durationMs) {
+function playPen(ms) {
   try {
     const ctx = new AudioContext();
-    const len = Math.floor(ctx.sampleRate * (durationMs / 1000));
+    const len = Math.floor(ctx.sampleRate * ms / 1000);
     const buf = ctx.createBuffer(1, len, ctx.sampleRate);
     const d = buf.getChannelData(0);
-
     let last = 0;
     for (let i = 0; i < len; i++) {
       const w = Math.random() * 2 - 1;
       last = (last + 0.02 * w) / 1.02;
       d[i] = last * 3.5;
     }
-
     const src = ctx.createBufferSource();
     src.buffer = buf;
-
     const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = 3500;
-    bp.Q.value = 0.8;
-
+    bp.type = 'bandpass'; bp.frequency.value = 3500; bp.Q.value = 0.8;
     const gain = ctx.createGain();
-    const t = ctx.currentTime;
-    const dur = durationMs / 1000;
+    const t = ctx.currentTime, dur = ms / 1000;
     gain.gain.setValueAtTime(0, t);
     gain.gain.linearRampToValueAtTime(0.35, t + 0.05);
     gain.gain.setValueAtTime(0.35, t + dur - 0.1);
     gain.gain.linearRampToValueAtTime(0, t + dur);
-
-    src.connect(bp);
-    bp.connect(gain);
-    gain.connect(ctx.destination);
-    src.start();
-    src.stop(t + dur);
-  } catch (_) {}
+    src.connect(bp); bp.connect(gain); gain.connect(ctx.destination);
+    src.start(); src.stop(t + dur);
+  } catch(_) {}
 }
 
-// ── STRIKE LOGIC ────────────────────────────────────────────────────────────
+// ── DRAG ───────────────────────────────────────────────────────────────────
 
-function strikeEl(el) {
+let drag = null;
+let zTop = 1;
+
+document.addEventListener('mousemove', e => {
+  if (!drag) return;
+  drag.task.x = e.clientX - drag.ox + window.scrollX;
+  drag.task.y = e.clientY - drag.oy + window.scrollY;
+  drag.note.style.left = drag.task.x + 'px';
+  drag.note.style.top  = drag.task.y + 'px';
+});
+
+document.addEventListener('mouseup', () => {
+  if (drag) { save(); drag = null; }
+});
+
+function bringToFront(note, task) {
+  task.z = ++zTop;
+  note.style.zIndex = task.z;
+}
+
+// ── STRIKE HELPERS ─────────────────────────────────────────────────────────
+
+function resetLine(el) {
+  const ln = el.querySelector('.strike-line');
+  if (!ln) return;
+  ln.style.animation = 'none';
+  ln.style.width = '0';
+  void ln.offsetWidth;
+  ln.style.animation = '';
+}
+
+function reanimateStruck(el) {
   el.classList.remove('struck');
   void el.offsetWidth;
   el.classList.add('struck');
 }
 
-function unstrikeEl(el) {
-  el.classList.remove('struck');
-  const line = el.querySelector(':scope > .item-row > .item-label > .strike-line, :scope > .sub-item-row > .item-label > .strike-line');
-  if (line) { line.style.width = '0'; line.style.animation = 'none'; void line.offsetWidth; line.style.animation = ''; }
+// Strike a note and all its sub-items
+function doStrike(note, task, sound) {
+  task.struck = true;
+  reanimateStruck(note);
+  note.querySelector('.btn-del').classList.remove('hidden');
+  task.subs.forEach(s => {
+    s.struck = true;
+    const el = note.querySelector(`[data-sid="${s.id}"]`);
+    if (el) reanimateStruck(el);
+  });
+  if (sound) playPen(500);
 }
 
-function allSubsDone(item) {
-  const subs = [...item.querySelectorAll(':scope > .sub-list > .sub-item')];
-  return subs.length > 0 && subs.every(s => s.classList.contains('struck'));
+// Un-strike a note and all sub-items
+function doUnstrike(note, task) {
+  task.struck = false;
+  note.classList.remove('struck');
+  resetLine(note.querySelector('.note-label'));
+  note.querySelector('.btn-del').classList.add('hidden');
+  task.subs.forEach(s => {
+    s.struck = false;
+    const el = note.querySelector(`[data-sid="${s.id}"]`);
+    if (el) { el.classList.remove('struck'); resetLine(el.querySelector('.sub-label')); }
+  });
 }
 
-function checkParentStrike(item, silent) {
-  if (allSubsDone(item)) {
-    strikeEl(item);
-    if (!silent) playPenSound(500);
-    revealDelete(item);
+// Auto-strike parent when all subs done
+function checkAutoStrike(note, task) {
+  if (task.subs.length > 0 && task.subs.every(s => s.struck)) {
+    doStrike(note, task, true);
+    save();
   }
 }
 
-function revealDelete(item) {
-  const btn = item.querySelector(':scope > .item-row > .item-actions > .btn-delete');
-  if (btn) btn.classList.remove('hidden');
-}
+// ── BUILD SUB-ITEM ─────────────────────────────────────────────────────────
 
-function hideDelete(item) {
-  const btn = item.querySelector(':scope > .item-row > .item-actions > .btn-delete');
-  if (btn) btn.classList.add('hidden');
-}
+function buildSub(sub, task, note, subList) {
+  const el = document.createElement('div');
+  el.className = 'sub-item' + (sub.struck ? ' struck' : '');
+  el.dataset.sid = sub.id;
 
-// ── TOGGLE HANDLERS ─────────────────────────────────────────────────────────
+  const lbl = document.createElement('div');
+  lbl.className = 'sub-label';
 
-function onItemLabelClick(item) {
-  const wasStruck = item.classList.contains('struck');
-  if (wasStruck) {
-    unstrikeEl(item);
-    item.querySelectorAll(':scope > .sub-list > .sub-item').forEach(s => unstrikeEl(s));
-    hideDelete(item);
-  } else {
-    strikeEl(item);
-    item.querySelectorAll(':scope > .sub-list > .sub-item').forEach(s => strikeEl(s));
-    playPenSound(500);
-    revealDelete(item);
-  }
-}
+  const txt = document.createElement('span');
+  txt.className = 'sub-text';
+  txt.textContent = sub.text;
 
-function onSubLabelClick(sub, item) {
-  const wasStruck = sub.classList.contains('struck');
-  if (wasStruck) {
-    unstrikeEl(sub);
-    unstrikeEl(item);
-    hideDelete(item);
-  } else {
-    strikeEl(sub);
-    playPenSound(300);
-    checkParentStrike(item, true);
-  }
-}
+  const ln = document.createElement('span');
+  ln.className = 'strike-line';
 
-// ── BUILD DOM ────────────────────────────────────────────────────────────────
+  lbl.appendChild(txt);
+  lbl.appendChild(ln);
 
-function makeSub(text, parent) {
-  const li = document.createElement('li');
-  li.className = 'sub-item';
+  const del = document.createElement('button');
+  del.className = 'sub-del';
+  del.title = 'Delete';
+  del.textContent = '🗑';
 
-  const row = document.createElement('div');
-  row.className = 'sub-item-row';
+  el.appendChild(lbl);
+  el.appendChild(del);
 
-  const label = document.createElement('div');
-  label.className = 'item-label';
-
-  const span = document.createElement('span');
-  span.className = 'item-text';
-  span.textContent = text;
-
-  const line = document.createElement('span');
-  line.className = 'strike-line';
-
-  label.appendChild(span);
-  label.appendChild(line);
-
-  const delBtn = document.createElement('button');
-  delBtn.className = 'btn-delete hidden';
-  delBtn.title = 'Delete sub-item';
-  delBtn.textContent = '🗑';
-
-  row.appendChild(label);
-  row.appendChild(delBtn);
-  li.appendChild(row);
-
-  label.addEventListener('click', () => onSubLabelClick(li, parent));
-
-  delBtn.addEventListener('click', (e) => {
+  lbl.addEventListener('click', e => {
     e.stopPropagation();
-    li.remove();
-    unstrikeEl(parent);
-    hideDelete(parent);
-    checkParentStrike(parent, true);
+    if (sub.struck) {
+      sub.struck = false;
+      el.classList.remove('struck');
+      resetLine(lbl);
+      // un-strike parent too
+      if (task.struck) {
+        task.struck = false;
+        note.classList.remove('struck');
+        resetLine(note.querySelector('.note-label'));
+        note.querySelector('.btn-del').classList.add('hidden');
+      }
+    } else {
+      sub.struck = true;
+      reanimateStruck(el);
+      playPen(300);
+      checkAutoStrike(note, task);
+    }
+    save();
   });
 
-  return li;
+  del.addEventListener('click', e => {
+    e.stopPropagation();
+    task.subs = task.subs.filter(s => s.id !== sub.id);
+    el.remove();
+    if (task.struck && task.subs.length > 0 && !task.subs.every(s => s.struck)) {
+      doUnstrike(note, task);
+    }
+    save();
+  });
+
+  return el;
 }
 
-function makeItem(text) {
-  const li = document.createElement('li');
-  li.className = 'item';
+// ── BUILD NOTE ─────────────────────────────────────────────────────────────
 
-  const row = document.createElement('div');
-  row.className = 'item-row';
+function buildNote(task) {
+  const note = document.createElement('div');
+  note.className = 'note' + (task.struck ? ' struck' : '');
+  note.dataset.id = task.id;
+  note.style.left      = task.x + 'px';
+  note.style.top       = task.y + 'px';
+  note.style.transform = `rotate(${task.rotation}deg)`;
+  note.style.zIndex    = task.z || 1;
 
-  const label = document.createElement('div');
-  label.className = 'item-label';
+  // ── Drag tab
+  const tab = document.createElement('div');
+  tab.className = 'note-tab';
 
-  const span = document.createElement('span');
-  span.className = 'item-text';
-  span.textContent = text;
+  tab.addEventListener('mousedown', e => {
+    bringToFront(note, task);
+    const rect = note.getBoundingClientRect();
+    drag = { note, task, ox: e.clientX - rect.left, oy: e.clientY - rect.top };
+    e.preventDefault();
+  });
 
-  const line = document.createElement('span');
-  line.className = 'strike-line';
+  // ── Content area
+  const content = document.createElement('div');
+  content.className = 'note-content';
 
-  label.appendChild(span);
-  label.appendChild(line);
+  // Main row: label + buttons
+  const mainRow = document.createElement('div');
+  mainRow.className = 'note-main-row';
 
-  const actions = document.createElement('div');
-  actions.className = 'item-actions';
+  const lbl = document.createElement('div');
+  lbl.className = 'note-label';
+
+  const txt = document.createElement('span');
+  txt.className = 'note-text';
+  txt.textContent = task.text;
+
+  const ln = document.createElement('span');
+  ln.className = 'strike-line';
+
+  lbl.appendChild(txt);
+  lbl.appendChild(ln);
+
+  const btns = document.createElement('div');
+  btns.className = 'note-btns';
 
   const subBtn = document.createElement('button');
   subBtn.className = 'btn-sub';
@@ -413,73 +517,107 @@ function makeItem(text) {
   subBtn.textContent = '+';
 
   const delBtn = document.createElement('button');
-  delBtn.className = 'btn-delete hidden';
+  delBtn.className = 'btn-del' + (task.struck ? '' : ' hidden');
   delBtn.title = 'Delete task';
   delBtn.textContent = '🗑';
 
-  actions.appendChild(subBtn);
-  actions.appendChild(delBtn);
+  btns.appendChild(subBtn);
+  btns.appendChild(delBtn);
+  mainRow.appendChild(lbl);
+  mainRow.appendChild(btns);
 
-  row.appendChild(label);
-  row.appendChild(actions);
-
-  const subInputRow = document.createElement('div');
-  subInputRow.className = 'sub-input-row hidden';
+  // Sub input row
+  const subInputWrap = document.createElement('div');
+  subInputWrap.className = 'sub-input-wrap hidden';
 
   const subInput = document.createElement('input');
   subInput.type = 'text';
-  subInput.placeholder = 'Add sub-item and press Enter…';
+  subInput.placeholder = 'Sub-item, press Enter…';
   subInput.autocomplete = 'off';
+  subInputWrap.appendChild(subInput);
 
-  subInputRow.appendChild(subInput);
-
-  const subList = document.createElement('ul');
+  // Sub list
+  const subList = document.createElement('div');
   subList.className = 'sub-list';
+  task.subs.forEach(s => subList.appendChild(buildSub(s, task, note, subList)));
 
-  li.appendChild(row);
-  li.appendChild(subInputRow);
-  li.appendChild(subList);
+  content.appendChild(mainRow);
+  content.appendChild(subInputWrap);
+  content.appendChild(subList);
 
-  label.addEventListener('click', () => onItemLabelClick(li));
+  note.appendChild(tab);
+  note.appendChild(content);
+  document.body.appendChild(note);
 
-  subBtn.addEventListener('click', (e) => {
+  // ── Events
+  lbl.addEventListener('click', e => {
     e.stopPropagation();
-    subInputRow.classList.toggle('hidden');
-    if (!subInputRow.classList.contains('hidden')) subInput.focus();
+    if (task.struck) { doUnstrike(note, task); } else { doStrike(note, task, true); }
+    save();
   });
 
-  delBtn.addEventListener('click', (e) => {
+  subBtn.addEventListener('click', e => {
     e.stopPropagation();
-    li.remove();
+    subInputWrap.classList.toggle('hidden');
+    if (!subInputWrap.classList.contains('hidden')) subInput.focus();
   });
 
-  subInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const val = subInput.value.trim();
-      if (!val) return;
-      subList.appendChild(makeSub(val, li));
-      subInput.value = '';
-      subInput.focus();
-    }
+  delBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    tasks = tasks.filter(t => t.id !== task.id);
+    note.remove();
+    save();
   });
 
-  return li;
+  subInput.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const val = subInput.value.trim();
+    if (!val) return;
+    const sub = { id: uid(), text: val, struck: false };
+    task.subs.push(sub);
+    subList.appendChild(buildSub(sub, task, note, subList));
+    subInput.value = '';
+    subInput.focus();
+    save();
+  });
+
+  note.addEventListener('mousedown', () => bringToFront(note, task));
+
+  return note;
 }
 
-// ── MAIN INPUT ───────────────────────────────────────────────────────────────
+// ── MAIN INPUT ─────────────────────────────────────────────────────────────
 
-const mainInput = document.getElementById('main-input');
-const mainList  = document.getElementById('main-list');
+document.getElementById('main-input').addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const val = e.target.value.trim();
+  if (!val) return;
 
-mainInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    const val = mainInput.value.trim();
-    if (!val) return;
-    mainList.appendChild(makeItem(val));
-    mainInput.value = '';
-    mainInput.focus();
-  }
+  const barH = 58;
+  const pad  = 80;
+  const vw   = window.innerWidth;
+  const vh   = window.innerHeight;
+
+  const task = {
+    id:       uid(),
+    text:     val,
+    struck:   false,
+    x:        pad + window.scrollX + Math.random() * Math.max(0, vw - 230 - pad * 2),
+    y:        barH + pad + window.scrollY + Math.random() * Math.max(0, vh - 200 - barH - pad),
+    rotation: (Math.random() * 8) - 4,
+    z:        ++zTop,
+    subs:     []
+  };
+
+  tasks.push(task);
+  buildNote(task);
+  save();
+  e.target.value = '';
+  e.target.focus();
 });
+
+// ── BOOT ───────────────────────────────────────────────────────────────────
+load();
 </script>
 </body>
 </html>
