@@ -23,13 +23,18 @@ Or via the shell: `start "C:\Users\chris\OneDrive\Desktop\Claude\shooter.html"`
 
 ## Git workflow
 
-Every meaningful change must be committed with a clean message and pushed to GitHub:
+**Commit and push after every meaningful unit of work** — a new feature, a bug fix, a visual change, a new file. Never leave work uncommitted at the end of a task. The goal is that the GitHub remote always reflects the current state of the project so work is never lost and any version can be restored.
 
 ```bash
 git add <file>
 git commit -m "short imperative summary"
 git push
 ```
+
+Commit message rules:
+- Start with an imperative verb: `Add`, `Fix`, `Update`, `Remove`
+- One concise subject line (50 chars or fewer when possible)
+- No vague messages like "changes" or "update stuff"
 
 Remote: `https://github.com/christianmonteniuss-stack/browser-games`
 
