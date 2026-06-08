@@ -19,12 +19,12 @@
     overflow-x: hidden;
   }
 
-  /* ── Fixed top bar ── */
+  /* ── Top bar ── */
   .topbar {
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 9999;
-    background: rgba(220, 242, 220, 0.94);
+    background: rgba(220,242,220,0.94);
     backdrop-filter: blur(8px);
     border-bottom: 2.5px solid #a5d6a7;
     padding: 10px 28px;
@@ -38,12 +38,10 @@
     font-size: 1.35rem;
     white-space: nowrap;
     user-select: none;
-    letter-spacing: 0.02em;
   }
 
   .topbar input {
     flex: 1;
-    max-width: 480px;
     padding: 6px 2px;
     border: none;
     border-bottom: 2px solid #81c784;
@@ -53,27 +51,26 @@
     font-size: 1rem;
     outline: none;
     transition: border-color 0.2s;
+    min-width: 0;
   }
-
-  .topbar input:focus { border-bottom-color: #2e7d32; }
+  .topbar input:focus     { border-bottom-color: #2e7d32; }
   .topbar input::placeholder { color: #a5d6a7; }
 
   /* ── Sticky note ── */
   .note {
     position: absolute;
     width: 230px;
-    background: #f4fbf4;
-    border: 2.5px solid #81c784;
+    background: var(--body, #f4fbf4);
+    border: 2.5px solid var(--border, #81c784);
     border-radius: 3px 12px 12px 3px;
-    box-shadow: 4px 5px 12px rgba(0,0,0,0.14), 1px 2px 0 #b2dfb2;
+    box-shadow: 4px 5px 12px rgba(0,0,0,0.14), 1px 2px 0 var(--border, #b2dfb2);
     display: flex;
     flex-direction: column;
     user-select: none;
     transition: box-shadow 0.15s;
   }
-
   .note:hover {
-    box-shadow: 6px 8px 18px rgba(0,0,0,0.18), 1px 2px 0 #b2dfb2;
+    box-shadow: 6px 8px 18px rgba(0,0,0,0.18), 1px 2px 0 var(--border, #b2dfb2);
   }
 
   /* ── Corner rotation handles ── */
@@ -81,24 +78,48 @@
     position: absolute;
     width: 14px;
     height: 14px;
-    background: rgba(76,175,80,0.3);
-    border: 2px solid #4caf50;
+    background: transparent;
+    border: 2px solid var(--tab, #4caf50);
     border-radius: 3px;
     cursor: crosshair;
     opacity: 0;
     transition: opacity 0.15s, background 0.15s;
     z-index: 5;
   }
-  .note:hover .note-corner { opacity: 1; }
-  .note-corner:hover { background: rgba(76,175,80,0.65); }
+  .note:hover .note-corner         { opacity: 1; }
+  .note-corner:hover                { background: var(--tab, #4caf50); opacity: 0.6; }
   .note-corner.tl { top: -6px; left: -6px; }
   .note-corner.tr { top: -6px; right: -6px; }
   .note-corner.bl { bottom: -6px; left: -6px; }
   .note-corner.br { bottom: -6px; right: -6px; }
 
-  /* Coloured drag tab at top */
+  /* ── Edge resize handles ── */
+  .note-edge {
+    position: absolute;
+    z-index: 4;
+    opacity: 0;
+    transition: opacity 0.15s;
+    border-radius: 4px;
+    background: var(--tab, #4caf50);
+  }
+  .note:hover .note-edge { opacity: 0.25; }
+  .note-edge:hover       { opacity: 0.55 !important; }
+  .note-edge.left, .note-edge.right {
+    top: 14px; bottom: 14px; width: 5px;
+    cursor: ew-resize;
+  }
+  .note-edge.top, .note-edge.bottom {
+    left: 14px; right: 14px; height: 5px;
+    cursor: ns-resize;
+  }
+  .note-edge.left   { left: 0; }
+  .note-edge.right  { right: 0; }
+  .note-edge.top    { top: 0; }
+  .note-edge.bottom { bottom: 0; }
+
+  /* ── Drag tab ── */
   .note-tab {
-    background: #81c784;
+    background: var(--tab, #4caf50);
     border-radius: 1px 10px 0 0;
     height: 22px;
     cursor: grab;
@@ -107,13 +128,10 @@
     justify-content: center;
     flex-shrink: 0;
   }
-
   .note-tab:active { cursor: grabbing; }
-
-  /* Three subtle dots to hint draggability */
   .note-tab::before {
     content: '· · ·';
-    color: rgba(27,94,32,0.45);
+    color: rgba(255,255,255,0.6);
     font-size: 1rem;
     letter-spacing: 4px;
     line-height: 1;
@@ -126,6 +144,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+    flex: 1;
   }
 
   .note-main-row {
@@ -142,7 +161,7 @@
 
   .note-text {
     display: block;
-    color: #1b5e20;
+    color: var(--text, #1b5e20);
     font-size: 1rem;
     line-height: 1.35;
     word-break: break-word;
@@ -156,22 +175,17 @@
     transform: translateY(-50%);
     height: 2.5px;
     width: 0;
-    background: #2e7d32;
+    background: var(--strike, #2e7d32);
     border-radius: 2px;
     pointer-events: none;
   }
 
-  /* Animate strike on .note.struck (main task) */
   .note.struck .note-label .strike-line {
     animation: draw-strike 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
   }
+  .note.struck .note-label .note-text { color: var(--border, #a5d6a7); }
 
-  .note.struck .note-label .note-text {
-    color: #a5d6a7;
-  }
-
-  /* Sub-item strike */
-  .sub-item.struck .sub-label .sub-text { color: #a5d6a7; }
+  .sub-item.struck .sub-label .sub-text { color: var(--border, #a5d6a7); }
   .sub-item.struck .sub-label .strike-line {
     animation: draw-strike 0.45s cubic-bezier(0.4,0,0.2,1) forwards;
   }
@@ -187,7 +201,21 @@
     flex-direction: column;
     gap: 4px;
     flex-shrink: 0;
+    position: relative;
   }
+
+  .btn-color {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.75);
+    cursor: pointer;
+    background: var(--tab, #4caf50);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-color:hover { transform: scale(1.2); }
 
   .btn-sub, .btn-del {
     width: 22px;
@@ -203,42 +231,54 @@
     font-family: inherit;
     background: transparent;
   }
-
-  .btn-sub {
-    border-color: #a5d6a7;
-    color: #2e7d32;
-    font-size: 1rem;
-  }
-
-  .btn-sub:hover { background: #c8e6c9; }
-
-  .btn-del {
-    border-color: #ef9a9a;
-    color: #c62828;
-  }
-
+  .btn-sub { border-color: var(--border, #a5d6a7); color: var(--text, #2e7d32); font-size: 1rem; }
+  .btn-sub:hover { background: var(--sub, #c8e6c9); }
+  .btn-del { border-color: #ef9a9a; color: #c62828; }
   .btn-del:hover { background: #ffebee; }
-
   .hidden { display: none !important; }
+
+  /* ── Color picker popup ── */
+  .color-popup {
+    position: absolute;
+    right: -2px;
+    top: calc(100% + 6px);
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 7px;
+    display: grid;
+    grid-template-columns: repeat(3, 26px);
+    gap: 5px;
+    z-index: 200;
+    box-shadow: 2px 4px 14px rgba(0,0,0,0.22);
+  }
+  .color-swatch {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2.5px solid transparent;
+    transition: transform 0.13s, border-color 0.13s;
+  }
+  .color-swatch:hover  { transform: scale(1.18); }
+  .color-swatch.active { border-color: #333; }
 
   /* ── Sub-item input ── */
   .sub-input-wrap {
-    border-bottom: 1.5px solid #a5d6a7;
-    margin: 0 2px 4px;
+    border-bottom: 1.5px solid var(--border, #a5d6a7);
+    margin: 0 2px 2px;
   }
-
   .sub-input-wrap input {
     width: 100%;
     padding: 4px 2px;
     border: none;
     background: transparent;
-    color: #1b5e20;
+    color: var(--text, #1b5e20);
     font-family: inherit;
     font-size: 0.82rem;
     outline: none;
   }
-
-  .sub-input-wrap input::placeholder { color: #b2dfb2; }
+  .sub-input-wrap input::placeholder { color: var(--border, #a5d6a7); }
 
   /* ── Sub items ── */
   .sub-list { display: flex; flex-direction: column; gap: 4px; }
@@ -248,30 +288,25 @@
     align-items: center;
     gap: 5px;
     padding: 5px 8px;
-    background: #edf7ed;
-    border: 2px solid #a5d6a7;
+    background: var(--sub, #edf7ed);
+    border: 2px solid var(--border, #a5d6a7);
     border-radius: 6px;
-    cursor: default;
   }
-
   .sub-label {
     flex: 1;
     position: relative;
     cursor: pointer;
   }
-
   .sub-text {
     display: block;
-    color: #1b5e20;
+    color: var(--text, #1b5e20);
     font-size: 0.82rem;
     line-height: 1.3;
     word-break: break-word;
     transition: color 0.4s ease;
   }
-
   .sub-del {
-    width: 18px;
-    height: 18px;
+    width: 18px; height: 18px;
     border-radius: 4px;
     border: 1.5px solid #ef9a9a;
     background: transparent;
@@ -284,7 +319,6 @@
     flex-shrink: 0;
     transition: background 0.15s;
   }
-
   .sub-del:hover { background: #ffebee; }
 </style>
 </head>
@@ -292,10 +326,34 @@
 
 <div class="topbar">
   <span class="topbar-title">To&#8209;Do</span>
-  <input id="main-input" type="text" placeholder="Write a task and press Enter…" autocomplete="off" />
+  <input id="main-input" type="text" placeholder="Skriv en uppgift och tryck Enter…" autocomplete="off" />
 </div>
 
 <script>
+// ── PALETTES ───────────────────────────────────────────────────────────────
+
+const PALETTES = [
+  { id: 'green',  body:'#f4fbf4', border:'#81c784', tab:'#4caf50', text:'#1b5e20', sub:'#edf7ed', strike:'#2e7d32' },
+  { id: 'yellow', body:'#fffde7', border:'#fff176', tab:'#fdd835', text:'#6d4c41', sub:'#fff9c4', strike:'#f9a825' },
+  { id: 'purple', body:'#f3e5f5', border:'#ce93d8', tab:'#9c27b0', text:'#4a148c', sub:'#ede7f6', strike:'#6a1b9a' },
+  { id: 'blue',   body:'#e3f2fd', border:'#90caf9', tab:'#1976d2', text:'#0d47a1', sub:'#e1f5fe', strike:'#1565c0' },
+  { id: 'pink',   body:'#fce4ec', border:'#f48fb1', tab:'#e91e63', text:'#880e4f', sub:'#fde4ec', strike:'#c2185b' },
+  { id: 'orange', body:'#fff3e0', border:'#ffcc80', tab:'#ff6d00', text:'#bf360c', sub:'#fff8e1', strike:'#e65100' },
+];
+
+function applyPalette(note, task) {
+  const p = PALETTES.find(x => x.id === (task.color || 'green')) || PALETTES[0];
+  note.style.setProperty('--body',   p.body);
+  note.style.setProperty('--border', p.border);
+  note.style.setProperty('--tab',    p.tab);
+  note.style.setProperty('--text',   p.text);
+  note.style.setProperty('--sub',    p.sub);
+  note.style.setProperty('--strike', p.strike);
+  // Update color button if it exists
+  const btn = note.querySelector('.btn-color');
+  if (btn) btn.style.background = p.tab;
+}
+
 // ── DATA ───────────────────────────────────────────────────────────────────
 
 let tasks = [];
@@ -303,18 +361,20 @@ let ctr = Date.now();
 const uid = () => (++ctr).toString(36);
 
 function save() {
-  localStorage.setItem('todo_v3', JSON.stringify({ tasks, ctr }));
+  localStorage.setItem('todo_v4', JSON.stringify({ tasks, ctr }));
 }
 
 function load() {
   try {
-    const raw = localStorage.getItem('todo_v3');
-    if (!raw) return;
-    const d = JSON.parse(raw);
+    const raw = localStorage.getItem('todo_v4');
+    // Migrate from v3
+    const raw3 = raw || localStorage.getItem('todo_v3');
+    if (!raw3) return;
+    const d = JSON.parse(raw3);
     tasks = d.tasks || [];
     ctr = d.ctr || ctr;
     let maxZ = 1;
-    tasks.forEach(t => { if (t.z > maxZ) maxZ = t.z; });
+    tasks.forEach(t => { if ((t.z || 1) > maxZ) maxZ = t.z; });
     zTop = maxZ;
     tasks.forEach(t => buildNote(t));
   } catch(_) {}
@@ -349,10 +409,11 @@ function playPen(ms) {
   } catch(_) {}
 }
 
-// ── DRAG ───────────────────────────────────────────────────────────────────
+// ── INTERACTION STATE ──────────────────────────────────────────────────────
 
-let drag = null;
-let rot  = null;
+let drag = null;  // translation
+let rot  = null;  // rotation
+let res  = null;  // resize
 let zTop = 1;
 
 document.addEventListener('mousemove', e => {
@@ -362,6 +423,7 @@ document.addEventListener('mousemove', e => {
     drag.note.style.left = drag.task.x + 'px';
     drag.note.style.top  = drag.task.y + 'px';
   }
+
   if (rot) {
     const rect = rot.note.getBoundingClientRect();
     const cx = rect.left + rect.width  / 2;
@@ -370,11 +432,48 @@ document.addEventListener('mousemove', e => {
     rot.task.rotation = rot.startRotation + (angle - rot.startAngle);
     rot.note.style.transform = `rotate(${rot.task.rotation}deg)`;
   }
+
+  if (res) {
+    const dx = e.clientX - res.startX;
+    const dy = e.clientY - res.startY;
+    const minW = 150, minH = 70;
+
+    if (res.edge === 'right') {
+      res.task.w = Math.max(minW, res.startW + dx);
+      res.note.style.width = res.task.w + 'px';
+
+    } else if (res.edge === 'left') {
+      const clamped = Math.min(dx, res.startW - minW);
+      res.task.w = res.startW - clamped;
+      res.task.x = res.startNX + clamped;
+      res.note.style.width = res.task.w + 'px';
+      res.note.style.left  = res.task.x + 'px';
+
+    } else if (res.edge === 'bottom') {
+      res.task.h = Math.max(minH, res.startH + dy);
+      res.note.style.minHeight = res.task.h + 'px';
+
+    } else if (res.edge === 'top') {
+      const clamped = Math.min(dy, res.startH - minH);
+      res.task.h = res.startH - clamped;
+      res.task.y = res.startNY + clamped;
+      res.note.style.minHeight = res.task.h + 'px';
+      res.note.style.top       = res.task.y + 'px';
+    }
+  }
 });
 
 document.addEventListener('mouseup', () => {
   if (drag) { save(); drag = null; }
   if (rot)  { save(); rot  = null; }
+  if (res)  { save(); res  = null; }
+});
+
+// Close any open color popup when clicking outside
+document.addEventListener('mousedown', e => {
+  if (!e.target.closest('.color-popup') && !e.target.closest('.btn-color')) {
+    document.querySelectorAll('.color-popup').forEach(p => p.remove());
+  }
 });
 
 function bringToFront(note, task) {
@@ -387,19 +486,14 @@ function bringToFront(note, task) {
 function resetLine(el) {
   const ln = el.querySelector('.strike-line');
   if (!ln) return;
-  ln.style.animation = 'none';
-  ln.style.width = '0';
-  void ln.offsetWidth;
-  ln.style.animation = '';
+  ln.style.animation = 'none'; ln.style.width = '0';
+  void ln.offsetWidth; ln.style.animation = '';
 }
 
 function reanimateStruck(el) {
-  el.classList.remove('struck');
-  void el.offsetWidth;
-  el.classList.add('struck');
+  el.classList.remove('struck'); void el.offsetWidth; el.classList.add('struck');
 }
 
-// Strike a note and all its sub-items
 function doStrike(note, task, sound) {
   task.struck = true;
   reanimateStruck(note);
@@ -412,7 +506,6 @@ function doStrike(note, task, sound) {
   if (sound) playPen(500);
 }
 
-// Un-strike a note and all sub-items
 function doUnstrike(note, task) {
   task.struck = false;
   note.classList.remove('struck');
@@ -425,11 +518,9 @@ function doUnstrike(note, task) {
   });
 }
 
-// Auto-strike parent when all subs done
 function checkAutoStrike(note, task) {
   if (task.subs.length > 0 && task.subs.every(s => s.struck)) {
-    doStrike(note, task, true);
-    save();
+    doStrike(note, task, true); save();
   }
 }
 
@@ -450,16 +541,13 @@ function buildSub(sub, task, note, subList) {
   const ln = document.createElement('span');
   ln.className = 'strike-line';
 
-  lbl.appendChild(txt);
-  lbl.appendChild(ln);
+  lbl.appendChild(txt); lbl.appendChild(ln);
 
   const del = document.createElement('button');
   del.className = 'sub-del';
-  del.title = 'Delete';
   del.textContent = '🗑';
 
-  el.appendChild(lbl);
-  el.appendChild(del);
+  el.appendChild(lbl); el.appendChild(del);
 
   lbl.addEventListener('click', e => {
     e.stopPropagation();
@@ -467,7 +555,6 @@ function buildSub(sub, task, note, subList) {
       sub.struck = false;
       el.classList.remove('struck');
       resetLine(lbl);
-      // un-strike parent too
       if (task.struck) {
         task.struck = false;
         note.classList.remove('struck');
@@ -499,6 +586,10 @@ function buildSub(sub, task, note, subList) {
 // ── BUILD NOTE ─────────────────────────────────────────────────────────────
 
 function buildNote(task) {
+  // Defaults for new properties
+  if (!task.color) task.color = 'green';
+  if (!task.w)     task.w     = 230;
+
   const note = document.createElement('div');
   note.className = 'note' + (task.struck ? ' struck' : '');
   note.dataset.id = task.id;
@@ -506,11 +597,14 @@ function buildNote(task) {
   note.style.top       = task.y + 'px';
   note.style.transform = `rotate(${task.rotation}deg)`;
   note.style.zIndex    = task.z || 1;
+  note.style.width     = task.w + 'px';
+  if (task.h) note.style.minHeight = task.h + 'px';
+
+  applyPalette(note, task);
 
   // ── Drag tab
   const tab = document.createElement('div');
   tab.className = 'note-tab';
-
   tab.addEventListener('mousedown', e => {
     bringToFront(note, task);
     const rect = note.getBoundingClientRect();
@@ -518,11 +612,10 @@ function buildNote(task) {
     e.preventDefault();
   });
 
-  // ── Content area
+  // ── Content
   const content = document.createElement('div');
   content.className = 'note-content';
 
-  // Main row: label + buttons
   const mainRow = document.createElement('div');
   mainRow.className = 'note-main-row';
 
@@ -536,38 +629,45 @@ function buildNote(task) {
   const ln = document.createElement('span');
   ln.className = 'strike-line';
 
-  lbl.appendChild(txt);
-  lbl.appendChild(ln);
+  lbl.appendChild(txt); lbl.appendChild(ln);
 
+  // ── Buttons column
   const btns = document.createElement('div');
   btns.className = 'note-btns';
 
+  // Color button
+  const colorBtn = document.createElement('button');
+  colorBtn.className = 'btn-color';
+  colorBtn.title = 'Byt färg';
+
+  // Sub button
   const subBtn = document.createElement('button');
   subBtn.className = 'btn-sub';
-  subBtn.title = 'Add sub-item';
+  subBtn.title = 'Lägg till underpunkt';
   subBtn.textContent = '+';
 
+  // Delete button
   const delBtn = document.createElement('button');
   delBtn.className = 'btn-del' + (task.struck ? '' : ' hidden');
-  delBtn.title = 'Delete task';
+  delBtn.title = 'Ta bort';
   delBtn.textContent = '🗑';
 
+  btns.appendChild(colorBtn);
   btns.appendChild(subBtn);
   btns.appendChild(delBtn);
   mainRow.appendChild(lbl);
   mainRow.appendChild(btns);
 
-  // Sub input row
+  // ── Sub input
   const subInputWrap = document.createElement('div');
   subInputWrap.className = 'sub-input-wrap hidden';
-
   const subInput = document.createElement('input');
   subInput.type = 'text';
-  subInput.placeholder = 'Sub-item, press Enter…';
+  subInput.placeholder = 'Underpunkt, tryck Enter…';
   subInput.autocomplete = 'off';
   subInputWrap.appendChild(subInput);
 
-  // Sub list
+  // ── Sub list
   const subList = document.createElement('div');
   subList.className = 'sub-list';
   task.subs.forEach(s => subList.appendChild(buildSub(s, task, note, subList)));
@@ -580,22 +680,41 @@ function buildNote(task) {
   note.appendChild(content);
   document.body.appendChild(note);
 
-  // ── Corner rotation handles
+  // ── Corner handles (rotation)
   ['tl','tr','bl','br'].forEach(pos => {
-    const corner = document.createElement('div');
-    corner.className = `note-corner ${pos}`;
-    note.appendChild(corner);
-    corner.addEventListener('mousedown', e => {
-      e.stopPropagation();
-      e.preventDefault();
+    const c = document.createElement('div');
+    c.className = `note-corner ${pos}`;
+    note.appendChild(c);
+    c.addEventListener('mousedown', e => {
+      e.stopPropagation(); e.preventDefault();
       bringToFront(note, task);
       const rect = note.getBoundingClientRect();
-      const cx = rect.left + rect.width  / 2;
-      const cy = rect.top  + rect.height / 2;
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
       rot = {
         note, task,
         startAngle:    Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI,
         startRotation: task.rotation
+      };
+    });
+  });
+
+  // ── Edge handles (resize)
+  ['left','right','top','bottom'].forEach(edge => {
+    const el = document.createElement('div');
+    el.className = `note-edge ${edge}`;
+    note.appendChild(el);
+    el.addEventListener('mousedown', e => {
+      e.stopPropagation(); e.preventDefault();
+      bringToFront(note, task);
+      res = {
+        note, task, edge,
+        startX: e.clientX,
+        startY: e.clientY,
+        startW: note.offsetWidth,
+        startH: note.offsetHeight,
+        startNX: task.x,
+        startNY: task.y
       };
     });
   });
@@ -632,6 +751,33 @@ function buildNote(task) {
     save();
   });
 
+  // Color picker
+  colorBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    // Close any other open popup
+    document.querySelectorAll('.color-popup').forEach(p => p.remove());
+
+    const popup = document.createElement('div');
+    popup.className = 'color-popup';
+
+    PALETTES.forEach(p => {
+      const sw = document.createElement('div');
+      sw.className = 'color-swatch' + (p.id === (task.color || 'green') ? ' active' : '');
+      sw.style.background = p.tab;
+      sw.title = p.id;
+      sw.addEventListener('mousedown', ev => {
+        ev.stopPropagation();
+        task.color = p.id;
+        applyPalette(note, task);
+        popup.remove();
+        save();
+      });
+      popup.appendChild(sw);
+    });
+
+    btns.appendChild(popup);
+  });
+
   note.addEventListener('mousedown', () => bringToFront(note, task));
 
   return note;
@@ -644,19 +790,20 @@ document.getElementById('main-input').addEventListener('keydown', e => {
   const val = e.target.value.trim();
   if (!val) return;
 
-  const barH = 58;
-  const pad  = 80;
-  const vw   = window.innerWidth;
-  const vh   = window.innerHeight;
+  const barH = 58, pad = 80;
+  const vw = window.innerWidth, vh = window.innerHeight;
 
   const task = {
     id:       uid(),
     text:     val,
     struck:   false,
+    color:    'green',
     x:        pad + window.scrollX + Math.random() * Math.max(0, vw - 230 - pad * 2),
     y:        barH + pad + window.scrollY + Math.random() * Math.max(0, vh - 200 - barH - pad),
     rotation: (Math.random() * 8) - 4,
     z:        ++zTop,
+    w:        230,
+    h:        null,
     subs:     []
   };
 
