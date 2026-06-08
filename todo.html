@@ -10,7 +10,7 @@
   body {
     min-height: 100vh;
     background: #e8f5e9;
-    font-family: 'Georgia', serif;
+    font-family: "Segoe Print", "Bradley Hand ITC", "Comic Sans MS", cursive;
     display: flex;
     justify-content: center;
     padding: 80px 16px 80px;
@@ -23,50 +23,33 @@
 
   h1 {
     color: #1b5e20;
-    font-size: 2.6rem;
-    letter-spacing: 0.08em;
+    font-size: 2.8rem;
+    letter-spacing: 0.04em;
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 36px;
     user-select: none;
   }
 
-  /* ── Main input row ── */
+  /* ── Main input — looks like a ruled line ── */
   .input-row {
-    display: flex;
-    gap: 8px;
+    width: 100%;
   }
 
   .input-row input {
-    flex: 1;
-    padding: 12px 16px;
-    border: 2px solid #a5d6a7;
-    border-radius: 10px;
-    background: #f1f8f2;
+    width: 100%;
+    padding: 10px 4px;
+    border: none;
+    border-bottom: 2.5px solid #81c784;
+    background: transparent;
     color: #1b5e20;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 1.15rem;
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.2s;
   }
 
-  .input-row input:focus { border-color: #2e7d32; }
-  .input-row input::placeholder { color: #81c784; }
-
-  .btn-add {
-    padding: 12px 22px;
-    background: #2e7d32;
-    color: #e8f5e9;
-    border: none;
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-    user-select: none;
-  }
-
-  .btn-add:hover { background: #1b5e20; }
-  .btn-add:active { transform: scale(0.97); }
+  .input-row input:focus { border-bottom-color: #2e7d32; }
+  .input-row input::placeholder { color: #a5d6a7; }
 
   /* ── Main list ── */
   #main-list {
@@ -79,11 +62,12 @@
 
   /* ── Item card ── */
   .item {
-    background: #f1f8f2;
-    border: 1.5px solid #a5d6a7;
+    background: #f4fbf4;
+    border: 2.5px solid #81c784;
     border-radius: 12px;
     padding: 0;
     overflow: hidden;
+    box-shadow: 2px 3px 0px #b2dfb2;
   }
 
   /* ── Item top row ── */
@@ -105,7 +89,7 @@
   .item-text {
     display: block;
     color: #1b5e20;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     line-height: 1.4;
     transition: color 0.4s ease;
   }
@@ -129,7 +113,7 @@
 
   .struck > .item-row > .item-label .item-text,
   .sub-item.struck > .sub-item-row > .item-label .item-text {
-    color: #81c784;
+    color: #a5d6a7;
     transition: color 0.4s ease;
   }
 
@@ -150,7 +134,7 @@
     width: 28px;
     height: 28px;
     background: #c8e6c9;
-    border: 1.5px solid #a5d6a7;
+    border: 2px solid #81c784;
     border-radius: 7px;
     color: #2e7d32;
     font-size: 1.1rem;
@@ -162,6 +146,7 @@
     transition: background 0.15s;
     user-select: none;
     flex-shrink: 0;
+    font-family: inherit;
   }
 
   .btn-sub:hover { background: #a5d6a7; }
@@ -170,7 +155,7 @@
     width: 28px;
     height: 28px;
     background: transparent;
-    border: 1.5px solid #ef9a9a;
+    border: 2px solid #ef9a9a;
     border-radius: 7px;
     color: #c62828;
     font-size: 0.85rem;
@@ -178,7 +163,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.15s, opacity 0.2s;
+    transition: background 0.15s;
     user-select: none;
     flex-shrink: 0;
   }
@@ -189,32 +174,24 @@
 
   /* ── Sub-item input row ── */
   .sub-input-row {
-    display: flex;
-    gap: 8px;
     padding: 0 14px 12px 36px;
   }
 
   .sub-input-row input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1.5px solid #a5d6a7;
-    border-radius: 8px;
-    background: #e8f5e9;
+    width: 100%;
+    padding: 6px 4px;
+    border: none;
+    border-bottom: 2px solid #a5d6a7;
+    background: transparent;
     color: #1b5e20;
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.2s;
   }
 
-  .sub-input-row input:focus { border-color: #2e7d32; }
-  .sub-input-row input::placeholder { color: #81c784; }
-
-  .sub-input-row .btn-add {
-    padding: 8px 14px;
-    font-size: 0.9rem;
-    border-radius: 8px;
-  }
+  .sub-input-row input:focus { border-bottom-color: #2e7d32; }
+  .sub-input-row input::placeholder { color: #b2dfb2; }
 
   /* ── Sub-item list ── */
   .sub-list {
@@ -226,25 +203,22 @@
   }
 
   .sub-item {
-    background: #e8f5e9;
-    border: 1.5px solid #c8e6c9;
+    background: #edf7ed;
+    border: 2px solid #a5d6a7;
     border-radius: 8px;
+    box-shadow: 1px 2px 0px #c8e6c9;
   }
 
   .sub-item-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 10px 10px 14px;
+    padding: 9px 10px 9px 14px;
   }
 
-  .sub-item-row .item-label {
-    cursor: pointer;
-  }
+  .sub-item-row .item-label { cursor: pointer; }
 
-  .sub-item-row .item-text {
-    font-size: 0.95rem;
-  }
+  .sub-item-row .item-text { font-size: 0.98rem; }
 </style>
 </head>
 <body>
@@ -253,8 +227,7 @@
   <h1>To-Do</h1>
 
   <div class="input-row">
-    <input id="main-input" type="text" placeholder="Add a task…" autocomplete="off" />
-    <button class="btn-add" id="main-add-btn">Add</button>
+    <input id="main-input" type="text" placeholder="Write a task and press Enter…" autocomplete="off" />
   </div>
 
   <ul id="main-list"></ul>
@@ -304,15 +277,13 @@ function playPenSound(durationMs) {
 // ── STRIKE LOGIC ────────────────────────────────────────────────────────────
 
 function strikeEl(el) {
-  // Re-trigger animation by removing and re-adding class
   el.classList.remove('struck');
-  void el.offsetWidth; // reflow
+  void el.offsetWidth;
   el.classList.add('struck');
 }
 
 function unstrikeEl(el) {
   el.classList.remove('struck');
-  // Reset the strike-line width
   const line = el.querySelector(':scope > .item-row > .item-label > .strike-line, :scope > .sub-item-row > .item-label > .strike-line');
   if (line) { line.style.width = '0'; line.style.animation = 'none'; void line.offsetWidth; line.style.animation = ''; }
 }
@@ -344,20 +315,13 @@ function hideDelete(item) {
 
 function onItemLabelClick(item) {
   const wasStruck = item.classList.contains('struck');
-
   if (wasStruck) {
-    // Un-strike item and all sub-items
     unstrikeEl(item);
-    item.querySelectorAll(':scope > .sub-list > .sub-item').forEach(s => {
-      unstrikeEl(s);
-    });
+    item.querySelectorAll(':scope > .sub-list > .sub-item').forEach(s => unstrikeEl(s));
     hideDelete(item);
   } else {
-    // Strike item and all sub-items
     strikeEl(item);
-    item.querySelectorAll(':scope > .sub-list > .sub-item').forEach(s => {
-      strikeEl(s);
-    });
+    item.querySelectorAll(':scope > .sub-list > .sub-item').forEach(s => strikeEl(s));
     playPenSound(500);
     revealDelete(item);
   }
@@ -365,17 +329,13 @@ function onItemLabelClick(item) {
 
 function onSubLabelClick(sub, item) {
   const wasStruck = sub.classList.contains('struck');
-
   if (wasStruck) {
-    // Un-strike this sub and also un-strike parent
     unstrikeEl(sub);
     unstrikeEl(item);
     hideDelete(item);
   } else {
-    // Strike this sub
     strikeEl(sub);
     playPenSound(300);
-    // Auto-strike parent if all subs done
     checkParentStrike(item, true);
   }
 }
@@ -416,7 +376,6 @@ function makeSub(text, parent) {
   delBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     li.remove();
-    // If parent was auto-struck and this sub is now gone, re-check
     unstrikeEl(parent);
     hideDelete(parent);
     checkParentStrike(parent, true);
@@ -429,7 +388,6 @@ function makeItem(text) {
   const li = document.createElement('li');
   li.className = 'item';
 
-  // ── Main row
   const row = document.createElement('div');
   row.className = 'item-row';
 
@@ -465,23 +423,16 @@ function makeItem(text) {
   row.appendChild(label);
   row.appendChild(actions);
 
-  // ── Sub-input row
   const subInputRow = document.createElement('div');
   subInputRow.className = 'sub-input-row hidden';
 
   const subInput = document.createElement('input');
   subInput.type = 'text';
-  subInput.placeholder = 'Add sub-item…';
+  subInput.placeholder = 'Add sub-item and press Enter…';
   subInput.autocomplete = 'off';
 
-  const subAddBtn = document.createElement('button');
-  subAddBtn.className = 'btn-add';
-  subAddBtn.textContent = 'Add';
-
   subInputRow.appendChild(subInput);
-  subInputRow.appendChild(subAddBtn);
 
-  // ── Sub list
   const subList = document.createElement('ul');
   subList.className = 'sub-list';
 
@@ -489,7 +440,6 @@ function makeItem(text) {
   li.appendChild(subInputRow);
   li.appendChild(subList);
 
-  // ── Events
   label.addEventListener('click', () => onItemLabelClick(li));
 
   subBtn.addEventListener('click', (e) => {
@@ -503,16 +453,15 @@ function makeItem(text) {
     li.remove();
   });
 
-  function commitSub() {
-    const val = subInput.value.trim();
-    if (!val) return;
-    subList.appendChild(makeSub(val, li));
-    subInput.value = '';
-    subInput.focus();
-  }
-
-  subAddBtn.addEventListener('click', commitSub);
-  subInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') commitSub(); });
+  subInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const val = subInput.value.trim();
+      if (!val) return;
+      subList.appendChild(makeSub(val, li));
+      subInput.value = '';
+      subInput.focus();
+    }
+  });
 
   return li;
 }
@@ -522,16 +471,15 @@ function makeItem(text) {
 const mainInput = document.getElementById('main-input');
 const mainList  = document.getElementById('main-list');
 
-function commitItem() {
-  const val = mainInput.value.trim();
-  if (!val) return;
-  mainList.appendChild(makeItem(val));
-  mainInput.value = '';
-  mainInput.focus();
-}
-
-document.getElementById('main-add-btn').addEventListener('click', commitItem);
-mainInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') commitItem(); });
+mainInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const val = mainInput.value.trim();
+    if (!val) return;
+    mainList.appendChild(makeItem(val));
+    mainInput.value = '';
+    mainInput.focus();
+  }
+});
 </script>
 </body>
 </html>
