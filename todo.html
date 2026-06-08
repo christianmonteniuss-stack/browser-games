@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>To-Do</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: #e8f5e9;
+    font-family: 'Georgia', serif;
+    display: flex;
+    justify-content: center;
+    padding: 80px 16px 80px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 580px;
+  }
+
+  h1 {
+    color: #1b5e20;
+    font-size: 2.6rem;
+    letter-spacing: 0.08em;
+    text-align: center;
+    margin-bottom: 32px;
+    user-select: none;
+  }
+
+  /* ── Main input row ── */
+  .input-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .input-row input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #a5d6a7;
+    border-radius: 10px;
+    background: #f1f8f2;
+    color: #1b5e20;
+    font-family: inherit;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .input-row input:focus { border-color: #2e7d32; }
+  .input-row input::placeholder { color: #81c784; }
+
+  .btn-add {
+    padding: 12px 22px;
+    background: #2e7d32;
+    color: #e8f5e9;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    user-select: none;
+  }
+
+  .btn-add:hover { background: #1b5e20; }
+  .btn-add:active { transform: scale(0.97); }
+
+  /* ── Main list ── */
+  #main-list {
+    list-style: none;
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ── Item card ── */
+  .item {
+    background: #f1f8f2;
+    border: 1.5px solid #a5d6a7;
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* ── Item top row ── */
+  .item-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 14px 14px 18px;
+  }
+
+  /* ── Label with strike overlay ── */
+  .item-label {
+    position: relative;
+    flex: 1;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .item-text {
+    display: block;
+    color: #1b5e20;
+    font-size: 1.05rem;
+    line-height: 1.4;
+    transition: color 0.4s ease;
+  }
+
+  .strike-line {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 2.5px;
+    width: 0;
+    background: #388e3c;
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
+  .struck > .item-row > .item-label .strike-line,
+  .sub-item.struck > .sub-item-row > .item-label .strike-line {
+    animation: draw-strike 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .struck > .item-row > .item-label .item-text,
+  .sub-item.struck > .sub-item-row > .item-label .item-text {
+    color: #81c784;
+    transition: color 0.4s ease;
+  }
+
+  @keyframes draw-strike {
+    from { width: 0; }
+    to   { width: 100%; }
+  }
+
+  /* ── Action buttons ── */
+  .item-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .btn-sub {
+    width: 28px;
+    height: 28px;
+    background: #c8e6c9;
+    border: 1.5px solid #a5d6a7;
+    border-radius: 7px;
+    color: #2e7d32;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  .btn-sub:hover { background: #a5d6a7; }
+
+  .btn-delete {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: 1.5px solid #ef9a9a;
+    border-radius: 7px;
+    color: #c62828;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, opacity 0.2s;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  .btn-delete:hover { background: #ffebee; }
+
+  .hidden { display: none !important; }
+
+  /* ── Sub-item input row ── */
+  .sub-input-row {
+    display: flex;
+    gap: 8px;
+    padding: 0 14px 12px 36px;
+  }
+
+  .sub-input-row input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1.5px solid #a5d6a7;
+    border-radius: 8px;
+    background: #e8f5e9;
+    color: #1b5e20;
+    font-family: inherit;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .sub-input-row input:focus { border-color: #2e7d32; }
+  .sub-input-row input::placeholder { color: #81c784; }
+
+  .sub-input-row .btn-add {
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
+
+  /* ── Sub-item list ── */
+  .sub-list {
+    list-style: none;
+    padding: 0 10px 10px 34px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sub-item {
+    background: #e8f5e9;
+    border: 1.5px solid #c8e6c9;
+    border-radius: 8px;
+  }
+
+  .sub-item-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 10px 10px 14px;
+  }
+
+  .sub-item-row .item-label {
+    cursor: pointer;
+  }
+
+  .sub-item-row .item-text {
+    font-size: 0.95rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>To-Do</h1>
+
+  <div class="input-row">
+    <input id="main-input" type="text" placeholder="Add a task…" autocomplete="off" />
+    <button class="btn-add" id="main-add-btn">Add</button>
+  </div>
+
+  <ul id="main-list"></ul>
+</div>
+
+<script>
+// ── AUDIO ──────────────────────────────────────────────────────────────────
+
+function playPenSound(durationMs) {
+  try {
+    const ctx = new AudioContext();
+    const len = Math.floor(ctx.sampleRate * (durationMs / 1000));
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+
+    let last = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      last = (last + 0.02 * w) / 1.02;
+      d[i] = last * 3.5;
+    }
+
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 3500;
+    bp.Q.value = 0.8;
+
+    const gain = ctx.createGain();
+    const t = ctx.currentTime;
+    const dur = durationMs / 1000;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.35, t + 0.05);
+    gain.gain.setValueAtTime(0.35, t + dur - 0.1);
+    gain.gain.linearRampToValueAtTime(0, t + dur);
+
+    src.connect(bp);
+    bp.connect(gain);
+    gain.connect(ctx.destination);
+    src.start();
+    src.stop(t + dur);
+  } catch (_) {}
+}
+
+// ── STRIKE LOGIC ────────────────────────────────────────────────────────────
+
+function strikeEl(el) {
+  // Re-trigger animation by removing and re-adding class
+  el.classList.remove('struck');
+  void el.offsetWidth; // reflow
+  el.classList.add('struck');
+}
+
+function unstrikeEl(el) {
+  el.classList.remove('struck');
+  // Reset the strike-line width
+  const line = el.querySelector(':scope > .item-row > .item-label > .strike-line, :scope > .sub-item-row > .item-label > .strike-line');
+  if (line) { line.style.width = '0'; line.style.animation = 'none'; void line.offsetWidth; line.style.animation = ''; }
+}
+
+function allSubsDone(item) {
+  const subs = [...item.querySelectorAll(':scope > .sub-list > .sub-item')];
+  return subs.length > 0 && subs.every(s => s.classList.contains('struck'));
+}
+
+function checkParentStrike(item, silent) {
+  if (allSubsDone(item)) {
+    strikeEl(item);
+    if (!silent) playPenSound(500);
+    revealDelete(item);
+  }
+}
+
+function revealDelete(item) {
+  const btn = item.querySelector(':scope > .item-row > .item-actions > .btn-delete');
+  if (btn) btn.classList.remove('hidden');
+}
+
+function hideDelete(item) {
+  const btn = item.querySelector(':scope > .item-row > .item-actions > .btn-delete');
+  if (btn) btn.classList.add('hidden');
+}
+
+// ── TOGGLE HANDLERS ─────────────────────────────────────────────────────────
+
+function onItemLabelClick(item) {
+  const wasStruck = item.classList.contains('struck');
+
+  if (wasStruck) {
+    // Un-strike item and all sub-items
+    unstrikeEl(item);
+    item.querySelectorAll(':scope > .sub-list > .sub-item').forEach(s => {
+      unstrikeEl(s);
+    });
+    hideDelete(item);
+  } else {
+    // Strike item and all sub-items
+    strikeEl(item);
+    item.querySelectorAll(':scope > .sub-list > .sub-item').forEach(s => {
+      strikeEl(s);
+    });
+    playPenSound(500);
+    revealDelete(item);
+  }
+}
+
+function onSubLabelClick(sub, item) {
+  const wasStruck = sub.classList.contains('struck');
+
+  if (wasStruck) {
+    // Un-strike this sub and also un-strike parent
+    unstrikeEl(sub);
+    unstrikeEl(item);
+    hideDelete(item);
+  } else {
+    // Strike this sub
+    strikeEl(sub);
+    playPenSound(300);
+    // Auto-strike parent if all subs done
+    checkParentStrike(item, true);
+  }
+}
+
+// ── BUILD DOM ────────────────────────────────────────────────────────────────
+
+function makeSub(text, parent) {
+  const li = document.createElement('li');
+  li.className = 'sub-item';
+
+  const row = document.createElement('div');
+  row.className = 'sub-item-row';
+
+  const label = document.createElement('div');
+  label.className = 'item-label';
+
+  const span = document.createElement('span');
+  span.className = 'item-text';
+  span.textContent = text;
+
+  const line = document.createElement('span');
+  line.className = 'strike-line';
+
+  label.appendChild(span);
+  label.appendChild(line);
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'btn-delete hidden';
+  delBtn.title = 'Delete sub-item';
+  delBtn.textContent = '🗑';
+
+  row.appendChild(label);
+  row.appendChild(delBtn);
+  li.appendChild(row);
+
+  label.addEventListener('click', () => onSubLabelClick(li, parent));
+
+  delBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    li.remove();
+    // If parent was auto-struck and this sub is now gone, re-check
+    unstrikeEl(parent);
+    hideDelete(parent);
+    checkParentStrike(parent, true);
+  });
+
+  return li;
+}
+
+function makeItem(text) {
+  const li = document.createElement('li');
+  li.className = 'item';
+
+  // ── Main row
+  const row = document.createElement('div');
+  row.className = 'item-row';
+
+  const label = document.createElement('div');
+  label.className = 'item-label';
+
+  const span = document.createElement('span');
+  span.className = 'item-text';
+  span.textContent = text;
+
+  const line = document.createElement('span');
+  line.className = 'strike-line';
+
+  label.appendChild(span);
+  label.appendChild(line);
+
+  const actions = document.createElement('div');
+  actions.className = 'item-actions';
+
+  const subBtn = document.createElement('button');
+  subBtn.className = 'btn-sub';
+  subBtn.title = 'Add sub-item';
+  subBtn.textContent = '+';
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'btn-delete hidden';
+  delBtn.title = 'Delete task';
+  delBtn.textContent = '🗑';
+
+  actions.appendChild(subBtn);
+  actions.appendChild(delBtn);
+
+  row.appendChild(label);
+  row.appendChild(actions);
+
+  // ── Sub-input row
+  const subInputRow = document.createElement('div');
+  subInputRow.className = 'sub-input-row hidden';
+
+  const subInput = document.createElement('input');
+  subInput.type = 'text';
+  subInput.placeholder = 'Add sub-item…';
+  subInput.autocomplete = 'off';
+
+  const subAddBtn = document.createElement('button');
+  subAddBtn.className = 'btn-add';
+  subAddBtn.textContent = 'Add';
+
+  subInputRow.appendChild(subInput);
+  subInputRow.appendChild(subAddBtn);
+
+  // ── Sub list
+  const subList = document.createElement('ul');
+  subList.className = 'sub-list';
+
+  li.appendChild(row);
+  li.appendChild(subInputRow);
+  li.appendChild(subList);
+
+  // ── Events
+  label.addEventListener('click', () => onItemLabelClick(li));
+
+  subBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    subInputRow.classList.toggle('hidden');
+    if (!subInputRow.classList.contains('hidden')) subInput.focus();
+  });
+
+  delBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    li.remove();
+  });
+
+  function commitSub() {
+    const val = subInput.value.trim();
+    if (!val) return;
+    subList.appendChild(makeSub(val, li));
+    subInput.value = '';
+    subInput.focus();
+  }
+
+  subAddBtn.addEventListener('click', commitSub);
+  subInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') commitSub(); });
+
+  return li;
+}
+
+// ── MAIN INPUT ───────────────────────────────────────────────────────────────
+
+const mainInput = document.getElementById('main-input');
+const mainList  = document.getElementById('main-list');
+
+function commitItem() {
+  const val = mainInput.value.trim();
+  if (!val) return;
+  mainList.appendChild(makeItem(val));
+  mainInput.value = '';
+  mainInput.focus();
+}
+
+document.getElementById('main-add-btn').addEventListener('click', commitItem);
+mainInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') commitItem(); });
+</script>
+</body>
+</html>
