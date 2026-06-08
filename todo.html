@@ -76,6 +76,26 @@
     box-shadow: 6px 8px 18px rgba(0,0,0,0.18), 1px 2px 0 #b2dfb2;
   }
 
+  /* ── Corner rotation handles ── */
+  .note-corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: rgba(76,175,80,0.3);
+    border: 2px solid #4caf50;
+    border-radius: 3px;
+    cursor: crosshair;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s;
+    z-index: 5;
+  }
+  .note:hover .note-corner { opacity: 1; }
+  .note-corner:hover { background: rgba(76,175,80,0.65); }
+  .note-corner.tl { top: -6px; left: -6px; }
+  .note-corner.tr { top: -6px; right: -6px; }
+  .note-corner.bl { bottom: -6px; left: -6px; }
+  .note-corner.br { bottom: -6px; right: -6px; }
+
   /* Coloured drag tab at top */
   .note-tab {
     background: #81c784;
@@ -332,18 +352,29 @@ function playPen(ms) {
 // ── DRAG ───────────────────────────────────────────────────────────────────
 
 let drag = null;
+let rot  = null;
 let zTop = 1;
 
 document.addEventListener('mousemove', e => {
-  if (!drag) return;
-  drag.task.x = e.clientX - drag.ox + window.scrollX;
-  drag.task.y = e.clientY - drag.oy + window.scrollY;
-  drag.note.style.left = drag.task.x + 'px';
-  drag.note.style.top  = drag.task.y + 'px';
+  if (drag) {
+    drag.task.x = e.clientX - drag.ox + window.scrollX;
+    drag.task.y = e.clientY - drag.oy + window.scrollY;
+    drag.note.style.left = drag.task.x + 'px';
+    drag.note.style.top  = drag.task.y + 'px';
+  }
+  if (rot) {
+    const rect = rot.note.getBoundingClientRect();
+    const cx = rect.left + rect.width  / 2;
+    const cy = rect.top  + rect.height / 2;
+    const angle = Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI;
+    rot.task.rotation = rot.startRotation + (angle - rot.startAngle);
+    rot.note.style.transform = `rotate(${rot.task.rotation}deg)`;
+  }
 });
 
 document.addEventListener('mouseup', () => {
   if (drag) { save(); drag = null; }
+  if (rot)  { save(); rot  = null; }
 });
 
 function bringToFront(note, task) {
@@ -548,6 +579,26 @@ function buildNote(task) {
   note.appendChild(tab);
   note.appendChild(content);
   document.body.appendChild(note);
+
+  // ── Corner rotation handles
+  ['tl','tr','bl','br'].forEach(pos => {
+    const corner = document.createElement('div');
+    corner.className = `note-corner ${pos}`;
+    note.appendChild(corner);
+    corner.addEventListener('mousedown', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      bringToFront(note, task);
+      const rect = note.getBoundingClientRect();
+      const cx = rect.left + rect.width  / 2;
+      const cy = rect.top  + rect.height / 2;
+      rot = {
+        note, task,
+        startAngle:    Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI,
+        startRotation: task.rotation
+      };
+    });
+  });
 
   // ── Events
   lbl.addEventListener('click', e => {
