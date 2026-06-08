@@ -18,7 +18,6 @@ const canvas=document.getElementById('c');
 const ctx=canvas.getContext('2d');
 canvas.width=W; canvas.height=H;
 
-// scale canvas to fit window
 function resize(){
   const s=Math.min(window.innerWidth/W,window.innerHeight/H);
   canvas.style.width=W*s+'px'; canvas.style.height=H*s+'px';
@@ -74,6 +73,20 @@ function spawnDust(x,y,color,n=8){
 function spawnFlash(x,y){
   particles.push({x,y,vx:0,vy:0,life:1,maxLife:0.07,size:14,color:'#fff8a0'});
 }
+function spawnFlameCone(x,y,angle){
+  for(let i=0;i<7;i++){
+    const spread=(Math.random()-0.5)*0.9;
+    const a=angle+spread;
+    const spd=90+Math.random()*130;
+    particles.push({
+      x:x+Math.cos(angle)*20, y:y+Math.sin(angle)*20,
+      vx:Math.cos(a)*spd, vy:Math.sin(a)*spd,
+      life:1, maxLife:0.18+Math.random()*0.22,
+      size:7+Math.random()*11,
+      color:Math.random()<0.5?'#ff6600':'#ffaa00'
+    });
+  }
+}
 function tickParticles(dt){
   for(let i=particles.length-1;i>=0;i--){
     const p=particles[i];
@@ -117,25 +130,16 @@ function drawSheriff(x,y,angle,phase,flash){
   ctx.save(); ctx.translate(x,y);
   if(flash) ctx.filter='brightness(9)';
   const b=Math.sin(phase)*3;
-  // shadow
   ctx.fillStyle='rgba(0,0,0,0.22)';
   ctx.beginPath(); ctx.ellipse(0,10+b,10,5,0,0,Math.PI*2); ctx.fill();
-  // body/coat
   R(-8,-10+b,16,18,COL.coatP);
-  // head
   R(-5,-20+b,10,11,COL.skinP);
-  // hat brim
   R(-11,-24+b,22,4,COL.hatP);
-  // hat crown
   R(-7,-36+b,14,16,COL.hatP);
-  // hat band
   R(-7,-24+b,14,4,'#8b6914');
-  // eyes
   R(-3,-16+b,3,3,'#2a1a08'); R(1,-16+b,3,3,'#2a1a08');
-  // badge
   R(-4,-5+b,8,8,'#f5c842');
   R(-2,-3+b,4,4,'#d4a010');
-  // gun arm
   ctx.save(); ctx.rotate(angle);
   R(6,-4,20,6,COL.coatP); R(24,-5,9,7,'#555');
   ctx.restore();
@@ -150,11 +154,8 @@ function drawOutlaw(x,y,angle,phase,flash){
   ctx.beginPath(); ctx.ellipse(0,10+b,10,5,0,0,Math.PI*2); ctx.fill();
   R(-8,-10+b,16,18,COL.outlaw);
   R(-5,-20+b,10,11,COL.skinP);
-  // bandana
   R(-6,-14+b,12,7,'#aa1800');
-  // hat
   R(-10,-28+b,20,4,'#222'); R(-7,-42+b,14,18,'#222');
-  // gun arm
   ctx.save(); ctx.rotate(angle);
   R(6,-3,16,5,COL.outlaw); R(20,-4,7,6,'#555');
   ctx.restore();
@@ -169,9 +170,7 @@ function drawSharpshooter(x,y,angle,phase,flash){
   ctx.beginPath(); ctx.ellipse(0,10+b,8,4,0,0,Math.PI*2); ctx.fill();
   R(-6,-10+b,12,18,COL.sharpshooter);
   R(-4,-20+b,8,11,COL.skinP);
-  // tall black hat
   R(-9,-26+b,18,4,'#111'); R(-5,-44+b,10,22,'#111');
-  // rifle arm
   ctx.save(); ctx.rotate(angle);
   R(6,-2,26,4,COL.sharpshooter); R(30,-3,10,5,'#333');
   ctx.restore();
@@ -187,9 +186,7 @@ function drawDesperado(x,y,angle,phase,flash){
   R(-13,-10+b,26,24,COL.desperado);
   R(-9,-8+b,18,20,'#aa3000');
   R(-9,-22+b,18,14,COL.skinP);
-  // hat
   R(-11,-30+b,22,5,'#5a3010'); R(-8,-44+b,16,18,'#5a3010');
-  // shotgun arm
   ctx.save(); ctx.rotate(angle);
   R(8,-5,22,10,COL.desperado); R(28,-6,12,8,'#333');
   ctx.restore();
@@ -205,23 +202,16 @@ function drawBoss(x,y,angle,phase,flash,hp,maxHp){
   const bColor=low?`rgb(${Math.round(230+pulse*20)},${Math.round(80-pulse*60)},${Math.round(80-pulse*60)})`:COL.boss;
   ctx.fillStyle='rgba(0,0,0,0.35)';
   ctx.beginPath(); ctx.ellipse(0,18+b,18,8,0,0,Math.PI*2); ctx.fill();
-  // legs
   R(-15,4+b,11,22,bColor); R(4,4+b,11,22,bColor);
-  // body
   R(-17,-18+b,34,26,bColor);
-  // skull buckle
   R(-7,-6+b,14,10,'#333');
   R(-5,-5+b,10,8,'#ddd');
   R(-4,-4+b,3,4,'#333'); R(1,-4+b,3,4,'#333');
-  // head
   R(-13,-34+b,26,20,bColor);
-  // hat
   R(-18,-40+b,36,7,'#111'); R(-11,-62+b,22,26,'#111');
-  // skull on hat
   R(-6,-60+b,12,10,'#ddd');
   R(-5,-59+b,3,4,'#333'); R(2,-59+b,3,4,'#333');
   R(-4,-55+b,8,3,'#333');
-  // gun arm
   ctx.save(); ctx.rotate(angle);
   R(10,-6,24,12,bColor); R(32,-7,14,10,'#333');
   ctx.restore();
@@ -285,11 +275,11 @@ class Enemy{
     } else if(d>this.r+14){
       mx=dx/d; my=dy/d;
     }
-    this.x=Math.max(10,Math.min(W-10,this.x+mx*this.spd*dt));
-    this.y=Math.max(10,Math.min(H-10,this.y+my*this.spd*dt));
-    this.dist+=Math.hypot(mx,my)*this.spd*dt;
+    const effSpd=this.spd*enemyMult.spd;
+    this.x=Math.max(10,Math.min(W-10,this.x+mx*effSpd*dt));
+    this.y=Math.max(10,Math.min(H-10,this.y+my*effSpd*dt));
+    this.dist+=Math.hypot(mx,my)*effSpd*dt;
     this.phase=this.dist*0.05;
-    // shooting
     if(EDEFS[this.type].shootInterval>0){
       this.shootCd-=dt;
       if(this.shootCd<=0){
@@ -309,10 +299,9 @@ class Enemy{
         }
       }
     }
-    // contact damage
     if(d<this.r+16){
-      const dmg=this.type==='desperado'?1.4:this.type==='boss'?1.8:0.7;
-      player.hit(dmg);
+      const baseDmg=this.type==='desperado'?1.4:this.type==='boss'?1.8:0.7;
+      player.hit(baseDmg*enemyMult.dmg);
     }
     if(this.hitTimer>0) this.hitTimer-=dt;
   }
@@ -322,13 +311,13 @@ class Enemy{
       this.dead=true;
       spawnDust(this.x,this.y,
         this.type==='desperado'?COL.desperado:this.type==='boss'?'#f0e6c8':COL.outlaw,14);
+      if(Math.random()<0.25) powerups.push(new Powerup(this.x,this.y));
     } else {
       spawnDust(this.x,this.y,COL.dust,4);
     }
   }
   draw(){
     this.drawFn(this.x,this.y,this.angle,this.phase,this.hitTimer>0,this.hp,this.maxHp);
-    // small HP bar
     if(this.hp<this.maxHp){
       const bw=Math.max(30,this.r*2.2), bh=4, bx=this.x-bw/2, by=this.y-this.r-22;
       ctx.fillStyle='#333'; ctx.fillRect(bx,by,bw,bh);
@@ -348,6 +337,10 @@ class Player{
     this.shootCd=0;
     this.phase=0; this.dist=0;
     this.hitTimer=0; this.invTimer=0;
+    this.activePowerup=null; // 'flamethrower'
+    this.flameTimer=0;
+    this.bombCount=0;
+    this.bombKeyHeld=false;
   }
   tick(dt,bullets){
     let dx=0,dy=0;
@@ -362,13 +355,50 @@ class Player{
     this.dist+=Math.hypot(dx,dy)*this.spd*dt;
     this.phase=this.dist*0.05;
     this.angle=Math.atan2(mouse.y-this.y,mouse.x-this.x);
-    if(this.shootCd>0) this.shootCd-=dt;
-    if(mouse.clicked && this.shootCd<=0){
-      this.shootCd=0.34;
-      const bx=this.x+Math.cos(this.angle)*28, by=this.y+Math.sin(this.angle)*28;
-      bullets.push(new Bullet(bx,by,Math.cos(this.angle)*510,Math.sin(this.angle)*510,10,'player'));
-      spawnFlash(bx+Math.cos(this.angle)*14,by+Math.sin(this.angle)*14);
+
+    // flamethrower
+    if(this.activePowerup==='flamethrower'){
+      this.flameTimer-=dt;
+      if(this.flameTimer<=0){ this.activePowerup=null; }
+      else if(mouse.down){
+        spawnFlameCone(this.x,this.y,this.angle);
+        for(const e of enemies){
+          if(!e.dead){
+            const ex=e.x-this.x, ey=e.y-this.y;
+            const ed=Math.hypot(ex,ey);
+            if(ed<110){
+              let diff=Math.atan2(ey,ex)-this.angle;
+              while(diff>Math.PI) diff-=Math.PI*2;
+              while(diff<-Math.PI) diff+=Math.PI*2;
+              if(Math.abs(diff)<0.45){
+                const dmg=4*dt*60;
+                e.hit(dmg);
+                if(e.dead){ score+=e.score; kills++; registerKill(); enemies=enemies.filter(x=>!x.dead); }
+              }
+            }
+          }
+        }
+      }
+    } else {
+      // normal shooting
+      if(this.shootCd>0) this.shootCd-=dt;
+      if(mouse.clicked && this.shootCd<=0){
+        this.shootCd=0.34;
+        const dmg=onFire?20:10;
+        const bx=this.x+Math.cos(this.angle)*28, by=this.y+Math.sin(this.angle)*28;
+        bullets.push(new Bullet(bx,by,Math.cos(this.angle)*510,Math.sin(this.angle)*510,dmg,'player'));
+        spawnFlash(bx+Math.cos(this.angle)*14,by+Math.sin(this.angle)*14);
+      }
     }
+
+    // bomb throw
+    if((keys['b']||keys['B'])&&!this.bombKeyHeld&&this.bombCount>0){
+      this.bombKeyHeld=true;
+      this.bombCount--;
+      bombs.push(new BombEntity(this.x,this.y,mouse.x,mouse.y));
+    }
+    if(!keys['b']&&!keys['B']) this.bombKeyHeld=false;
+
     if(this.hitTimer>0) this.hitTimer-=dt;
     if(this.invTimer>0) this.invTimer-=dt;
   }
@@ -379,19 +409,182 @@ class Player{
     spawnDust(this.x,this.y,'#ff6644',5);
   }
   draw(){
+    if(onFire){
+      const pulse=0.35+0.35*Math.sin(Date.now()*0.015);
+      ctx.globalAlpha=pulse;
+      ctx.fillStyle='#ff6600';
+      ctx.beginPath(); ctx.arc(this.x,this.y,24,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=1;
+    }
     drawSheriff(this.x,this.y,this.angle,this.phase,this.hitTimer>0);
+  }
+}
+
+// ── POWERUP ───────────────────────────────────────────────────────────────────
+class Powerup{
+  constructor(x,y){
+    this.x=x; this.y=y;
+    this.type=Math.random()<0.5?'flamethrower':'bomb';
+    this.pulseT=0; this.dead=false;
+  }
+  tick(dt){ this.pulseT+=dt; }
+  draw(){
+    const pulse=0.55+0.45*Math.sin(this.pulseT*4);
+    const col=this.type==='flamethrower'?'#ff6600':'#cc9900';
+    ctx.globalAlpha=pulse*0.55;
+    ctx.fillStyle=col;
+    ctx.beginPath(); ctx.arc(this.x,this.y,20,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+    if(this.type==='flamethrower'){
+      // flame shape
+      R(this.x-5,this.y-6,10,14,'#888');   // handle
+      R(this.x-3,this.y-14,6,10,'#ff6600'); // flame body
+      R(this.x-1,this.y-18,3,6,'#ffcc00'); // flame tip
+    } else {
+      // dynamite stick
+      R(this.x-5,this.y-8,10,14,'#cc2200');
+      R(this.x-3,this.y-9,6,4,'#aa1800');
+      R(this.x-1,this.y-13,2,6,'#ffee44'); // fuse
+    }
+    ctx.fillStyle=col;
+    ctx.font='bold 10px Courier New';
+    ctx.textAlign='center';
+    ctx.fillText(this.type==='flamethrower'?'FLAME':'BOMB [B]',this.x,this.y+28);
+  }
+}
+
+// ── BOMB ENTITY ───────────────────────────────────────────────────────────────
+class BombEntity{
+  constructor(x,y,tx,ty){
+    this.x=x; this.y=y;
+    const d=Math.hypot(tx-x,ty-y)||1;
+    const spd=300;
+    this.vx=(tx-x)/d*spd; this.vy=(ty-y)/d*spd;
+    this.tx=tx; this.ty=ty;
+    this.fuseT=0; this.dead=false;
+  }
+  tick(dt){
+    this.x+=this.vx*dt; this.y+=this.vy*dt;
+    this.fuseT+=dt;
+    if(Math.hypot(this.x-this.tx,this.y-this.ty)<10) this.explode();
+  }
+  explode(){
+    this.dead=true;
+    spawnDust(this.x,this.y,'#ff8800',22);
+    spawnDust(this.x,this.y,'#ffee00',14);
+    spawnDust(this.x,this.y,'#888',8);
+    shakeT=0.6;
+    for(const e of enemies){
+      if(!e.dead && Math.hypot(this.x-e.x,this.y-e.y)<120){
+        e.hit(80);
+        if(e.dead){ score+=e.score; kills++; registerKill(); }
+      }
+    }
+    enemies=enemies.filter(e=>!e.dead);
+  }
+  draw(){
+    const fuse=0.5+0.5*Math.sin(this.fuseT*18);
+    R(this.x-4,this.y-7,8,12,fuse>0.5?'#cc2200':'#882200');
+    ctx.fillStyle='#ffee44';
+    ctx.fillRect(this.x-1,this.y-11,2,5);
+  }
+}
+
+// ── BULLDOG ───────────────────────────────────────────────────────────────────
+class Bulldog{
+  constructor(x,y){
+    this.x=x; this.y=y;
+    this.hp=60; this.maxHp=60;
+    this.spd=140;
+    this.attackCd=0;
+    this.phase=0; this.dist=0;
+    this.hitTimer=0; this.dead=false;
+  }
+  tick(dt){
+    const dx=player.x-this.x, dy=player.y-this.y;
+    const d=Math.hypot(dx,dy)||1;
+    if(d>80){
+      this.x+=dx/d*this.spd*dt;
+      this.y+=dy/d*this.spd*dt;
+      this.dist+=this.spd*dt;
+    }
+    this.phase=this.dist*0.1;
+    this.attackCd-=dt;
+    if(this.attackCd<=0){
+      let nearest=null, nearestD=140;
+      for(const e of enemies){
+        if(!e.dead){
+          const ed=Math.hypot(e.x-this.x,e.y-this.y);
+          if(ed<nearestD){ nearest=e; nearestD=ed; }
+        }
+      }
+      if(nearest){
+        this.attackCd=0.8;
+        nearest.hit(25);
+        spawnDust(nearest.x,nearest.y,'#c86400',6);
+        if(nearest.dead){ score+=nearest.score; kills++; registerKill(); }
+      }
+    }
+    if(this.hitTimer>0) this.hitTimer-=dt;
+  }
+  hit(dmg){
+    this.hp-=dmg; this.hitTimer=0.1;
+    if(this.hp<=0) this.dead=true;
+  }
+  draw(){
+    ctx.save(); ctx.translate(this.x,this.y);
+    if(this.hitTimer>0) ctx.filter='brightness(9)';
+    const b=Math.sin(this.phase)*2;
+    ctx.fillStyle='rgba(0,0,0,0.2)';
+    ctx.beginPath(); ctx.ellipse(0,8+b,8,4,0,0,Math.PI*2); ctx.fill();
+    R(-10,-4+b,20,10,'#8b5e1a');
+    R(-6,-12+b,12,10,'#a0721f');
+    R(-8,-14+b,5,8,'#7a4e12'); R(3,-14+b,5,8,'#7a4e12');
+    R(-4,-10+b,3,3,'#111'); R(1,-10+b,3,3,'#111');
+    R(-3,-5+b,6,5,'#c4884a');
+    const legOff=Math.sin(this.phase)*3;
+    R(-8,5+b+legOff,4,7,'#8b5e1a'); R(-2,5+b-legOff,4,7,'#8b5e1a');
+    R(2,5+b+legOff,4,7,'#8b5e1a');
+    R(10,-1+b,7,3,'#8b5e1a');
+    ctx.filter='none'; ctx.restore();
+    if(this.hp<this.maxHp){
+      const bw=28,bh=3,bx=this.x-14,by=this.y-24;
+      ctx.fillStyle='#333'; ctx.fillRect(bx,by,bw,bh);
+      ctx.fillStyle='#5d5'; ctx.fillRect(bx,by,bw*(this.hp/this.maxHp),bh);
+    }
   }
 }
 
 // ── GAME STATE ────────────────────────────────────────────────────────────────
 let gstate='MENU';
-let player,bullets,enemies;
+let player,bullets,enemies,powerups,bombs;
 let levelIdx=0,waveIdx=0;
 let score=0,kills=0;
 let waveMsg='',waveMsgT=0;
 let clearTimer=0;
 let bossMsg=false,bossMsgT=0;
 let shakeT=0;
+let bulldog=null;
+let comboKills=0,comboTimer=0;
+let onFire=false,onFireTimer=0;
+let enemyMult={spd:1,dmg:1};
+let gameTimer=0;
+
+function registerKill(){
+  comboKills++;
+  comboTimer=3.5;
+  if(!onFire && comboKills>=5){
+    onFire=true; onFireTimer=10;
+    enemyMult={spd:1.35,dmg:1.35};
+    bulldog=new Bulldog(player.x+40,player.y);
+  }
+}
+
+function endOnFire(){
+  onFire=false; comboKills=0; comboTimer=0;
+  enemyMult={spd:1,dmg:1};
+  bulldog=null;
+}
 
 function edgePos(){
   const side=Math.floor(Math.random()*4);
@@ -413,7 +606,7 @@ function spawnWave(){
 }
 
 function startLevel(){
-  enemies=[]; bullets=[];
+  enemies=[]; bullets=[]; powerups=[]; bombs=[];
   waveIdx=0; spawnWave();
   const lv=LEVELS[levelIdx];
   waveMsg=`${lv.name}${lv.waves.length>1?' — WAVE 1/'+lv.waves.length:''}`;
@@ -422,9 +615,14 @@ function startLevel(){
 
 function startGame(){
   player=new Player();
-  bullets=[]; enemies=[];
+  bullets=[]; enemies=[]; powerups=[]; bombs=[];
+  bulldog=null;
   score=0; kills=0;
   levelIdx=0; waveIdx=0;
+  comboKills=0; comboTimer=0;
+  onFire=false; onFireTimer=0;
+  enemyMult={spd:1,dmg:1};
+  gameTimer=0;
   gstate='PLAYING';
   startLevel();
 }
@@ -447,36 +645,99 @@ function drawHUD(){
   ctx.fillStyle=pct>0.5?'#5d5':'#c44';
   ctx.fillRect(14,14,bw*pct,bh);
   txt(`HP  ${Math.ceil(Math.max(0,player.hp))}`,116,30,13,COL.uiText);
+
+  // active powerup + bomb count (below HP bar)
+  let puY=44;
+  if(player.activePowerup==='flamethrower'){
+    ctx.fillStyle=COL.ui; ctx.fillRect(12,puY,206,22);
+    ctx.fillStyle='#553300'; ctx.fillRect(14,puY+2,200,18);
+    ctx.fillStyle='#ff6600'; ctx.fillRect(14,puY+2,200*(player.flameTimer/12),18);
+    txt('FLAME',116,puY+15,12,COL.uiText);
+    puY+=26;
+  }
+  if(player.bombCount>0){
+    ctx.fillStyle=COL.ui; ctx.fillRect(12,puY,206,22);
+    txt(`BOMBS [B]: ${player.bombCount}`,116,puY+15,12,'#ffcc44');
+  }
+
+  // timer (top center)
+  const mins=Math.floor(gameTimer/60);
+  const secs=Math.floor(gameTimer%60);
+  const timeStr=`${mins}:${String(secs).padStart(2,'0')}`;
+  ctx.fillStyle=COL.ui; ctx.fillRect(W/2-46,12,92,26);
+  txt(timeStr,W/2,31,14,COL.uiText);
+
+  // combo pips (below timer)
+  const pipW=14,pipGap=5,totalPip=5*(pipW+pipGap)-pipGap;
+  const pipX=W/2-totalPip/2, pipY=44;
+  ctx.fillStyle=COL.ui; ctx.fillRect(pipX-4,pipY-2,totalPip+8,18);
+  for(let i=0;i<5;i++){
+    const filled=i<comboKills;
+    const px2=pipX+i*(pipW+pipGap);
+    ctx.fillStyle=filled?(onFire?'#ff4400':'#ff8800'):'#333';
+    ctx.fillRect(px2,pipY,pipW,14);
+    if(filled&&!onFire){
+      const pulse=0.6+0.4*Math.sin(Date.now()*0.01+i);
+      ctx.globalAlpha=pulse*0.5;
+      ctx.fillStyle='#ffcc00';
+      ctx.fillRect(px2,pipY,pipW,14);
+      ctx.globalAlpha=1;
+    }
+  }
+
   // level + enemies
   ctx.fillStyle=COL.ui; ctx.fillRect(W-222,12,210,44);
   txt(LEVELS[levelIdx].name,W-117,30,12,COL.uiText);
   txt(`OUTLAWS: ${enemies.length}`,W-117,48,12,'#ffa500');
-  // wave msg
-  if(waveMsgT>0){
+
+  // wave msg (only when no ON FIRE overlay)
+  if(waveMsgT>0 && !onFire){
     ctx.globalAlpha=Math.min(1,waveMsgT)*0.95;
     ctx.fillStyle=COL.ui; ctx.fillRect(W/2-220,H/2-28,440,52);
     txt(waveMsg,W/2,H/2+8,17,COL.uiText);
     ctx.globalAlpha=1;
   }
+
   // boss entrance
   if(bossMsg){
     ctx.fillStyle='rgba(0,0,0,0.72)'; ctx.fillRect(0,H/2-46,W,82);
     txt('BLACK BART APPROACHES...',W/2,H/2+10,30,COL.boss);
+  }
+
+  // ON FIRE! overlay
+  if(onFire){
+    const pulse=0.75+0.25*Math.sin(Date.now()*0.012);
+    ctx.globalAlpha=pulse;
+    ctx.fillStyle='rgba(80,20,0,0.35)'; ctx.fillRect(0,0,W,H);
+    ctx.globalAlpha=1;
+    // banner
+    ctx.fillStyle='rgba(40,10,0,0.85)'; ctx.fillRect(W/2-180,H-100,360,52);
+    ctx.strokeStyle='#ff4400'; ctx.lineWidth=2;
+    ctx.strokeRect(W/2-180,H-100,360,52);
+    txt('🔥 ON FIRE! 🔥',W/2,H-68,26,'#ff6600');
+    // countdown bar
+    const cbw=340,cbh=7;
+    ctx.fillStyle='#330800'; ctx.fillRect(W/2-cbw/2,H-46,cbw,cbh);
+    ctx.fillStyle='#ff4400'; ctx.fillRect(W/2-cbw/2,H-46,cbw*(onFireTimer/10),cbh);
+    // enemy boost warning
+    txt('ENEMIES: FASTER & DEADLIER',W/2,H-108,12,'#ff8844');
+    // 2x damage indicator
+    ctx.fillStyle=COL.ui; ctx.fillRect(W/2+190,H-100,80,24);
+    txt('DMG x2',W/2+230,H-82,12,'#ffcc44');
+    ctx.globalAlpha=1;
   }
 }
 
 // ── SCREENS ───────────────────────────────────────────────────────────────────
 function drawMenu(){
   ctx.fillStyle=COL.bg; ctx.fillRect(0,0,W,H);
-  // wanted poster
-  ctx.fillStyle='rgba(61,43,26,0.92)'; ctx.fillRect(W/2-250,50,500,470);
+  ctx.fillStyle='rgba(61,43,26,0.92)'; ctx.fillRect(W/2-250,50,500,500);
   ctx.strokeStyle='#a88a48'; ctx.lineWidth=7;
-  ctx.strokeRect(W/2-250,50,500,470);
-  ctx.strokeRect(W/2-236,64,472,442);
+  ctx.strokeRect(W/2-250,50,500,500);
+  ctx.strokeRect(W/2-236,64,472,472);
   txt('WANTED',W/2,128,54,'#cc2200');
   txt('DEAD OR ALIVE',W/2,160,22,COL.uiText);
-  // star badge
-  const cx=W/2, cy=250, or=60, ir=28;
+  const cx=W/2, cy=248, or=60, ir=28;
   ctx.fillStyle='#8b6914';
   ctx.beginPath();
   for(let i=0;i<10;i++){
@@ -493,36 +754,40 @@ function drawMenu(){
     i===0?ctx.moveTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2):ctx.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2);
   }
   ctx.closePath(); ctx.fill();
-  txt('DEAD WEST',W/2,242,20,'#3d2b1a');
-  txt('SHERIFF',W/2,264,16,'#3d2b1a');
-
-  txt('CLICK  TO  DRAW',W/2,348,26,'#ffa500');
-  txt('ARROW KEYS / WASD: MOVE',W/2,395,13,COL.uiText);
-  txt('MOUSE: AIM   CLICK: SHOOT',W/2,416,13,COL.uiText);
-  txt('5 LEVELS — BRING LAW TO THE WEST',W/2,450,13,COL.uiText);
+  txt('DEAD WEST',W/2,240,20,'#3d2b1a');
+  txt('SHERIFF',W/2,262,16,'#3d2b1a');
+  txt('CLICK  TO  DRAW',W/2,340,26,'#ffa500');
+  txt('ARROW KEYS / WASD: MOVE   MOUSE: AIM   CLICK: SHOOT',W/2,385,12,COL.uiText);
+  txt('CHAIN 5 KILLS → ON FIRE! (2x DMG + BULLDOG BUDDY)',W/2,408,12,'#ff8844');
+  txt('PICK UP FLAME = FLAMETHROWER  |  PICK UP BOMB + PRESS B',W/2,430,12,COL.uiText);
+  txt('5 LEVELS — BRING LAW TO THE WEST',W/2,460,13,COL.uiText);
 }
 
 function drawGameOver(){
   ctx.drawImage(floorBuf,0,0);
   ctx.fillStyle='rgba(70,0,0,0.78)'; ctx.fillRect(0,0,W,H);
-  ctx.fillStyle=COL.ui; ctx.fillRect(W/2-270,H/2-110,540,220);
+  ctx.fillStyle=COL.ui; ctx.fillRect(W/2-270,H/2-120,540,240);
   ctx.strokeStyle='#cc2200'; ctx.lineWidth=4;
-  ctx.strokeRect(W/2-270,H/2-110,540,220);
-  txt("YOU'VE BEEN OUTGUNNED",W/2,H/2-52,27,'#cc2200');
-  txt(`OUTLAWS KILLED: ${kills}     SCORE: ${score}`,W/2,H/2,19,COL.uiText);
-  txt('CLICK OR PRESS SPACE TO TRY AGAIN',W/2,H/2+58,14,COL.uiText);
+  ctx.strokeRect(W/2-270,H/2-120,540,240);
+  txt("YOU'VE BEEN OUTGUNNED",W/2,H/2-62,27,'#cc2200');
+  const mins=Math.floor(gameTimer/60), secs=Math.floor(gameTimer%60);
+  txt(`OUTLAWS KILLED: ${kills}     SCORE: ${score}`,W/2,H/2-12,19,COL.uiText);
+  txt(`TIME: ${mins}:${String(secs).padStart(2,'0')}`,W/2,H/2+22,16,COL.uiText);
+  txt('CLICK OR PRESS SPACE TO TRY AGAIN',W/2,H/2+68,14,COL.uiText);
 }
 
 function drawWin(){
   ctx.drawImage(floorBuf,0,0);
   ctx.fillStyle='rgba(90,70,0,0.78)'; ctx.fillRect(0,0,W,H);
-  ctx.fillStyle=COL.ui; ctx.fillRect(W/2-290,H/2-120,580,240);
+  ctx.fillStyle=COL.ui; ctx.fillRect(W/2-290,H/2-130,580,260);
   ctx.strokeStyle='#f5c842'; ctx.lineWidth=4;
-  ctx.strokeRect(W/2-290,H/2-120,580,240);
-  txt('THE WEST IS YOURS, SHERIFF',W/2,H/2-60,26,'#f5c842');
-  txt(`OUTLAWS KILLED: ${kills}     FINAL SCORE: ${score}`,W/2,H/2-14,19,COL.uiText);
-  txt('JUSTICE HAS BEEN SERVED.',W/2,H/2+26,16,COL.uiText);
-  txt('CLICK OR PRESS SPACE TO PLAY AGAIN',W/2,H/2+82,14,COL.uiText);
+  ctx.strokeRect(W/2-290,H/2-130,580,260);
+  txt('THE WEST IS YOURS, SHERIFF',W/2,H/2-70,26,'#f5c842');
+  const mins=Math.floor(gameTimer/60), secs=Math.floor(gameTimer%60);
+  txt(`OUTLAWS KILLED: ${kills}     FINAL SCORE: ${score}`,W/2,H/2-24,19,COL.uiText);
+  txt(`COMPLETED IN: ${mins}:${String(secs).padStart(2,'0')}`,W/2,H/2+14,16,COL.uiText);
+  txt('JUSTICE HAS BEEN SERVED.',W/2,H/2+44,16,COL.uiText);
+  txt('CLICK OR PRESS SPACE TO PLAY AGAIN',W/2,H/2+92,14,COL.uiText);
 }
 
 function drawLevelClear(){
@@ -547,14 +812,56 @@ function loop(ts){
     if(clicked||keys[' ']||keys['Enter']) startGame();
   }
   else if(gstate==='PLAYING'){
+    gameTimer+=dt;
     if(shakeT>0) shakeT-=dt;
     if(bossMsgT>0){ bossMsgT-=dt; if(bossMsgT<=0) bossMsg=false; }
     if(waveMsgT>0) waveMsgT-=dt;
+
+    // combo decay
+    if(comboTimer>0){
+      comboTimer-=dt;
+      if(comboTimer<=0 && !onFire) comboKills=0;
+    }
+    // ON FIRE! countdown
+    if(onFire){
+      onFireTimer-=dt;
+      if(onFireTimer<=0) endOnFire();
+    }
+
     // re-inject clicked for shooting
     if(clicked) mouse.clicked=true;
     player.tick(dt,bullets);
     mouse.clicked=false;
+
+    // powerup pickups
+    for(let i=powerups.length-1;i>=0;i--){
+      const pu=powerups[i];
+      pu.tick(dt);
+      if(Math.hypot(player.x-pu.x,player.y-pu.y)<26){
+        if(pu.type==='flamethrower'){
+          player.activePowerup='flamethrower';
+          player.flameTimer=12;
+        } else {
+          player.bombCount++;
+        }
+        pu.dead=true;
+      }
+    }
+    powerups=powerups.filter(p=>!p.dead);
+
+    // bombs in flight
+    for(const bm of bombs) bm.tick(dt);
+    bombs=bombs.filter(bm=>!bm.dead);
+
+    // bulldog
+    if(bulldog){
+      bulldog.tick(dt);
+      if(bulldog.dead) bulldog=null;
+      enemies=enemies.filter(e=>!e.dead);
+    }
+
     for(const e of enemies) e.tick(dt,player,bullets);
+
     // bullet hits
     for(const b of bullets){
       b.tick(dt);
@@ -563,7 +870,7 @@ function loop(ts){
         for(const e of enemies){
           if(!e.dead && Math.hypot(b.x-e.x,b.y-e.y)<e.r){
             e.hit(b.dmg); b.dead=true;
-            if(e.dead){ score+=e.score; kills++; }
+            if(e.dead){ score+=e.score; kills++; registerKill(); }
             break;
           }
         }
@@ -575,6 +882,7 @@ function loop(ts){
     }
     bullets=bullets.filter(b=>!b.dead);
     enemies=enemies.filter(e=>!e.dead);
+
     if(player.hp<=0){ gstate='GAME_OVER'; return; }
     if(enemies.length===0){
       const lv=LEVELS[levelIdx];
@@ -608,7 +916,7 @@ function loop(ts){
   // ── draw ──
   ctx.save();
   if(shakeT>0){
-    const s=(shakeT/0.5)*8;
+    const s=(shakeT/0.6)*10;
     ctx.translate((Math.random()-0.5)*s,(Math.random()-0.5)*s);
   }
 
@@ -618,8 +926,11 @@ function loop(ts){
   else {
     ctx.drawImage(floorBuf,0,0);
     drawParticles();
+    for(const pu of powerups) pu.draw();
+    for(const bm of bombs) bm.draw();
     for(const b of bullets) b.draw();
     for(const e of enemies) e.draw();
+    if(bulldog) bulldog.draw();
     player.draw();
     drawHUD();
     if(gstate==='LEVEL_CLEAR') drawLevelClear();
