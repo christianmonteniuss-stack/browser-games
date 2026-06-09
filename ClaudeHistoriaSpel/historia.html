@@ -112,7 +112,13 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 }
 
 #timeline-row {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 20px;
+}
+.adj-col {
+  display: flex; flex-direction: column; align-items: center; gap: 5px; flex-shrink: 0;
+}
+.adj-label {
+  font-size: 0.72rem; color: #94a3b8; font-weight: 700;
 }
 #timeline-track-wrap {
   flex: 1; padding: 14px 0; cursor: pointer; position: relative;
@@ -147,10 +153,6 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 .year-adj-btn:active { transform: scale(0.91); }
 .year-adj-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 
-#timeline-ends {
-  display: flex; justify-content: space-between;
-  font-size: 0.78rem; color: #94a3b8; font-weight: 700; margin-top: 2px;
-}
 
 #guess-submit-row { display: flex; justify-content: center; margin-top: 16px; }
 #submit-btn {
@@ -333,22 +335,24 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
     <div id="timeline-wrap">
       <div id="timeline-year-display">1910</div>
       <div id="timeline-row">
-        <button class="year-adj-btn" id="year-dec">−</button>
+        <div class="adj-col">
+          <button class="year-adj-btn" id="year-dec">−</button>
+          <span class="adj-label">Past</span>
+        </div>
         <div id="timeline-track-wrap">
           <div id="timeline-track">
             <div id="timeline-fill"></div>
             <div id="timeline-thumb"></div>
           </div>
         </div>
-        <button class="year-adj-btn" id="year-inc">+</button>
-      </div>
-      <div id="timeline-ends">
-        <span>Past</span>
-        <span>Present</span>
+        <div class="adj-col">
+          <button class="year-adj-btn" id="year-inc">+</button>
+          <span class="adj-label">Present</span>
+        </div>
       </div>
     </div>
     <div id="guess-submit-row">
-      <button id="submit-btn" onclick="handleGuess()">Lock in Guess</button>
+      <button id="submit-btn" onclick="handleGuess()">Guess</button>
     </div>
     <div id="guesses-left">3 guesses remaining</div>
   </div>
