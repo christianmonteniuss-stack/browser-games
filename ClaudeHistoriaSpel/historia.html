@@ -319,9 +319,18 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
   border: none; border-radius: 10px;
   font-size: 1.05rem; font-weight: 800;
   cursor: pointer; transition: background 0.15s;
-  font-family: inherit;
+  font-family: inherit; margin-bottom: 10px;
 }
 #play-again-btn:hover { background: #2563eb; }
+#home-btn {
+  width: 100%; padding: 13px;
+  background: #f0f4f8; color: #475569;
+  border: 2px solid #e2e8f0; border-radius: 10px;
+  font-size: 1rem; font-weight: 700;
+  cursor: pointer; transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+#home-btn:hover { background: #e2e8f0; border-color: #cbd5e1; }
 
 /* ── LEADERBOARD ── */
 .lb-section { text-align: left; margin-bottom: 20px; }
@@ -417,6 +426,7 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
     <div class="end-rank-msg" id="end-rank-msg"></div>
     <div id="end-leaderboard" class="lb-section"></div>
     <button id="play-again-btn" onclick="restartGame()">Play Again &rarr;</button>
+    <button id="home-btn" onclick="goHome()">Home</button>
   </div>
 </div>
 
@@ -794,7 +804,15 @@ function goHome() {
   document.getElementById('start-screen').style.display = 'flex';
 }
 
-function restartGame() { goHome(); }
+function restartGame() {
+  document.getElementById('end-screen').style.display = 'none';
+  document.getElementById('name-input').value = playerName;
+  if (gameMode === 'endless') {
+    beginEndless(endlessDiff);
+  } else {
+    beginClassic();
+  }
+}
 
 function renderStartLeaderboard() {
   const wrap = document.getElementById('start-leaderboard');
