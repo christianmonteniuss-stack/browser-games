@@ -25,7 +25,7 @@ header {
   display: flex; align-items: center; justify-content: space-between;
   box-shadow: 0 1px 8px rgba(0,0,0,0.06);
 }
-.logo { font-size: 1.4rem; font-weight: 900; letter-spacing: -1px; color: #3b82f6; }
+.logo { font-size: 1.4rem; font-weight: 900; letter-spacing: -1px; color: #3b82f6; cursor: pointer; }
 .header-meta { font-size: 0.8rem; color: #94a3b8; margin-top: 2px; }
 #header-score {
   font-size: 1.1rem; font-weight: 800; color: #1a1a2e;
@@ -344,6 +344,42 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 .lb-row.lb-you .lb-name,
 .lb-row.lb-you .lb-score { color: #1e40af; }
 
+/* ── MODE / DIFFICULTY BUTTONS ── */
+#mode-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;
+}
+.mode-btn {
+  padding: 14px; background: #3b82f6; color: #fff;
+  border: none; border-radius: 10px; font-size: 1rem; font-weight: 800;
+  cursor: pointer; transition: background 0.15s; font-family: inherit;
+}
+.mode-btn:hover:not(:disabled) { background: #2563eb; }
+.mode-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+#diff-row {
+  display: none; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px;
+}
+.diff-btn {
+  padding: 11px 6px; border: none; border-radius: 10px;
+  font-size: 0.88rem; font-weight: 800; cursor: pointer;
+  transition: filter 0.15s, transform 0.1s; font-family: inherit; color: #fff;
+  line-height: 1.4;
+}
+.diff-btn:hover  { filter: brightness(0.88); }
+.diff-btn:active { transform: scale(0.94); }
+.diff-btn.easy   { background: #22c55e; }
+.diff-btn.medium { background: #f97316; }
+.diff-btn.hard   { background: #ef4444; }
+
+/* ── LEADERBOARD TABS ── */
+.lb-tabs { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.lb-tab {
+  padding: 5px 12px; border: 2px solid #e2e8f0; border-radius: 20px;
+  background: #fff; color: #64748b; font-size: 0.76rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s; font-family: inherit;
+}
+.lb-tab:hover  { border-color: #3b82f6; color: #3b82f6; }
+.lb-tab.active { background: #3b82f6; border-color: #3b82f6; color: #fff; }
+
 </style>
 </head>
 <body>
@@ -355,11 +391,19 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 <div id="start-screen">
   <div id="start-card">
     <div class="start-logo">Historia</div>
-    <div class="start-subtitle">Guess the Year &mdash; 5 Rounds</div>
+    <div class="start-subtitle">Guess the Year</div>
     <input id="name-input" type="text" placeholder="Your name" maxlength="20" autocomplete="off"
-           oninput="onNameInput()" onkeydown="if(event.key==='Enter')beginGame()">
-    <button id="play-btn" onclick="beginGame()" disabled>Play &rarr;</button>
-    <div id="start-leaderboard" class="lb-section" style="display:none"></div>
+           oninput="onNameInput()" onkeydown="if(event.key==='Enter')beginClassic()">
+    <div id="mode-row">
+      <button class="mode-btn" id="classic-btn" onclick="beginClassic()" disabled>Classic</button>
+      <button class="mode-btn" id="endless-btn" onclick="showDifficulty()" disabled>Endless</button>
+    </div>
+    <div id="diff-row">
+      <button class="diff-btn easy"   onclick="beginEndless('easy')">Easy<br><small>±10 yrs</small></button>
+      <button class="diff-btn medium" onclick="beginEndless('medium')">Medium<br><small>±5 yrs</small></button>
+      <button class="diff-btn hard"   onclick="beginEndless('hard')">Hard<br><small>Exact</small></button>
+    </div>
+    <div id="start-leaderboard" class="lb-section"></div>
   </div>
 </div>
 
@@ -369,7 +413,7 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
     <div class="end-title">Game over,</div>
     <div class="end-name" id="end-name-display"></div>
     <div class="end-score-num" id="end-score-num">0</div>
-    <div class="end-score-label">points across 5 rounds</div>
+    <div class="end-score-label" id="end-score-label">points across 5 rounds</div>
     <div class="end-rank-msg" id="end-rank-msg"></div>
     <div id="end-leaderboard" class="lb-section"></div>
     <button id="play-again-btn" onclick="restartGame()">Play Again &rarr;</button>
@@ -378,7 +422,7 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 
 <header>
   <div>
-    <div class="logo">Historia</div>
+    <div class="logo" onclick="goHome()">Historia</div>
     <div class="header-meta" id="header-round">Round 1 / 5</div>
   </div>
   <div style="display:flex;align-items:center">
@@ -605,110 +649,172 @@ let playerName  = '';
 let currentYearData, currentPool, revealedCount, guessCount, roundOver;
 let guessHistory = [];
 let playedYears  = new Set();
+let gameMode     = 'classic';   // 'classic' | 'endless'
+let endlessDiff  = 'easy';      // 'easy' | 'medium' | 'hard'
+let endlessScore = 0;
+let roundWon     = false;
+const ENDLESS_TOLERANCE = { easy: 10, medium: 5, hard: 0 };
 
 // ── LEADERBOARD ──
-function loadLeaderboard() {
-  try { return JSON.parse(localStorage.getItem('historia_lb') || '[]'); }
+function lbKey(mode, diff) {
+  return mode === 'classic' ? 'historia_lb' : `historia_lb_endless_${diff}`;
+}
+function loadLb(key) {
+  try { return JSON.parse(localStorage.getItem(key) || '[]'); }
   catch { return []; }
 }
+function loadLeaderboard() { return loadLb('historia_lb'); }
 
-function saveToLeaderboard(name, score) {
-  const lb = loadLeaderboard();
+function saveToLb(key, name, score) {
+  const lb = loadLb(key);
   lb.push({ name, score });
   lb.sort((a, b) => b.score - a.score);
-  // Keep best score per player, then top 10 overall
   const seen = new Set();
-  const deduped = lb.filter(e => {
-    if (seen.has(e.name)) return false;
-    seen.add(e.name);
-    return true;
-  });
-  localStorage.setItem('historia_lb', JSON.stringify(deduped.slice(0, 10)));
+  const deduped = lb.filter(e => { if (seen.has(e.name)) return false; seen.add(e.name); return true; });
+  localStorage.setItem(key, JSON.stringify(deduped.slice(0, 10)));
   return deduped;
 }
+function saveToLeaderboard(name, score) { return saveToLb('historia_lb', name, score); }
 
-function renderLeaderboard(containerId, highlightName, highlightScore) {
-  const lb  = loadLeaderboard();
+function renderLbInto(containerId, key, highlightName, highlightScore) {
+  const lb  = loadLb(key);
   const top = lb.slice(0, 5);
   const el  = document.getElementById(containerId);
+  if (!el) return;
+  const isEndless = key !== 'historia_lb';
   if (top.length === 0) {
     el.innerHTML = '<div class="lb-empty">No scores yet — be the first!</div>';
     return;
   }
-  const medals = ['🥇', '🥈', '🥉', '4', '5'];
+  const medals = ['🥇','🥈','🥉','4','5'];
   el.innerHTML = top.map((e, i) => {
     const isYou = highlightName && e.name === highlightName && e.score === highlightScore;
+    const scoreStr = isEndless ? `${e.score} correct` : `${e.score} pts`;
     return `<div class="lb-row${isYou ? ' lb-you' : ''}">
       <span class="lb-rank">${medals[i]}</span>
       <span class="lb-name">${e.name}${isYou ? ' 👈' : ''}</span>
-      <span class="lb-score">${e.score} pts</span>
+      <span class="lb-score">${scoreStr}</span>
     </div>`;
   }).join('');
+}
+function renderLeaderboard(containerId, highlightName, highlightScore) {
+  renderLbInto(containerId, 'historia_lb', highlightName, highlightScore);
 }
 
 // ── START SCREEN ──
 function onNameInput() {
   const val = document.getElementById('name-input').value.trim();
-  document.getElementById('play-btn').disabled = val.length === 0;
+  document.getElementById('classic-btn').disabled = val.length === 0;
+  document.getElementById('endless-btn').disabled = val.length === 0;
 }
 
-function beginGame() {
+function showDifficulty() {
+  const row = document.getElementById('diff-row');
+  row.style.display = row.style.display === 'grid' ? 'none' : 'grid';
+}
+
+function beginClassic() {
   const name = document.getElementById('name-input').value.trim();
   if (!name) return;
-  playerName   = name;
-  sessionScore = 0;
-  roundNum     = 0;
+  gameMode = 'classic';
+  playerName = name; sessionScore = 0; roundNum = 0; endlessScore = 0;
   playedYears.clear();
   document.getElementById('header-score').textContent = '0 pts';
   document.getElementById('start-screen').style.display = 'none';
   startRound();
 }
 
+function beginEndless(diff) {
+  const name = document.getElementById('name-input').value.trim();
+  if (!name) return;
+  gameMode = 'endless'; endlessDiff = diff;
+  playerName = name; sessionScore = 0; endlessScore = 0; roundNum = 0;
+  playedYears.clear();
+  document.getElementById('header-score').textContent = '0 correct';
+  document.getElementById('start-screen').style.display = 'none';
+  startRound();
+}
+
+function beginGame() { beginClassic(); }
+
 // ── END SCREEN ──
 function showEndScreen() {
-  const lb   = saveToLeaderboard(playerName, sessionScore);
-  const rank = lb.findIndex(e => e.name === playerName && e.score === sessionScore) + 1;
+  const key   = lbKey(gameMode, endlessDiff);
+  const score = gameMode === 'endless' ? endlessScore : sessionScore;
+  const lb    = saveToLb(key, playerName, score);
+  const rank  = lb.findIndex(e => e.name === playerName && e.score === score) + 1;
 
   document.getElementById('end-name-display').textContent = playerName;
-  document.getElementById('end-score-num').textContent    = sessionScore;
+  document.getElementById('end-score-num').textContent    = score;
+  document.getElementById('end-score-label').textContent  =
+    gameMode === 'endless'
+      ? `correct answers · ${{ easy: 'Easy', medium: 'Medium', hard: 'Hard' }[endlessDiff]}`
+      : 'points across 5 rounds';
 
   const rankMsg = document.getElementById('end-rank-msg');
-  if (rank >= 1 && rank <= 5) {
-    rankMsg.textContent = `You entered the Top 5 at #${rank}!`;
-  } else if (rank > 0) {
-    rankMsg.textContent = `You ranked #${rank} overall.`;
-  } else {
-    rankMsg.textContent = '';
-  }
+  if (rank >= 1 && rank <= 5) rankMsg.textContent = `You entered the Top 5 at #${rank}!`;
+  else if (rank > 0)          rankMsg.textContent = `You ranked #${rank} overall.`;
+  else                        rankMsg.textContent = '';
 
-  const lbSection = document.getElementById('end-leaderboard');
-  lbSection.innerHTML = '<div class="lb-heading">🏆 Top Players</div>';
-  const lbRows = document.createElement('div');
-  lbRows.id = 'end-lb-rows';
-  lbSection.appendChild(lbRows);
-  renderLeaderboard('end-lb-rows', playerName, sessionScore);
+  const activeClass = (tab) => (
+    (tab === 'classic' && gameMode === 'classic') ||
+    (tab === endlessDiff && gameMode === 'endless')
+  ) ? ' active' : '';
 
+  document.getElementById('end-leaderboard').innerHTML = `
+    <div class="lb-heading">🏆 Top Players</div>
+    <div class="lb-tabs">
+      <button class="lb-tab${activeClass('classic')}" data-tab="classic" onclick="switchEndLbTab('classic')">Classic</button>
+      <button class="lb-tab${activeClass('easy')}"    data-tab="easy"    onclick="switchEndLbTab('easy')">Easy</button>
+      <button class="lb-tab${activeClass('medium')}"  data-tab="medium"  onclick="switchEndLbTab('medium')">Medium</button>
+      <button class="lb-tab${activeClass('hard')}"    data-tab="hard"    onclick="switchEndLbTab('hard')">Hard</button>
+    </div>
+    <div id="end-lb-rows"></div>`;
+
+  renderLbInto('end-lb-rows', key, playerName, score);
   document.getElementById('end-screen').style.display = 'flex';
 }
 
-function restartGame() {
+function switchEndLbTab(tab) {
+  document.querySelectorAll('#end-leaderboard .lb-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.tab === tab));
+  const key = tab === 'classic' ? 'historia_lb' : `historia_lb_endless_${tab}`;
+  renderLbInto('end-lb-rows', key, null, null);
+}
+
+function goHome() {
   document.getElementById('end-screen').style.display = 'none';
+  sessionScore = 0; roundNum = 0; endlessScore = 0;
+  playedYears.clear();
   document.getElementById('name-input').value = playerName;
-  document.getElementById('play-btn').disabled = false;
+  document.getElementById('classic-btn').disabled = playerName.length === 0;
+  document.getElementById('endless-btn').disabled = playerName.length === 0;
+  document.getElementById('diff-row').style.display = 'none';
   renderStartLeaderboard();
   document.getElementById('start-screen').style.display = 'flex';
 }
 
+function restartGame() { goHome(); }
+
 function renderStartLeaderboard() {
-  const lb = loadLeaderboard();
   const wrap = document.getElementById('start-leaderboard');
-  if (lb.length === 0) { wrap.style.display = 'none'; return; }
-  wrap.style.display = 'block';
-  wrap.innerHTML = '<div class="lb-heading">🏆 Top Players</div>';
-  const rows = document.createElement('div');
-  rows.id = 'start-lb-rows';
-  wrap.appendChild(rows);
-  renderLeaderboard('start-lb-rows', null, null);
+  wrap.innerHTML = `
+    <div class="lb-heading">🏆 Top Players</div>
+    <div class="lb-tabs">
+      <button class="lb-tab active" data-tab="classic" onclick="switchStartLbTab('classic')">Classic</button>
+      <button class="lb-tab"        data-tab="easy"    onclick="switchStartLbTab('easy')">Easy</button>
+      <button class="lb-tab"        data-tab="medium"  onclick="switchStartLbTab('medium')">Medium</button>
+      <button class="lb-tab"        data-tab="hard"    onclick="switchStartLbTab('hard')">Hard</button>
+    </div>
+    <div id="start-lb-rows"></div>`;
+  renderLbInto('start-lb-rows', 'historia_lb', null, null);
+}
+
+function switchStartLbTab(tab) {
+  document.querySelectorAll('#start-leaderboard .lb-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.tab === tab));
+  const key = tab === 'classic' ? 'historia_lb' : `historia_lb_endless_${tab}`;
+  renderLbInto('start-lb-rows', key, null, null);
 }
 
 // ── SLIDER ──
@@ -910,7 +1016,7 @@ function proximityColor(yearsOff) {
 
 // ── GAME LOGIC ──
 function startRound() {
-  roundNum++;
+  if (gameMode === 'classic') roundNum++;
 
   let pool = EVENTS.filter(e => !playedYears.has(e.year));
   if (pool.length === 0) { playedYears.clear(); pool = [...EVENTS]; }
@@ -921,6 +1027,7 @@ function startRound() {
   revealedCount = 1;
   guessCount    = 0;
   roundOver     = false;
+  roundWon      = false;
   guessHistory  = [];
 
   document.getElementById('clue-area').innerHTML     = '';
@@ -932,9 +1039,15 @@ function startRound() {
   document.getElementById('submit-btn').disabled = false;
   resetSlider();
 
-  document.getElementById('header-round').textContent =
-    `${playerName} · Round ${roundNum} / ${MAX_ROUNDS}`;
-  updateGuessesLeft();
+  if (gameMode === 'endless') {
+    const diffLabel = { easy: 'Easy', medium: 'Medium', hard: 'Hard' }[endlessDiff];
+    document.getElementById('header-round').textContent = `${playerName} · ${diffLabel} · Q${endlessScore + 1}`;
+    const gl = document.getElementById('guesses-left');
+    gl.textContent = '1 attempt'; gl.classList.remove('last-guess');
+  } else {
+    document.getElementById('header-round').textContent = `${playerName} · Round ${roundNum} / ${MAX_ROUNDS}`;
+    updateGuessesLeft();
+  }
   addClueCard(0, false);
 }
 
@@ -949,33 +1062,37 @@ function handleGuess() {
   playGuessSound();
   guessCount++;
 
-  if (guessed === year) { win(); return; }
-
-  addGuessRow(guessed, year, yearsOff);
-
-  if (guessCount >= 3) {
+  if (gameMode === 'endless') {
+    const tol = ENDLESS_TOLERANCE[endlessDiff];
+    if (yearsOff <= tol) { win(); return; }
+    addGuessRow(guessed, year, yearsOff);
     setTimeout(() => lose(), 700);
     return;
   }
 
+  // Classic
+  if (guessed === year) { win(); return; }
+  addGuessRow(guessed, year, yearsOff);
+  if (guessCount >= 3) { setTimeout(() => lose(), 700); return; }
   if (revealedCount < currentPool.length) {
-    setTimeout(() => {
-      playRevealSound();
-      addClueCard(revealedCount, true);
-      revealedCount++;
-    }, 350);
+    setTimeout(() => { playRevealSound(); addClueCard(revealedCount, true); revealedCount++; }, 350);
   }
-
   updateGuessesLeft();
 }
 
 function win() {
-  roundOver = true;
-  const pts = [200, 100, 50][guessCount - 1] ?? 0;
-  sessionScore += pts;
+  roundOver = true; roundWon = true;
   playWinSound(); launchConfetti(); flash('#22c55e');
-  document.getElementById('header-score').textContent = `${sessionScore} pts`;
-  showResult(true, pts);
+  if (gameMode === 'endless') {
+    endlessScore++;
+    document.getElementById('header-score').textContent = `${endlessScore} correct`;
+    showResult(true, null);
+  } else {
+    const pts = [200, 100, 50][guessCount - 1] ?? 0;
+    sessionScore += pts;
+    document.getElementById('header-score').textContent = `${sessionScore} pts`;
+    showResult(true, pts);
+  }
   endRound();
 }
 
@@ -990,10 +1107,15 @@ function endRound() {
   document.getElementById('guess-section').style.display = 'none';
   document.getElementById('flip-hint').style.display     = 'block';
 
-  const isLastRound = roundNum >= MAX_ROUNDS;
   const btn = document.getElementById('next-btn');
-  btn.textContent = isLastRound ? 'See Results →' : 'Next Round →';
-  btn.onclick     = isLastRound ? showEndScreen : startRound;
+  if (gameMode === 'endless') {
+    btn.textContent = roundWon ? 'Next →' : 'See Results →';
+    btn.onclick     = roundWon ? startRound : showEndScreen;
+  } else {
+    const isLastRound = roundNum >= MAX_ROUNDS;
+    btn.textContent = isLastRound ? 'See Results →' : 'Next Round →';
+    btn.onclick     = isLastRound ? showEndScreen : startRound;
+  }
   btn.style.display = 'block';
 
   const cards = document.querySelectorAll('.card');
@@ -1073,20 +1195,38 @@ function renderGuessHistory() {
 
 function showResult(isWin, pts) {
   const area = document.getElementById('result-area');
-  if (isWin) {
-    area.innerHTML = `
-      <div class="result-banner win">
-        <h2>🎉 Correct!</h2>
-        <div class="delta">+${pts} pts</div>
-        <div class="answer">The year was <strong>${currentYearData.year}</strong> — solved in ${guessCount} guess${guessCount !== 1 ? 'es' : ''}</div>
-      </div>`;
+  if (gameMode === 'endless') {
+    if (isWin) {
+      area.innerHTML = `
+        <div class="result-banner win">
+          <h2>🎉 Correct!</h2>
+          <div class="delta">${endlessScore} correct</div>
+          <div class="answer">The year was <strong>${currentYearData.year}</strong></div>
+        </div>`;
+    } else {
+      area.innerHTML = `
+        <div class="result-banner lose">
+          <h2>Wrong!</h2>
+          <div class="delta">Game over</div>
+          <div class="answer">The answer was <strong>${currentYearData.year}</strong></div>
+        </div>`;
+    }
   } else {
-    area.innerHTML = `
-      <div class="result-banner lose">
-        <h2>No more guesses</h2>
-        <div class="delta">+0 pts</div>
-        <div class="answer">The answer was <strong>${currentYearData.year}</strong></div>
-      </div>`;
+    if (isWin) {
+      area.innerHTML = `
+        <div class="result-banner win">
+          <h2>🎉 Correct!</h2>
+          <div class="delta">+${pts} pts</div>
+          <div class="answer">The year was <strong>${currentYearData.year}</strong> — solved in ${guessCount} guess${guessCount !== 1 ? 'es' : ''}</div>
+        </div>`;
+    } else {
+      area.innerHTML = `
+        <div class="result-banner lose">
+          <h2>No more guesses</h2>
+          <div class="delta">+0 pts</div>
+          <div class="answer">The answer was <strong>${currentYearData.year}</strong></div>
+        </div>`;
+    }
   }
 }
 
