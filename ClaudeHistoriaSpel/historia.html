@@ -850,9 +850,6 @@ function handleGuess() {
   addGuessRow(guessed, year, yearsOff);
 
   if (guessCount >= 3) {
-    if (revealedCount < currentPool.length) {
-      setTimeout(() => { addClueCard(revealedCount, true); revealedCount++; }, 300);
-    }
     setTimeout(() => lose(), 700);
     return;
   }
@@ -870,7 +867,7 @@ function handleGuess() {
 
 function win() {
   roundOver = true;
-  const pts = (4 - guessCount) * 100;
+  const pts = [200, 100, 50][guessCount - 1] ?? 0;
   sessionScore += pts;
   playWinSound(); launchConfetti(); flash('#22c55e');
   document.getElementById('header-score').textContent = `${sessionScore} pts`;
