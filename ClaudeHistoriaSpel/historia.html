@@ -163,9 +163,10 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 #submit-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 
 #guesses-left {
-  text-align: center; font-size: 0.82rem; color: #94a3b8;
-  margin-top: 10px; font-weight: 600;
+  text-align: center; font-size: 1rem; color: #94a3b8;
+  margin-top: 10px; font-weight: 700;
 }
+#guesses-left.last-guess { color: #ef4444; }
 
 /* ── RESULT BANNER ── */
 #result-area { margin-bottom: 14px; }
@@ -332,14 +333,14 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
     <div id="timeline-wrap">
       <div id="timeline-year-display">1910</div>
       <div id="timeline-row">
-        <button class="year-adj-btn" id="year-dec" onclick="adjustYear(-1)">−</button>
+        <button class="year-adj-btn" id="year-dec">−</button>
         <div id="timeline-track-wrap">
           <div id="timeline-track">
             <div id="timeline-fill"></div>
             <div id="timeline-thumb"></div>
           </div>
         </div>
-        <button class="year-adj-btn" id="year-inc" onclick="adjustYear(1)">+</button>
+        <button class="year-adj-btn" id="year-inc">+</button>
       </div>
       <div id="timeline-ends">
         <span>1800</span>
@@ -683,6 +684,29 @@ function initSlider() {
   document.addEventListener ('touchmove',  onDrag,    { passive: false });
   document.addEventListener ('touchend',   endDrag);
 
+  // Hold-to-repeat for +/− buttons
+  let holdInterval = null;
+  let holdTimeout  = null;
+  function startHold(delta) {
+    adjustYear(delta);
+    holdTimeout = setTimeout(() => {
+      holdInterval = setInterval(() => adjustYear(delta), 60);
+    }, 350);
+  }
+  function stopHold() {
+    clearTimeout(holdTimeout);
+    clearInterval(holdInterval);
+    holdTimeout = holdInterval = null;
+  }
+  ['mousedown','touchstart'].forEach(ev => {
+    document.getElementById('year-dec').addEventListener(ev, e => { e.preventDefault(); startHold(-1); }, { passive: false });
+    document.getElementById('year-inc').addEventListener(ev, e => { e.preventDefault(); startHold(1);  }, { passive: false });
+  });
+  ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev => {
+    document.getElementById('year-dec').addEventListener(ev, stopHold);
+    document.getElementById('year-inc').addEventListener(ev, stopHold);
+  });
+
   updateSliderUI();
 }
 
@@ -988,8 +1012,9 @@ function showResult(isWin, pts) {
 
 function updateGuessesLeft() {
   const left = 3 - guessCount;
-  document.getElementById('guesses-left').textContent =
-    left === 3 ? '3 guesses remaining' : left === 1 ? 'Last guess!' : `${left} guesses remaining`;
+  const el = document.getElementById('guesses-left');
+  el.textContent = left === 3 ? '3 guesses remaining' : left === 1 ? 'Last guess!' : `${left} guesses remaining`;
+  el.classList.toggle('last-guess', left === 1);
 }
 
 // ── HELPERS ──
