@@ -806,12 +806,13 @@ function goHome() {
 
 function restartGame() {
   document.getElementById('end-screen').style.display = 'none';
-  document.getElementById('name-input').value = playerName;
-  if (gameMode === 'endless') {
-    beginEndless(endlessDiff);
-  } else {
-    beginClassic();
-  }
+  sessionScore = 0;
+  roundNum     = 0;
+  endlessScore = 0;
+  playedYears.clear();
+  document.getElementById('header-score').textContent =
+    gameMode === 'endless' ? '0 correct' : '0 pts';
+  startRound();
 }
 
 function renderStartLeaderboard() {
