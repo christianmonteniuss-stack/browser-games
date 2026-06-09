@@ -676,13 +676,18 @@ function loadLb(key) {
 function loadLeaderboard() { return loadLb('historia_lb'); }
 
 function saveToLb(key, name, score) {
-  const lb = loadLb(key);
+  const lb = loadLb(key); // already sorted descending from previous saves
+  // Only add if there is room OR the score strictly beats the current 5th place
+  if (lb.length >= 5 && score <= lb[4].score) {
+    return lb;
+  }
   lb.push({ name, score });
+  // Stable sort descending — equal-score entries keep their original (insertion) order,
+  // so an existing entry always beats a new entry with the same score.
   lb.sort((a, b) => b.score - a.score);
-  const seen = new Set();
-  const deduped = lb.filter(e => { if (seen.has(e.name)) return false; seen.add(e.name); return true; });
-  localStorage.setItem(key, JSON.stringify(deduped.slice(0, 10)));
-  return deduped;
+  const top5 = lb.slice(0, 5);
+  localStorage.setItem(key, JSON.stringify(top5));
+  return top5;
 }
 function saveToLeaderboard(name, score) { return saveToLb('historia_lb', name, score); }
 
