@@ -41,7 +41,7 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 .card { perspective: 1000px; }
 .card-inner {
   position: relative; width: 100%;
-  transition: transform 0.55s cubic-bezier(.4,0,.2,1);
+  transition: transform 0.55s cubic-bezier(.4,0,.2,1), height 0.45s ease;
   transform-style: preserve-3d;
 }
 .card.flipped .card-inner { transform: rotateY(180deg); }
@@ -55,9 +55,9 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
   -webkit-backface-visibility: hidden;
 }
 .card-back {
-  position: absolute; inset: 0;
+  position: absolute; top: 0; left: 0; right: 0;
   transform: rotateY(180deg);
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: flex-start; justify-content: center;
   padding: 22px 20px;
   background: linear-gradient(135deg, #eff6ff, #dbeafe);
 }
@@ -898,7 +898,12 @@ function endRound() {
   const cards = document.querySelectorAll('.card');
   cards.forEach((c, i) => {
     c.classList.add('flippable');
-    setTimeout(() => c.classList.add('flipped'), 400 + i * 180);
+    setTimeout(() => {
+      const inner = c.querySelector('.card-inner');
+      const back  = c.querySelector('.card-back');
+      c.classList.add('flipped');
+      inner.style.height = back.offsetHeight + 'px';
+    }, 400 + i * 180);
   });
 }
 
@@ -924,10 +929,26 @@ function addClueCard(idx, isNew) {
     </div>`;
 
   card.addEventListener('click', () => {
-    if (roundOver) card.classList.toggle('flipped');
+    if (!roundOver) return;
+    const inner = card.querySelector('.card-inner');
+    const front = card.querySelector('.card-front');
+    const back  = card.querySelector('.card-back');
+    if (card.classList.contains('flipped')) {
+      card.classList.remove('flipped');
+      inner.style.height = front.offsetHeight + 'px';
+    } else {
+      card.classList.add('flipped');
+      inner.style.height = back.offsetHeight + 'px';
+    }
   });
 
   document.getElementById('clue-area').appendChild(card);
+  // Lock front height on card-inner so the CSS height transition has a defined start
+  requestAnimationFrame(() => {
+    const inner = card.querySelector('.card-inner');
+    const front = card.querySelector('.card-front');
+    if (inner && front) inner.style.height = front.offsetHeight + 'px';
+  });
 }
 
 function addGuessRow(guessed, correctYear, yearsOff) {
