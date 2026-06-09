@@ -161,6 +161,7 @@
 <!-- ── HEADER ── -->
 <div class="header">
   <div class="logo">Job<span>Search</span>.html <small>AI-powered · your voice, adapted</small></div>
+  <button class="btn-icon" onclick="loadDemo()" style="background:rgba(99,102,241,.25);color:#a5b4fc">▶ Try Demo</button>
   <button class="btn-icon" onclick="openSettings()">⚙ Settings</button>
 </div>
 
@@ -339,6 +340,62 @@
 
 <script>
 'use strict';
+
+// ── DEMO DATA ──
+const DEMO = {
+  resume: `Alex Chen  |  alex.chen@email.com  |  linkedin.com/in/alexchen
+
+EDUCATION
+B.Sc. Business Administration — Copenhagen Business School, 2024
+Exchange semester: NHH Norwegian School of Economics
+
+SKILLS
+Excel (advanced), PowerPoint, SQL, Tableau, Google Analytics, HubSpot, Salesforce
+Project management, market research, financial modelling, A/B testing, stakeholder communication
+
+EXPERIENCE
+Marketing & Operations Intern — Spotify, Copenhagen  (Summer 2023)
+• Supported campaign analytics across 4 Nordic markets
+• Built Tableau dashboards tracking 12 KPIs for the growth team
+• Coordinated cross-functional projects across marketing and product (team of 8)
+
+Student Consultant — CBS Consulting  (2022–2023)
+• Delivered market-entry analysis for a Danish SME expanding to Germany
+• Presented findings to C-suite; recommendation adopted within 6 weeks
+
+LANGUAGES
+English (fluent), Danish (native), German (conversational)`,
+
+  cl: `Dear Hiring Manager,
+
+I am writing to apply for this position at your company. Having recently completed my degree in Business Administration with a focus on marketing and analytics, I am eager to bring my skills to a dynamic team.
+
+During my internship at Spotify, I worked closely with the Nordic growth team, building dashboards that tracked key performance indicators and supported data-driven decisions across four markets. I thrive in fast-paced environments and enjoy the challenge of translating data into clear, actionable insights.
+
+I am a collaborative team player who communicates clearly across functions. I am excited about the opportunity to contribute to your team and would welcome the chance to discuss my application further.
+
+Best regards,
+Alex Chen`,
+
+  jobs: [
+    { _di:0, title:'Growth Marketing Analyst', company_name:'Spotify', candidate_required_location:'Europe / Remote', job_type:'full_time', publication_date: new Date(Date.now()-2*864e5).toISOString(), url:'#', description:'...', score:82, gaps:['SQL (advanced)','Python','campaign attribution modelling'] },
+    { _di:1, title:'Business Operations Associate', company_name:'Notion', candidate_required_location:'Worldwide', job_type:'full_time', publication_date: new Date(Date.now()-4*864e5).toISOString(), url:'#', description:'...', score:71, gaps:['OKR frameworks','Jira','SaaS product metrics'] },
+    { _di:2, title:'Marketing & Growth Intern', company_name:'Figma', candidate_required_location:'USA / Europe', job_type:'internship', publication_date: new Date(Date.now()-864e5).toISOString(), url:'#', description:'...', score:91, gaps:['Amplitude','growth loop design'] },
+    { _di:3, title:'Data Analyst', company_name:'Zalando', candidate_required_location:'Germany / Remote', job_type:'full_time', publication_date: new Date(Date.now()-6*864e5).toISOString(), url:'#', description:'...', score:58, gaps:['Python (pandas)','dbt','BigQuery'] },
+    { _di:4, title:'Strategy & Analytics Manager', company_name:'McKinsey Digital', candidate_required_location:'Europe', job_type:'full_time', publication_date: new Date(Date.now()-3*864e5).toISOString(), url:'#', description:'...', score:64, gaps:['advanced Python/R','ML fundamentals','cloud infrastructure'] },
+  ],
+
+  adaptedLetter: `Dear Hiring Manager,
+
+I am writing to apply for the Growth Marketing Analyst position at Spotify. Having recently completed my degree in Business Administration with a focus on marketing and analytics, I am eager to bring my skills in campaign analytics and data-driven decision-making to your Nordic growth team.
+
+During my internship at Spotify, I worked directly with the growth team, building Tableau dashboards that tracked 12 KPIs across four Nordic markets and supported strategic decisions at the campaign level. I have since been developing my SQL skills further to handle larger datasets independently — campaign attribution modelling in particular is an area I am actively strengthening.
+
+I am a collaborative team player who communicates clearly across functions. I am excited about the opportunity to contribute to Spotify's continued growth and would welcome the chance to discuss my application further.
+
+Best regards,
+Alex Chen`,
+};
 
 // ── STATE ──
 let claudeKey = '';
@@ -661,19 +718,21 @@ function applyFiltersAndRender() {
 
   document.getElementById('results').innerHTML = jobs.map((j, i) => cardHtml(j, i)).join('');
 
-  jobs.forEach((j, i) => {
-    const desc = stripHtml(j.description);
-    scoreJob(desc)
-      .then(r => { scores[i] = r; applyScore(i, r); })
-      .catch(err => applyScore(i, null, err.message));
-  });
+  if (!demoMode) {
+    jobs.forEach((j, i) => {
+      const desc = stripHtml(j.description);
+      scoreJob(desc)
+        .then(r => { scores[i] = r; applyScore(i, r); })
+        .catch(err => applyScore(i, null, err.message));
+    });
+  }
 }
 
 // ── JOB SEARCH ──
 async function doSearch() {
   const query = document.getElementById('searchInput').value.trim();
   if (!query) return;
-  if (!claudeKey) { openSettings(); return; }
+  if (!demoMode && !claudeKey) { openSettings(); return; }
   if (!(localStorage.getItem('jst_resume') || '')) {
     toast('Upload your resume first — click the sidebar.', true); return;
   }
@@ -781,8 +840,17 @@ async function openCL(i) {
   document.getElementById('copyBtn').style.display = 'none';
   document.getElementById('copiedMsg').style.display = 'none';
   document.getElementById('clBody').innerHTML =
-    `<div class="cl-loading-wrap"><div class="spin spin-dark"></div><div>Adapting your cover letter…</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">Preserving your voice · ~15 s</div></div>`;
+    `<div class="cl-loading-wrap"><div class="spin spin-dark"></div><div>${demoMode ? 'Loading demo letter…' : 'Adapting your cover letter…'}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">${demoMode ? 'Sample output — no API needed' : 'Preserving your voice · ~15 s'}</div></div>`;
   document.getElementById('clOverlay').classList.add('show');
+
+  if (demoMode) {
+    await new Promise(r => setTimeout(r, 900));
+    currentLetter = DEMO.adaptedLetter;
+    document.getElementById('clBody').innerHTML = `<textarea id="adaptedTA">${esc(DEMO.adaptedLetter)}</textarea>`;
+    document.getElementById('clNote').textContent = 'Demo mode — this is a sample adapted letter';
+    document.getElementById('copyBtn').style.display = 'block';
+    return;
+  }
 
   try {
     const desc = stripHtml(job.description).slice(0, 2500);
@@ -829,6 +897,33 @@ async function copyLetter() {
   } catch {
     toast('Clipboard blocked — select the text and copy manually.', true);
   }
+}
+
+// ── DEMO MODE ──
+let demoMode = false;
+
+function loadDemo() {
+  demoMode = true;
+  // Pre-fill sidebar
+  localStorage.setItem('jst_resume', DEMO.resume);
+  localStorage.setItem('jst_cl', DEMO.cl);
+  localStorage.removeItem('jst_rskills');
+  resumeSkillsCache = null;
+  restoreUploadState('resume', DEMO.resume);
+  restoreUploadState('cl', DEMO.cl);
+  document.getElementById('resumeText').value = DEMO.resume;
+  document.getElementById('clText').value = DEMO.cl;
+  document.getElementById('resumeTextSection').style.display = '';
+  document.getElementById('clTextSection').style.display = '';
+  // Pre-fill search and render jobs
+  document.getElementById('searchInput').value = 'Marketing Analyst';
+  allJobs = DEMO.jobs;
+  applyFiltersAndRender();
+  // Override applyScore to use baked-in scores
+  DEMO.jobs.forEach((j, i) => {
+    setTimeout(() => applyScore(i, { score: j.score, gaps: j.gaps }), 200 + i * 120);
+  });
+  toast('Demo loaded — no API key needed. All data is sample data.', false);
 }
 
 // ── UTILS ──
