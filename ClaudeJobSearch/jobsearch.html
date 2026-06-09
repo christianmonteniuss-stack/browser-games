@@ -6,19 +6,12 @@
   <title>JobSearch — AI Job Matcher & Cover Letter Tool</title>
   <style>
     :root {
-      --bg: #f8fafc;
-      --surface: #ffffff;
-      --sidebar-bg: #1e293b;
-      --sidebar-text: #e2e8f0;
+      --bg: #f8fafc; --surface: #ffffff;
+      --sidebar-bg: #1e293b; --sidebar-text: #e2e8f0;
       --header-bg: #0f172a;
-      --accent: #3b82f6;
-      --accent-h: #2563eb;
-      --green: #22c55e;
-      --amber: #f59e0b;
-      --red: #ef4444;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e2e8f0;
+      --accent: #3b82f6; --accent-h: #2563eb;
+      --green: #22c55e; --amber: #f59e0b; --red: #ef4444;
+      --text: #0f172a; --muted: #64748b; --border: #e2e8f0;
       --radius: 8px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -29,7 +22,6 @@
     .logo { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
     .logo span { color: #60a5fa; }
     .logo small { font-size: 11px; font-weight: 400; color: #475569; margin-left: 8px; }
-    .header-right { display: flex; gap: 10px; align-items: center; }
     .btn-icon { background: rgba(255,255,255,.08); border: none; color: #cbd5e1; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
     .btn-icon:hover { background: rgba(255,255,255,.15); color: #fff; }
 
@@ -37,33 +29,63 @@
     .app { display: flex; flex: 1; overflow: hidden; }
 
     /* ── SIDEBAR ── */
-    .sidebar { width: 310px; flex-shrink: 0; background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; overflow: hidden; }
-    .sidebar-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .sidebar { width: 300px; flex-shrink: 0; background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; overflow: hidden; }
+    .sidebar-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,.08); flex-shrink: 0; }
     .stab { flex: 1; padding: 10px; text-align: center; font-size: 12px; font-weight: 500; cursor: pointer; color: #64748b; border-bottom: 2px solid transparent; transition: .15s; }
     .stab.active { color: #e2e8f0; border-bottom-color: #3b82f6; }
-    .stab-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; padding: 14px; gap: 10px; }
+    .stab-panel { display: none; flex: 1; flex-direction: column; overflow-y: auto; padding: 14px; gap: 12px; }
     .stab-panel.active { display: flex; }
-    .slabel { font-size: 10px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
-    .sidebar textarea { flex: 1; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; color: var(--sidebar-text); font-size: 12px; line-height: 1.6; padding: 8px 10px; resize: none; font-family: inherit; min-height: 100px; }
-    .sidebar textarea:focus { outline: none; border-color: #3b82f6; }
-    .sidebar textarea::placeholder { color: #334155; }
-    .btn-save { width: 100%; background: var(--accent); color: #fff; border: none; padding: 9px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; margin-top: auto; }
-    .btn-save:hover { background: var(--accent-h); }
-    .save-msg { text-align: center; font-size: 11px; color: var(--green); min-height: 16px; margin-top: 4px; }
+    .slabel { font-size: 10px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: #475569; }
+
+    /* Upload zone */
+    .upload-zone { border: 1.5px dashed rgba(255,255,255,.15); border-radius: 8px; padding: 22px 16px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; }
+    .upload-zone:hover, .upload-zone.drag { border-color: #3b82f6; background: rgba(59,130,246,.05); }
+    .upload-zone .uz-icon { font-size: 28px; margin-bottom: 7px; }
+    .upload-zone .uz-title { font-size: 13px; font-weight: 500; color: #cbd5e1; }
+    .upload-zone .uz-sub { font-size: 11px; color: #475569; margin-top: 4px; }
+
+    /* Upload status */
+    .upload-done { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 8px; padding: 10px 12px; }
+    .upload-done .ud-row { display: flex; align-items: center; gap: 8px; }
+    .ud-icon { font-size: 16px; flex-shrink: 0; }
+    .ud-name { flex: 1; font-size: 12px; color: #cbd5e1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ud-msg { font-size: 11px; color: #64748b; margin-top: 5px; }
+    .ud-msg.ok { color: #4ade80; }
+    .ud-msg.err { color: #f87171; }
+    .btn-replace { background: none; border: none; color: #3b82f6; font-size: 11px; cursor: pointer; flex-shrink: 0; padding: 0; }
+    .btn-replace:hover { text-decoration: underline; }
+
+    /* Extracted text toggle */
+    .btn-toggle-text { background: none; border: none; color: #64748b; font-size: 11px; cursor: pointer; padding: 0; text-align: left; }
+    .btn-toggle-text:hover { color: #94a3b8; }
+    .extracted-ta { width: 100%; min-height: 120px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 6px; color: #cbd5e1; font-size: 11px; line-height: 1.6; padding: 8px 10px; resize: vertical; font-family: inherit; margin-top: 6px; }
+    .extracted-ta:focus { outline: none; border-color: #3b82f6; }
 
     /* ── MAIN ── */
     .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
     /* Search bar */
-    .search-area { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; gap: 10px; flex-shrink: 0; }
+    .search-area { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 18px; display: flex; gap: 10px; flex-shrink: 0; }
     .search-area input { flex: 1; border: 1.5px solid var(--border); border-radius: 6px; padding: 8px 14px; font-size: 14px; color: var(--text); font-family: inherit; }
     .search-area input:focus { outline: none; border-color: var(--accent); }
-    .btn-search { background: var(--accent); color: #fff; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; white-space: nowrap; transition: background .15s; }
+    .btn-search { background: var(--accent); color: #fff; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; white-space: nowrap; }
     .btn-search:hover { background: var(--accent-h); }
     .btn-search:disabled { background: #94a3b8; cursor: not-allowed; }
 
+    /* Filter bar */
+    .filter-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px 18px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; flex-wrap: wrap; }
+    .filter-group { display: flex; align-items: center; gap: 5px; }
+    .filter-label { font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+    .pill { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; border: 1.5px solid var(--border); font-size: 11px; font-weight: 500; cursor: pointer; color: var(--muted); background: #fff; transition: all .12s; white-space: nowrap; }
+    .pill:hover { border-color: #93c5fd; color: var(--accent); }
+    .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .filter-sep { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; }
+    .filter-loc { border: 1.5px solid var(--border); border-radius: 6px; padding: 3px 10px; font-size: 12px; font-family: inherit; color: var(--text); width: 140px; }
+    .filter-loc:focus { outline: none; border-color: var(--accent); }
+    .filter-count { font-size: 11px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+
     /* Results */
-    .results { flex: 1; overflow-y: auto; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+    .results { flex: 1; overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; }
     .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); text-align: center; gap: 8px; padding: 40px; }
     .empty h3 { font-size: 16px; font-weight: 500; color: #334155; }
     .empty p { font-size: 13px; line-height: 1.6; max-width: 320px; }
@@ -73,7 +95,8 @@
     .card:hover { border-color: #93c5fd; }
     .card-top { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
     .job-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.3; }
-    .job-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .job-meta { font-size: 11px; color: var(--muted); margin-top: 3px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .job-type-tag { display: inline-block; background: #f0f9ff; color: #0369a1; border-radius: 4px; padding: 1px 6px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; }
     .score-badge { flex-shrink: 0; text-align: right; min-width: 52px; }
     .score-num { font-size: 22px; font-weight: 700; line-height: 1; }
     .score-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
@@ -85,16 +108,17 @@
     .card-footer { display: flex; align-items: center; justify-content: space-between; }
     a.view-link { font-size: 12px; color: var(--accent); text-decoration: none; }
     a.view-link:hover { text-decoration: underline; }
-    .btn-adapt { background: var(--header-bg); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; transition: background .15s; }
+    .btn-adapt { background: var(--header-bg); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; }
     .btn-adapt:hover { background: #0f1f35; }
     .btn-adapt:disabled { background: #94a3b8; cursor: not-allowed; }
 
     /* ── SPINNERS ── */
     @keyframes spin { to { transform: rotate(360deg); } }
-    .spin { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+    .spin { width: 24px; height: 24px; border: 3px solid rgba(255,255,255,.15); border-top-color: #60a5fa; border-radius: 50%; animation: spin .8s linear infinite; display: inline-block; vertical-align: middle; }
+    .spin-dark { border-color: var(--border); border-top-color: var(--accent); }
 
     /* ── TOAST ── */
-    .toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; color: #fff; padding: 11px 16px; border-radius: 8px; font-size: 13px; max-width: 380px; z-index: 999; opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; color: #fff; padding: 11px 16px; border-radius: 8px; font-size: 13px; max-width: 400px; z-index: 999; opacity: 0; pointer-events: none; transition: opacity .2s; }
     .toast.err { background: #450a0a; border-left: 3px solid var(--red); }
     .toast.show { opacity: 1; pointer-events: auto; }
 
@@ -129,7 +153,7 @@
     .cl-note { font-size: 11px; color: var(--muted); }
     .btn-copy { background: var(--green); color: #fff; border: none; padding: 7px 18px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
     .btn-copy:hover { background: #16a34a; }
-    .copied { font-size: 12px; color: var(--green); }
+    .copied-msg { font-size: 12px; color: var(--green); }
   </style>
 </head>
 <body>
@@ -137,9 +161,7 @@
 <!-- ── HEADER ── -->
 <div class="header">
   <div class="logo">Job<span>Search</span>.html <small>AI-powered · your voice, adapted</small></div>
-  <div class="header-right">
-    <button class="btn-icon" onclick="openSettings()">⚙ Settings</button>
-  </div>
+  <button class="btn-icon" onclick="openSettings()">⚙ Settings</button>
 </div>
 
 <!-- ── APP ── -->
@@ -152,31 +174,108 @@
       <div class="stab" onclick="switchTab('letter')">Cover Letter</div>
     </div>
 
+    <!-- RESUME PANEL -->
     <div class="stab-panel active" id="panel-resume">
-      <div class="slabel">Your Resume</div>
-      <textarea id="resumeInput" placeholder="Paste your full resume here. It'll be cached so you don't need to paste it every time."></textarea>
-      <button class="btn-save" onclick="saveProfile()">Save Profile</button>
-      <div class="save-msg" id="saveMsg"></div>
+      <div class="slabel">Resume PDF</div>
+      <input type="file" id="resumeFile" accept=".pdf" style="display:none" onchange="handleFile(this.files[0],'resume')">
+
+      <!-- Upload zone (shown when no file) -->
+      <div class="upload-zone" id="resumeZone"
+           onclick="document.getElementById('resumeFile').click()"
+           ondragover="onDragOver(event,'resumeZone')"
+           ondragleave="onDragLeave('resumeZone')"
+           ondrop="onDrop(event,'resume')">
+        <div class="uz-icon">📄</div>
+        <div class="uz-title">Drop PDF or click to upload</div>
+        <div class="uz-sub">Your resume — any layout</div>
+      </div>
+
+      <!-- Status (shown after upload) -->
+      <div class="upload-done" id="resumeDone" style="display:none">
+        <div class="ud-row">
+          <span class="ud-icon" id="resumeIcon">⟳</span>
+          <span class="ud-name" id="resumeFileName"></span>
+          <button class="btn-replace" onclick="document.getElementById('resumeFile').click()">Replace</button>
+        </div>
+        <div class="ud-msg" id="resumeMsg"></div>
+      </div>
+
+      <!-- Extracted text (collapsible) -->
+      <div id="resumeTextSection" style="display:none">
+        <button class="btn-toggle-text" id="resumeToggleBtn" onclick="toggleExtracted('resume')">▶ View extracted text</button>
+        <textarea class="extracted-ta" id="resumeText" style="display:none" placeholder="Extracted resume text…" oninput="onExtractedEdit('resume')"></textarea>
+      </div>
     </div>
 
+    <!-- COVER LETTER PANEL -->
     <div class="stab-panel" id="panel-letter">
-      <div class="slabel">Your Cover Letter</div>
-      <textarea id="clInput" placeholder="Paste your cover letter here. This is your authentic voice — the tool adapts it to each job, it does not replace it."></textarea>
-      <button class="btn-save" onclick="saveProfile()">Save Profile</button>
-      <div class="save-msg" id="saveMsg2"></div>
+      <div class="slabel">Cover Letter PDF</div>
+      <input type="file" id="clFile" accept=".pdf" style="display:none" onchange="handleFile(this.files[0],'cl')">
+
+      <div class="upload-zone" id="clZone"
+           onclick="document.getElementById('clFile').click()"
+           ondragover="onDragOver(event,'clZone')"
+           ondragleave="onDragLeave('clZone')"
+           ondrop="onDrop(event,'cl')">
+        <div class="uz-icon">✉️</div>
+        <div class="uz-title">Drop PDF or click to upload</div>
+        <div class="uz-sub">Your authentic voice — adapted, not replaced</div>
+      </div>
+
+      <div class="upload-done" id="clDone" style="display:none">
+        <div class="ud-row">
+          <span class="ud-icon" id="clIcon">⟳</span>
+          <span class="ud-name" id="clFileName"></span>
+          <button class="btn-replace" onclick="document.getElementById('clFile').click()">Replace</button>
+        </div>
+        <div class="ud-msg" id="clMsg"></div>
+      </div>
+
+      <div id="clTextSection" style="display:none">
+        <button class="btn-toggle-text" id="clToggleBtn" onclick="toggleExtracted('cl')">▶ View extracted text</button>
+        <textarea class="extracted-ta" id="clText" style="display:none" placeholder="Extracted cover letter text…" oninput="onExtractedEdit('cl')"></textarea>
+      </div>
     </div>
   </div>
 
   <!-- MAIN -->
   <div class="main">
+
+    <!-- Search bar -->
     <div class="search-area">
-      <input type="text" id="searchInput" placeholder="Job title — e.g. Software Engineer, Product Designer, Data Analyst" onkeydown="if(event.key==='Enter')doSearch()">
+      <input type="text" id="searchInput" placeholder="Job title — e.g. Software Engineer, Product Designer, Marketing Manager" onkeydown="if(event.key==='Enter')doSearch()">
       <button class="btn-search" id="searchBtn" onclick="doSearch()">Search Jobs</button>
     </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">Type</span>
+        <span class="pill active" data-jt="any" onclick="setJobType('any')">Any</span>
+        <span class="pill" data-jt="full_time" onclick="setJobType('full_time')">Full-time</span>
+        <span class="pill" data-jt="part_time" onclick="setJobType('part_time')">Part-time</span>
+        <span class="pill" data-jt="contract" onclick="setJobType('contract')">Contract</span>
+        <span class="pill" data-jt="internship" onclick="setJobType('internship')">Internship</span>
+      </div>
+      <div class="filter-sep"></div>
+      <div class="filter-group">
+        <span class="filter-label">Level</span>
+        <span class="pill active" data-sl="any" onclick="setSeniority('any')">Any</span>
+        <span class="pill" data-sl="junior" onclick="setSeniority('junior')">Junior</span>
+        <span class="pill" data-sl="mid" onclick="setSeniority('mid')">Mid</span>
+        <span class="pill" data-sl="senior" onclick="setSeniority('senior')">Senior</span>
+        <span class="pill" data-sl="lead" onclick="setSeniority('lead')">Lead</span>
+      </div>
+      <div class="filter-sep"></div>
+      <input class="filter-loc" id="locFilter" placeholder="Location…" oninput="setLocation(this.value)">
+      <span class="filter-count" id="filterCount"></span>
+    </div>
+
+    <!-- Results -->
     <div class="results" id="results">
       <div class="empty">
         <h3>Find your next job</h3>
-        <p>Paste your resume and cover letter in the sidebar, then search for a job title. Each result shows your match score and the skill gaps to highlight.</p>
+        <p>Upload your resume and cover letter as PDFs, then search a job title. Each result shows your AI match score and the skill gaps to close.</p>
       </div>
     </div>
   </div>
@@ -187,28 +286,23 @@
 <div class="overlay" id="settingsOverlay">
   <div class="modal">
     <h2>Settings</h2>
-    <p class="sub">Your API key is stored only in your browser — never transmitted anywhere except directly to Anthropic.</p>
+    <p class="sub">Your API key is stored only in your browser — never sent anywhere except directly to Anthropic.</p>
     <div class="fg">
       <label>Claude API Key</label>
-      <input type="password" id="keyInput" placeholder="sk-ant-api03-...">
+      <input type="password" id="keyInput" placeholder="sk-ant-api03-…">
       <div class="hint">Get yours at <strong>console.anthropic.com</strong> → API Keys</div>
     </div>
     <div class="fg">
-      <label>Model</label>
+      <label>Cover Letter Model</label>
       <select id="modelSelect">
-        <option value="claude-haiku-4-5-20251001">Haiku 4.5 — fast &amp; cheap (recommended for scoring)</option>
-        <option value="claude-sonnet-4-6">Sonnet 4.6 — higher quality cover letters (costs more)</option>
+        <option value="claude-haiku-4-5-20251001">Haiku 4.5 — fast &amp; cheap (recommended)</option>
+        <option value="claude-sonnet-4-6">Sonnet 4.6 — richer edits (costs more)</option>
       </select>
-      <div class="hint">Haiku is used for job scoring. Selected model is used for cover letter adaptation.</div>
-    </div>
-    <div class="fg">
-      <label>Job Source</label>
-      <input type="text" value="Remotive — remote jobs from company websites (no key needed)" disabled style="background:#f8fafc;color:#94a3b8">
-      <div class="hint">Searches real remote job listings. Adzuna &amp; more sources coming in v2.</div>
+      <div class="hint">Haiku is always used for PDF extraction and match scoring.</div>
     </div>
     <div class="mfooter">
       <button class="btn-cancel" onclick="closeSettings()">Cancel</button>
-      <button class="btn-ok" onclick="saveSettings()">Save Settings</button>
+      <button class="btn-ok" onclick="saveSettings()">Save</button>
     </div>
   </div>
 </div>
@@ -225,15 +319,15 @@
     </div>
     <div class="cl-body" id="clBody">
       <div class="cl-loading-wrap">
-        <div class="spin"></div>
+        <div class="spin spin-dark"></div>
         <div>Adapting your cover letter…</div>
-        <div style="font-size:11px;color:#94a3b8">Preserving your voice. ~15 seconds.</div>
+        <div style="font-size:11px;color:#94a3b8">Preserving your voice · ~15 s</div>
       </div>
     </div>
     <div class="cl-foot">
       <div class="cl-note" id="clNote"></div>
       <div style="display:flex;gap:10px;align-items:center">
-        <span class="copied" id="copiedMsg" style="display:none">✓ Copied!</span>
+        <span class="copied-msg" id="copiedMsg" style="display:none">✓ Copied!</span>
         <button class="btn-copy" id="copyBtn" onclick="copyLetter()" style="display:none">Copy to Clipboard</button>
       </div>
     </div>
@@ -251,42 +345,159 @@ let claudeKey = '';
 let adaptModel = 'claude-haiku-4-5-20251001';
 let resumeSkillsCache = null;
 let currentLetter = '';
-let jobs = [];
+let allJobs = [];   // raw fetch results
+let jobs = [];      // after filter
 let scores = [];
+
+// Filters
+let filterJobType = 'any';
+let filterSeniority = 'any';
+let filterLocation = '';
 
 // ── INIT ──
 (function init() {
   claudeKey = localStorage.getItem('jst_key') || '';
   adaptModel = localStorage.getItem('jst_model') || 'claude-haiku-4-5-20251001';
-  document.getElementById('resumeInput').value = localStorage.getItem('jst_resume') || '';
-  document.getElementById('clInput').value = localStorage.getItem('jst_cl') || '';
   resumeSkillsCache = JSON.parse(localStorage.getItem('jst_rskills') || 'null');
+
+  // Restore previous uploads if text was cached
+  const savedResume = localStorage.getItem('jst_resume') || '';
+  const savedCl = localStorage.getItem('jst_cl') || '';
+  if (savedResume) restoreUploadState('resume', savedResume);
+  if (savedCl) restoreUploadState('cl', savedCl);
+
   if (!claudeKey) setTimeout(openSettings, 400);
 })();
 
+function restoreUploadState(kind, text) {
+  const name = kind === 'resume' ? 'resume' : 'cover letter';
+  showDone(kind, `Previously uploaded ${name}`, '✓', `✓ Extracted — ${wordCount(text)} words`, 'ok');
+}
+
 // ── SIDEBAR TABS ──
 function switchTab(tab) {
-  document.querySelectorAll('.stab').forEach((el, i) => el.classList.toggle('active', ['resume','letter'][i] === tab));
-  document.querySelectorAll('.stab-panel').forEach((el, i) => el.classList.toggle('active', ['panel-resume','panel-letter'][i] === ('panel-' + tab)));
+  document.querySelectorAll('.stab').forEach((el, i) =>
+    el.classList.toggle('active', ['resume','letter'][i] === tab));
+  document.querySelectorAll('.stab-panel').forEach((el, i) =>
+    el.classList.toggle('active', ['panel-resume','panel-letter'][i] === 'panel-' + tab));
 }
 
-// ── PROFILE ──
-function saveProfile() {
-  const resume = document.getElementById('resumeInput').value;
-  const cl = document.getElementById('clInput').value;
-  localStorage.setItem('jst_resume', resume);
-  localStorage.setItem('jst_cl', cl);
-  localStorage.removeItem('jst_rskills');
-  resumeSkillsCache = null;
-  flash('saveMsg', '✓ Saved');
-  flash('saveMsg2', '✓ Saved');
+// ── DRAG & DROP ──
+function onDragOver(e, zoneId) { e.preventDefault(); document.getElementById(zoneId).classList.add('drag'); }
+function onDragLeave(zoneId) { document.getElementById(zoneId).classList.remove('drag'); }
+function onDrop(e, kind) {
+  e.preventDefault();
+  const zoneId = kind === 'resume' ? 'resumeZone' : 'clZone';
+  document.getElementById(zoneId).classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file, kind);
 }
 
-function flash(id, msg) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = msg;
-  setTimeout(() => { el.textContent = ''; }, 2000);
+// ── FILE UPLOAD ──
+async function handleFile(file, kind) {
+  if (!file) return;
+  if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+    toast('Please upload a PDF file.', true); return;
+  }
+  if (!claudeKey) { openSettings(); return; }
+  if (file.size > 5 * 1024 * 1024) {
+    toast('PDF is too large (max 5 MB). Try compressing it first.', true); return;
+  }
+
+  showDone(kind, file.name, '<span class="spin"></span>', 'Extracting text…', '');
+
+  try {
+    const b64 = await fileToBase64(file);
+    const text = await extractPdfText(b64, kind);
+    const storageKey = kind === 'resume' ? 'jst_resume' : 'jst_cl';
+    localStorage.setItem(storageKey, text);
+    if (kind === 'resume') { resumeSkillsCache = null; localStorage.removeItem('jst_rskills'); }
+
+    showDone(kind, file.name, '✅', `✓ Extracted — ${wordCount(text)} words`, 'ok');
+    // Populate extracted text area
+    document.getElementById(kind === 'resume' ? 'resumeText' : 'clText').value = text;
+    document.getElementById(kind === 'resume' ? 'resumeTextSection' : 'clTextSection').style.display = '';
+    toast(`${kind === 'resume' ? 'Resume' : 'Cover letter'} extracted successfully.`, false);
+  } catch (err) {
+    showDone(kind, file.name, '❌', err.message, 'err');
+  }
+}
+
+function showDone(kind, fileName, icon, msg, msgClass) {
+  const z = kind === 'resume' ? 'resumeZone' : 'clZone';
+  const d = kind === 'resume' ? 'resumeDone' : 'clDone';
+  document.getElementById(z).style.display = 'none';
+  const done = document.getElementById(d);
+  done.style.display = '';
+  document.getElementById(kind === 'resume' ? 'resumeIcon' : 'clIcon').innerHTML = icon;
+  document.getElementById(kind === 'resume' ? 'resumeFileName' : 'clFileName').textContent = fileName;
+  const msgEl = document.getElementById(kind === 'resume' ? 'resumeMsg' : 'clMsg');
+  msgEl.innerHTML = msg;
+  msgEl.className = 'ud-msg' + (msgClass ? ' ' + msgClass : '');
+  document.getElementById(kind === 'resume' ? 'resumeTextSection' : 'clTextSection').style.display = '';
+}
+
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('Failed to read file.'));
+    r.readAsDataURL(file);
+  });
+}
+
+async function extractPdfText(b64, kind) {
+  if (!claudeKey) throw new Error('No API key — open Settings first.');
+  const prompt = kind === 'resume'
+    ? 'Extract all text from this resume PDF. Return the full text content only, no commentary.'
+    : 'Extract all text from this cover letter PDF. Return the full text content only, preserving paragraph breaks.';
+
+  const body = {
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 3000,
+    messages: [{
+      role: 'user',
+      content: [
+        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } },
+        { type: 'text', text: prompt }
+      ]
+    }]
+  };
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': claudeKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-beta': 'pdfs-2024-09-25',
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    if (res.status === 401) throw new Error('Invalid API key. Check Settings.');
+    throw new Error(err.error?.message || `API error ${res.status}`);
+  }
+  const data = await res.json();
+  return data.content[0].text.trim();
+}
+
+function wordCount(text) { return text.trim().split(/\s+/).length.toLocaleString(); }
+
+// ── EXTRACTED TEXT TOGGLE ──
+function toggleExtracted(kind) {
+  const ta = document.getElementById(kind === 'resume' ? 'resumeText' : 'clText');
+  const btn = document.getElementById(kind === 'resume' ? 'resumeToggleBtn' : 'clToggleBtn');
+  const hidden = ta.style.display === 'none';
+  ta.style.display = hidden ? '' : 'none';
+  btn.textContent = (hidden ? '▼' : '▶') + ' View extracted text';
+}
+
+function onExtractedEdit(kind) {
+  const key = kind === 'resume' ? 'jst_resume' : 'jst_cl';
+  const ta = document.getElementById(kind === 'resume' ? 'resumeText' : 'clText');
+  localStorage.setItem(key, ta.value);
+  if (kind === 'resume') { resumeSkillsCache = null; localStorage.removeItem('jst_rskills'); }
 }
 
 // ── SETTINGS ──
@@ -314,13 +525,13 @@ function toast(msg, isErr = true) {
   el._t = setTimeout(() => el.classList.remove('show'), 4500);
 }
 
-// ── CLAUDE API ──
+// ── CLAUDE API (text only) ──
 async function claude(userMsg, systemMsg, maxTokens, model) {
   if (!claudeKey) throw new Error('No API key — open Settings first.');
   const body = {
     model: model || 'claude-haiku-4-5-20251001',
     max_tokens: maxTokens || 500,
-    messages: [{ role: 'user', content: userMsg }],
+    messages: [{ role: 'user', content: userMsg }]
   };
   if (systemMsg) body.system = systemMsg;
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -328,16 +539,15 @@ async function claude(userMsg, systemMsg, maxTokens, model) {
     headers: {
       'x-api-key': claudeKey,
       'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
+      'content-type': 'application/json'
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    const msg = err.error?.message || '';
     if (res.status === 401) throw new Error('Invalid API key. Check Settings.');
-    if (res.status === 429) throw new Error('Rate limit hit. Wait a moment and try again.');
-    throw new Error(msg || `Claude error ${res.status}`);
+    if (res.status === 429) throw new Error('Rate limit hit — wait a moment and try again.');
+    throw new Error(err.error?.message || `Claude error ${res.status}`);
   }
   const data = await res.json();
   return data.content[0].text;
@@ -357,7 +567,7 @@ async function extractSkills(text, kind) {
 async function getResumeSkills() {
   if (resumeSkillsCache) return resumeSkillsCache;
   const resume = localStorage.getItem('jst_resume') || '';
-  if (!resume) throw new Error('Add your resume in the sidebar first.');
+  if (!resume) throw new Error('Upload your resume first.');
   const skills = await extractSkills(resume, 'resume');
   resumeSkillsCache = skills;
   localStorage.setItem('jst_rskills', JSON.stringify(skills));
@@ -372,11 +582,10 @@ function skillMatch(a, b) {
 
 async function scoreJob(desc) {
   const [rSkills, jSkills] = await Promise.all([getResumeSkills(), extractSkills(desc, 'job')]);
-  if (!jSkills.length) return { score: 0, gaps: [], jSkills: [] };
+  if (!jSkills.length) return { score: 0, gaps: [] };
   const matched = jSkills.filter(j => rSkills.some(r => skillMatch(r, j)));
   const gaps = jSkills.filter(j => !rSkills.some(r => skillMatch(r, j))).slice(0, 3);
-  const score = Math.min(100, Math.round(matched.length / jSkills.length * 100));
-  return { score, gaps };
+  return { score: Math.min(100, Math.round(matched.length / jSkills.length * 100)), gaps };
 }
 
 function scoreColor(n) {
@@ -385,58 +594,136 @@ function scoreColor(n) {
   return '#ef4444';
 }
 
+// ── FILTERS ──
+function setJobType(type) {
+  filterJobType = type;
+  document.querySelectorAll('[data-jt]').forEach(el => el.classList.toggle('active', el.dataset.jt === type));
+  applyFiltersAndRender();
+}
+
+function setSeniority(level) {
+  filterSeniority = level;
+  document.querySelectorAll('[data-sl]').forEach(el => el.classList.toggle('active', el.dataset.sl === level));
+  applyFiltersAndRender();
+}
+
+function setLocation(val) {
+  filterLocation = val.trim().toLowerCase();
+  applyFiltersAndRender();
+}
+
+function matchesSeniority(title, level) {
+  if (level === 'any') return true;
+  const t = title.toLowerCase();
+  if (level === 'junior') return /\b(junior|jr\.?|entry[\s-]?level|associate|graduate|grad)\b/.test(t);
+  if (level === 'mid') return /\b(mid[\s-]?level|mid[\s-]?senior|intermediate)\b/.test(t);
+  if (level === 'senior') return /\bsenior\b|(\bsr\.?\s)/.test(t) && !/\b(lead|staff|principal|director|vp)\b/.test(t);
+  if (level === 'lead') return /\b(lead|staff|principal|architect|director|vp|head of)\b/.test(t);
+  return true;
+}
+
+function applyFiltersAndRender() {
+  if (!allJobs.length) return;
+
+  jobs = allJobs.filter(j => {
+    // Job type filter
+    if (filterJobType !== 'any') {
+      const jt = (j.job_type || '').toLowerCase().replace(' ', '_');
+      const contractTypes = ['contract', 'freelance'];
+      if (filterJobType === 'contract') {
+        if (jt && !contractTypes.includes(jt)) return false;
+      } else {
+        if (jt && jt !== filterJobType) return false;
+      }
+    }
+    // Seniority filter
+    if (!matchesSeniority(j.title, filterSeniority)) return false;
+    // Location filter
+    if (filterLocation) {
+      const loc = (j.candidate_required_location || '').toLowerCase();
+      if (!loc.includes(filterLocation)) return false;
+    }
+    return true;
+  });
+
+  const count = jobs.length;
+  const total = allJobs.length;
+  document.getElementById('filterCount').textContent =
+    (count < total) ? `${count} of ${total} jobs` : `${total} jobs`;
+
+  scores = new Array(jobs.length).fill(null);
+
+  if (!jobs.length) {
+    document.getElementById('results').innerHTML =
+      '<div class="empty"><h3>No matches</h3><p>Try loosening the filters — some jobs may not have type or seniority tagged.</p></div>';
+    return;
+  }
+
+  document.getElementById('results').innerHTML = jobs.map((j, i) => cardHtml(j, i)).join('');
+
+  jobs.forEach((j, i) => {
+    const desc = stripHtml(j.description);
+    scoreJob(desc)
+      .then(r => { scores[i] = r; applyScore(i, r); })
+      .catch(err => applyScore(i, null, err.message));
+  });
+}
+
 // ── JOB SEARCH ──
 async function doSearch() {
   const query = document.getElementById('searchInput').value.trim();
   if (!query) return;
   if (!claudeKey) { openSettings(); return; }
   if (!(localStorage.getItem('jst_resume') || '')) {
-    toast('Add your resume in the sidebar first, then save.'); return;
+    toast('Upload your resume first — click the sidebar.', true); return;
   }
 
   const btn = document.getElementById('searchBtn');
   btn.disabled = true; btn.textContent = 'Searching…';
-  const el = document.getElementById('results');
-  el.innerHTML = `<div class="empty"><div class="spin" style="margin-bottom:12px"></div><p>Finding jobs matching <strong>${esc(query)}</strong>…</p></div>`;
+  document.getElementById('results').innerHTML =
+    `<div class="empty"><div class="spin spin-dark" style="margin-bottom:12px"></div><p>Finding jobs matching <strong>${esc(query)}</strong>…</p></div>`;
+  document.getElementById('filterCount').textContent = '';
 
   try {
-    const res = await fetch(`https://remotive.com/api/remote-jobs?search=${encodeURIComponent(query)}&limit=10`);
-    if (!res.ok) throw new Error(`Job API returned ${res.status}. If you see a CORS error in the console, open this file via a local server:\n  python -m http.server 8080\nthen visit http://localhost:8080/jobsearch.html`);
+    const res = await fetch(`https://remotive.com/api/remote-jobs?search=${encodeURIComponent(query)}&limit=25`);
+    if (!res.ok) throw new Error(`Job API returned ${res.status}. Try running via python -m http.server if you see a CORS error.`);
     const data = await res.json();
-    jobs = (data.jobs || []).slice(0, 5);
-    scores = new Array(jobs.length).fill(null);
+    allJobs = data.jobs || [];
 
-    if (!jobs.length) {
-      el.innerHTML = '<div class="empty"><h3>No results</h3><p>Try a broader title — e.g. "engineer" instead of "senior frontend engineer".</p></div>';
+    if (!allJobs.length) {
+      document.getElementById('results').innerHTML =
+        '<div class="empty"><h3>No results</h3><p>Try a broader title — e.g. "engineer" instead of "senior frontend engineer".</p></div>';
       return;
     }
 
-    el.innerHTML = jobs.map((j, i) => cardHtml(j, i)).join('');
-
-    // Score cards in parallel, update as results arrive
-    jobs.forEach((j, i) => {
-      const desc = stripHtml(j.description);
-      scoreJob(desc)
-        .then(result => { scores[i] = result; applyScore(i, result); })
-        .catch(err => applyScore(i, null, err.message));
-    });
+    applyFiltersAndRender();
 
   } catch (err) {
     toast(err.message, true);
-    el.innerHTML = `<div class="empty"><h3>Search failed</h3><p>${esc(err.message)}</p></div>`;
+    document.getElementById('results').innerHTML =
+      `<div class="empty"><h3>Search failed</h3><p>${esc(err.message)}</p></div>`;
   } finally {
     btn.disabled = false; btn.textContent = 'Search Jobs';
   }
 }
 
+function jobTypeLabel(jt) {
+  const map = { full_time: 'Full-time', part_time: 'Part-time', contract: 'Contract', freelance: 'Freelance', internship: 'Internship', other: '' };
+  return map[jt] || '';
+}
+
 function cardHtml(j, i) {
   const date = new Date(j.publication_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   const loc = j.candidate_required_location || 'Remote';
+  const jt = jobTypeLabel(j.job_type || '');
   return `<div class="card" id="card-${i}">
   <div class="card-top">
     <div>
       <div class="job-title">${esc(j.title)}</div>
-      <div class="job-meta">${esc(j.company_name)} · ${esc(loc)} · ${date}</div>
+      <div class="job-meta">
+        ${esc(j.company_name)} · ${esc(loc)} · ${date}
+        ${jt ? `<span class="job-type-tag">${esc(jt)}</span>` : ''}
+      </div>
     </div>
     <div class="score-badge" id="badge-${i}"><div class="score-loading">Scoring…</div></div>
   </div>
@@ -457,7 +744,7 @@ function applyScore(i, result, errMsg) {
   if (!badge) return;
   if (errMsg || !result) {
     badge.innerHTML = '<div class="score-loading" style="color:var(--red)">Error</div>';
-    btn.disabled = false; // still let them try adapting
+    btn.disabled = false;
     return;
   }
   const { score, gaps } = result;
@@ -470,7 +757,7 @@ function applyScore(i, result, errMsg) {
 }
 
 // ── COVER LETTER ADAPTATION ──
-const SYS = `You are a cover letter editor, not a writer. Your job is to make minimal, surgical edits to the applicant's existing cover letter to better match a specific job posting.
+const SYS = `You are a cover letter editor, not a writer. Make minimal, surgical edits to adapt the applicant's existing cover letter to a specific job posting.
 
 Hard rules:
 1. Preserve the applicant's sentence structure, vocabulary, and tone throughout
@@ -485,15 +772,16 @@ async function openCL(i) {
   const score = scores[i];
   const cl = localStorage.getItem('jst_cl') || '';
   const resume = localStorage.getItem('jst_resume') || '';
-  if (!cl) { toast('Add your cover letter in the sidebar first.'); return; }
-  if (!resume) { toast('Add your resume in the sidebar first.'); return; }
+  if (!cl) { toast('Upload your cover letter first.', true); return; }
+  if (!resume) { toast('Upload your resume first.', true); return; }
 
   document.getElementById('clTitle').textContent = `${job.title} · ${job.company_name}`;
   document.getElementById('clSub').textContent = job.candidate_required_location || 'Remote';
   document.getElementById('clNote').textContent = '';
   document.getElementById('copyBtn').style.display = 'none';
   document.getElementById('copiedMsg').style.display = 'none';
-  document.getElementById('clBody').innerHTML = `<div class="cl-loading-wrap"><div class="spin"></div><div>Adapting your cover letter…</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">Preserving your voice · ~15 seconds</div></div>`;
+  document.getElementById('clBody').innerHTML =
+    `<div class="cl-loading-wrap"><div class="spin spin-dark"></div><div>Adapting your cover letter…</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">Preserving your voice · ~15 s</div></div>`;
   document.getElementById('clOverlay').classList.add('show');
 
   try {
@@ -513,18 +801,19 @@ JOB DESCRIPTION:
 ${desc}
 
 SKILLS TO SURFACE (present in my resume, underemphasized in my letter):
-${gaps.length ? gaps.join(', ') : 'Optimize for best overall fit based on the job description'}
+${gaps.length ? gaps.join(', ') : 'Optimise for overall fit with the job description'}
 
 Return only the edited cover letter.`;
 
     const adapted = await claude(prompt, SYS, 2000, adaptModel);
     currentLetter = adapted;
     document.getElementById('clBody').innerHTML = `<textarea id="adaptedTA">${esc(adapted)}</textarea>`;
-    document.getElementById('clNote').textContent = `Model: ${adaptModel.includes('haiku') ? 'Haiku 4.5' : 'Sonnet 4.6'} · Edit above if needed`;
+    document.getElementById('clNote').textContent =
+      `Model: ${adaptModel.includes('haiku') ? 'Haiku 4.5' : 'Sonnet 4.6'} · Edit above if needed`;
     document.getElementById('copyBtn').style.display = 'block';
-
   } catch (err) {
-    document.getElementById('clBody').innerHTML = `<div class="cl-loading-wrap" style="color:var(--red)">${esc(err.message || 'Adaptation failed. Try again.')}</div>`;
+    document.getElementById('clBody').innerHTML =
+      `<div class="cl-loading-wrap" style="color:var(--red)">${esc(err.message || 'Adaptation failed.')}</div>`;
   }
 }
 
