@@ -81,9 +81,9 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 }
 .card-text { font-size: 0.95rem; line-height: 1.5; font-weight: 500; }
 
-.card { cursor: pointer; }
-.card .card-front { position: relative; }
-.card .card-front::after {
+.card.flippable { cursor: pointer; }
+.card.flippable .card-front { position: relative; }
+.card.flippable .card-front::after {
   content: '↩ flip for story';
   position: absolute; bottom: 10px; right: 12px;
   font-size: 0.68rem; color: #94a3b8; font-style: italic;
@@ -116,9 +116,23 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
   font-variant-numeric: tabular-nums;
 }
 
-#timeline-track-wrap {
-  padding: 14px 0; cursor: pointer; position: relative;
+#timeline-row {
+  display: flex; align-items: center; gap: 10px;
 }
+#timeline-track-wrap {
+  flex: 1; padding: 14px 0; cursor: pointer; position: relative;
+}
+.year-adj-btn {
+  width: 38px; height: 38px; flex-shrink: 0;
+  background: #3b82f6; color: #fff;
+  border: none; border-radius: 9px;
+  font-size: 1.1rem; font-weight: 900;
+  cursor: pointer; line-height: 1;
+  transition: background 0.15s, transform 0.1s;
+}
+.year-adj-btn:hover { background: #2563eb; }
+.year-adj-btn:active { transform: scale(0.91); }
+.year-adj-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 #timeline-track {
   height: 8px; background: #e2e8f0; border-radius: 4px; position: relative;
 }
@@ -218,11 +232,15 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
   <div id="guess-section">
     <div id="timeline-wrap">
       <div id="timeline-year-display">1910</div>
-      <div id="timeline-track-wrap">
-        <div id="timeline-track">
-          <div id="timeline-fill"></div>
-          <div id="timeline-thumb"></div>
+      <div id="timeline-row">
+        <button class="year-adj-btn" id="year-dec" onclick="adjustYear(-1)">−</button>
+        <div id="timeline-track-wrap">
+          <div id="timeline-track">
+            <div id="timeline-fill"></div>
+            <div id="timeline-thumb"></div>
+          </div>
         </div>
+        <button class="year-adj-btn" id="year-inc" onclick="adjustYear(1)">+</button>
       </div>
       <div id="timeline-ends">
         <span>1800</span>
@@ -236,7 +254,7 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
   </div>
 
   <div id="result-area"></div>
-  <p id="flip-hint">↩ Click any card to flip and read the story</p>
+  <p id="flip-hint" style="display:none">↩ Click any card to flip and read the story</p>
   <button id="next-btn" style="display:none" onclick="startRound()">Next Round →</button>
 </main>
 
@@ -671,7 +689,14 @@ function lose() {
 
 function endRound() {
   document.getElementById('guess-section').style.display = 'none';
+  document.getElementById('flip-hint').style.display     = 'block';
   document.getElementById('next-btn').style.display      = 'block';
+
+  const cards = document.querySelectorAll('.card');
+  cards.forEach((c, i) => {
+    c.classList.add('flippable');
+    setTimeout(() => c.classList.add('flipped'), 400 + i * 180);
+  });
 }
 
 // ── RENDER ──
@@ -702,7 +727,9 @@ function addClueCard(idx, isNew) {
       </div>
     </div>`;
 
-  card.addEventListener('click', () => card.classList.toggle('flipped'));
+  card.addEventListener('click', () => {
+    if (roundOver) card.classList.toggle('flipped');
+  });
 
   document.getElementById('clue-area').appendChild(card);
 }
@@ -774,6 +801,13 @@ function eraBg(year) {
   if (year < 1990) return '#d9d8e0';
   if (year < 2000) return '#dfd8e0';
   return '#d8e0de';
+}
+
+// ── YEAR ADJUST BUTTONS ──
+function adjustYear(delta) {
+  if (roundOver) return;
+  sliderYear = Math.max(SLIDER_MIN, Math.min(SLIDER_MAX, sliderYear + delta));
+  updateSliderUI();
 }
 
 // ── KEYBOARD ──
