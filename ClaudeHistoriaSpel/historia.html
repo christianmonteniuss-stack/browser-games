@@ -392,7 +392,7 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
     <button id="help-close" onclick="toggleHelp()">×</button>
     <h2>How to Play</h2>
     <p>You'll be shown a historical event. Use the slider — or the − and + buttons — to pick the year you think it happened, then press <strong>Guess</strong>.<br><br>
-    You have <strong>3 guesses</strong> per round. After each wrong guess a new clue appears. Guess faster to score more points: <strong>200</strong> for the first try, <strong>100</strong> for the second, <strong>50</strong> for the third.<br><br>
+    You have <strong>3 guesses</strong> per round. After each wrong guess, a new event from the same year will appear as an extra clue. The fewer guesses you use, the more points you earn: <strong>200</strong> for the first try, <strong>100</strong> for the second, <strong>50</strong> for the third.<br><br>
     The game lasts <strong>5 rounds</strong>. Try to get the highest score!</p>
     <div id="color-scale-wrap">
       <p>How close is your guess?</p>
@@ -714,7 +714,7 @@ function renderStartLeaderboard() {
 // ── SLIDER ──
 const SLIDER_MIN = 1800;
 const SLIDER_MAX = 2026;
-let sliderYear   = 2026;
+let sliderYear   = Math.round((1800 + 2026) / 2);
 let sliderDragging = false;
 
 function updateSliderUI() {
@@ -725,7 +725,7 @@ function updateSliderUI() {
 }
 
 function resetSlider() {
-  sliderYear = 2026;
+  sliderYear = Math.round((SLIDER_MIN + SLIDER_MAX) / 2);
   updateSliderUI();
 }
 
