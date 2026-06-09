@@ -343,8 +343,8 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
         <button class="year-adj-btn" id="year-inc">+</button>
       </div>
       <div id="timeline-ends">
-        <span>1800</span>
-        <span>2020</span>
+        <span>Past</span>
+        <span>Present</span>
       </div>
     </div>
     <div id="guess-submit-row">
@@ -633,8 +633,8 @@ function renderStartLeaderboard() {
 
 // ── SLIDER ──
 const SLIDER_MIN = 1800;
-const SLIDER_MAX = 2020;
-let sliderYear   = 1910;
+const SLIDER_MAX = 2026;
+let sliderYear   = 2026;
 let sliderDragging = false;
 
 function updateSliderUI() {
@@ -645,7 +645,7 @@ function updateSliderUI() {
 }
 
 function resetSlider() {
-  sliderYear = 1910;
+  sliderYear = 2026;
   updateSliderUI();
 }
 
