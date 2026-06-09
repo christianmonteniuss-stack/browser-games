@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Historia — Guess the Year</title>
+<link rel="icon" href="historia.ico" type="image/x-icon">
+<style>
+
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f0f4f8;
+  color: #1a1a2e;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 50;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+}
+.logo { font-size: 1.4rem; font-weight: 900; letter-spacing: -1px; color: #3b82f6; }
+.header-meta { font-size: 0.8rem; color: #94a3b8; margin-top: 2px; }
+#header-score {
+  font-size: 1.1rem; font-weight: 800; color: #1a1a2e;
+  background: #f0f4f8; border-radius: 8px; padding: 6px 14px;
+}
+
+/* ── MAIN ── */
+main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
+
+/* ── CLUE CARDS ── */
+#clue-area { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+.card { perspective: 1000px; }
+.card-inner {
+  position: relative; width: 100%;
+  transition: transform 0.55s cubic-bezier(.4,0,.2,1), height 0.45s ease;
+  transform-style: preserve-3d;
+}
+.card.flipped .card-inner { transform: rotateY(180deg); }
+
+.card-front, .card-back {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.card-back {
+  position: absolute; top: 0; left: 0; right: 0;
+  transform: rotateY(180deg);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 22px 20px;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+}
+.card-back p { font-size: 0.95rem; line-height: 1.65; color: #1e3a5f; font-weight: 500; }
+
+.card-body {
+  padding: 26px 24px;
+  text-align: center;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 110px;
+}
+.card-label {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
+  color: #94a3b8; text-transform: uppercase; margin-bottom: 8px;
+}
+.card-text { font-size: 1rem; line-height: 1.55; font-weight: 500; }
+
+.card.flippable { cursor: pointer; }
+.card.flippable .card-front { position: relative; }
+.card.flippable .card-front::after {
+  content: '↩ flip for story';
+  position: absolute; bottom: 10px; right: 12px;
+  font-size: 0.68rem; color: #94a3b8; font-style: italic;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card.new { animation: slideUp 0.35s ease-out; }
+
+/* ── GUESS HISTORY ── */
+#guess-history { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
+.guess-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; border-radius: 10px;
+  font-weight: 700; font-size: 0.95rem;
+  animation: slideUp 0.25s ease-out;
+}
+.guess-year { font-size: 1.15rem; min-width: 50px; }
+.guess-dir  { font-size: 1.1rem; margin-left: auto; }
+
+/* ── TIMELINE SLIDER ── */
+#guess-section { margin-bottom: 14px; user-select: none; -webkit-user-select: none; }
+
+#timeline-year-display {
+  text-align: center;
+  font-size: 2.6rem; font-weight: 900; letter-spacing: -2px;
+  color: #1a1a2e; margin-bottom: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+#timeline-row {
+  display: flex; align-items: center; gap: 10px;
+}
+#timeline-track-wrap {
+  flex: 1; padding: 14px 0; cursor: pointer; position: relative;
+}
+#timeline-track {
+  height: 8px; background: #e2e8f0; border-radius: 4px; position: relative;
+}
+#timeline-fill {
+  height: 100%; background: #3b82f6; border-radius: 4px;
+  width: 50%; pointer-events: none;
+}
+#timeline-thumb {
+  width: 28px; height: 28px;
+  background: #3b82f6; border: 3px solid #fff;
+  box-shadow: 0 2px 10px rgba(59,130,246,0.45);
+  border-radius: 50%; position: absolute;
+  top: 50%; transform: translate(-50%, -50%);
+  cursor: grab; left: 50%;
+  transition: box-shadow 0.15s;
+}
+#timeline-thumb.dragging { cursor: grabbing; box-shadow: 0 3px 18px rgba(59,130,246,0.65); }
+
+.year-adj-btn {
+  width: 38px; height: 38px; flex-shrink: 0;
+  background: #3b82f6; color: #fff;
+  border: none; border-radius: 9px;
+  font-size: 1.1rem; font-weight: 900;
+  cursor: pointer; line-height: 1;
+  transition: background 0.15s, transform 0.1s;
+}
+.year-adj-btn:hover { background: #2563eb; }
+.year-adj-btn:active { transform: scale(0.91); }
+.year-adj-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+#timeline-ends {
+  display: flex; justify-content: space-between;
+  font-size: 0.78rem; color: #94a3b8; font-weight: 700; margin-top: 2px;
+}
+
+#guess-submit-row { display: flex; justify-content: center; margin-top: 16px; }
+#submit-btn {
+  padding: 13px 44px; background: #3b82f6; color: #fff;
+  border: none; border-radius: 10px; font-size: 1rem; font-weight: 700;
+  cursor: pointer; transition: background 0.15s, transform 0.1s; min-width: 180px;
+}
+#submit-btn:hover:not(:disabled) { background: #2563eb; }
+#submit-btn:active:not(:disabled) { transform: scale(0.96); }
+#submit-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+#guesses-left {
+  text-align: center; font-size: 0.82rem; color: #94a3b8;
+  margin-top: 10px; font-weight: 600;
+}
+
+/* ── RESULT BANNER ── */
+#result-area { margin-bottom: 14px; }
+.result-banner {
+  border-radius: 14px; padding: 20px 22px; text-align: center;
+  animation: slideUp 0.4s ease-out;
+}
+.result-banner.win { background: #dcfce7; border: 2px solid #22c55e; color: #14532d; }
+.result-banner.lose { background: #fee2e2; border: 2px solid #ef4444; color: #7f1d1d; }
+.result-banner h2 { font-size: 1.4rem; margin-bottom: 6px; }
+.result-banner .delta { font-size: 2rem; font-weight: 900; margin-bottom: 6px; }
+.result-banner .answer { font-size: 0.9rem; opacity: 0.8; }
+
+#flip-hint {
+  text-align: center; font-size: 0.82rem; color: #3b82f6;
+  font-weight: 700; margin-bottom: 12px; letter-spacing: 0.01em;
+}
+
+#next-btn {
+  width: 100%; padding: 15px; background: #3b82f6; color: #fff;
+  border: none; border-radius: 12px; font-size: 1.05rem; font-weight: 800;
+  cursor: pointer; transition: background 0.15s;
+}
+#next-btn:hover { background: #2563eb; }
+
+/* ── OVERLAYS ── */
+#flash-overlay {
+  position: fixed; inset: 0; pointer-events: none; z-index: 90;
+  opacity: 0; transition: opacity 0.1s;
+}
+#confetti-canvas {
+  position: fixed; inset: 0; pointer-events: none; z-index: 100; display: none;
+}
+
+/* ── START SCREEN ── */
+#start-screen {
+  position: fixed; inset: 0; z-index: 200;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+#start-card {
+  background: #fff; border-radius: 20px;
+  padding: 36px 32px; width: 100%; max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  text-align: center;
+}
+.start-logo { font-size: 2.8rem; font-weight: 900; letter-spacing: -2px; color: #3b82f6; margin-bottom: 4px; }
+.start-subtitle { font-size: 0.9rem; color: #94a3b8; font-weight: 600; margin-bottom: 28px; }
+#name-input {
+  width: 100%; padding: 13px 16px;
+  border: 2px solid #e2e8f0; border-radius: 10px;
+  font-size: 1rem; font-weight: 600; color: #1a1a2e;
+  outline: none; margin-bottom: 12px;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+#name-input:focus { border-color: #3b82f6; }
+#play-btn {
+  width: 100%; padding: 14px;
+  background: #3b82f6; color: #fff;
+  border: none; border-radius: 10px;
+  font-size: 1.05rem; font-weight: 800;
+  cursor: pointer; transition: background 0.15s;
+  margin-bottom: 24px; font-family: inherit;
+}
+#play-btn:hover { background: #2563eb; }
+#play-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+/* ── END SCREEN ── */
+#end-screen {
+  position: fixed; inset: 0; z-index: 200;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px; overflow-y: auto;
+}
+#end-card {
+  background: #fff; border-radius: 20px;
+  padding: 36px 32px; width: 100%; max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  text-align: center;
+}
+.end-title { font-size: 1.3rem; font-weight: 700; color: #64748b; margin-bottom: 4px; }
+.end-name  { font-size: 1.7rem; font-weight: 900; color: #1a1a2e; margin-bottom: 16px; }
+.end-score-num   { font-size: 3.2rem; font-weight: 900; letter-spacing: -2px; color: #3b82f6; line-height: 1; }
+.end-score-label { font-size: 0.85rem; color: #94a3b8; font-weight: 600; margin-bottom: 6px; }
+.end-rank-msg { font-size: 0.95rem; font-weight: 700; color: #22c55e; margin-bottom: 20px; min-height: 1.4em; }
+#play-again-btn {
+  width: 100%; padding: 14px;
+  background: #3b82f6; color: #fff;
+  border: none; border-radius: 10px;
+  font-size: 1.05rem; font-weight: 800;
+  cursor: pointer; transition: background 0.15s;
+  font-family: inherit;
+}
+#play-again-btn:hover { background: #2563eb; }
+
+/* ── LEADERBOARD ── */
+.lb-section { text-align: left; margin-bottom: 20px; }
+.lb-heading {
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;
+  color: #94a3b8; text-transform: uppercase; margin-bottom: 10px;
+}
+.lb-empty { font-size: 0.9rem; color: #cbd5e1; text-align: center; padding: 12px 0; }
+.lb-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 9px;
+  margin-bottom: 5px;
+}
+.lb-row:nth-child(odd) { background: #f8fafc; }
+.lb-row.lb-you { background: #dbeafe; border: 2px solid #3b82f6; }
+.lb-rank  { font-size: 0.95rem; font-weight: 900; color: #94a3b8; min-width: 24px; text-align: center; }
+.lb-name  { flex: 1; font-size: 0.9rem; font-weight: 600; color: #1a1a2e; text-align: left; }
+.lb-score { font-size: 0.9rem; font-weight: 800; color: #3b82f6; }
+.lb-row.lb-you .lb-rank,
+.lb-row.lb-you .lb-name,
+.lb-row.lb-you .lb-score { color: #1e40af; }
+
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+<div id="flash-overlay"></div>
+
+<!-- ── START SCREEN ── -->
+<div id="start-screen">
+  <div id="start-card">
+    <div class="start-logo">Historia</div>
+    <div class="start-subtitle">Guess the Year &mdash; 5 Rounds</div>
+    <input id="name-input" type="text" placeholder="Your name" maxlength="20" autocomplete="off"
+           oninput="onNameInput()" onkeydown="if(event.key==='Enter')beginGame()">
+    <button id="play-btn" onclick="beginGame()" disabled>Play &rarr;</button>
+    <div id="start-leaderboard" class="lb-section" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ── END SCREEN ── -->
+<div id="end-screen">
+  <div id="end-card">
+    <div class="end-title">Game over,</div>
+    <div class="end-name" id="end-name-display"></div>
+    <div class="end-score-num" id="end-score-num">0</div>
+    <div class="end-score-label">points across 5 rounds</div>
+    <div class="end-rank-msg" id="end-rank-msg"></div>
+    <div id="end-leaderboard" class="lb-section"></div>
+    <button id="play-again-btn" onclick="restartGame()">Play Again &rarr;</button>
+  </div>
+</div>
+
+<header>
+  <div>
+    <div class="logo">Historia</div>
+    <div class="header-meta" id="header-round">Round 1 / 5</div>
+  </div>
+  <div id="header-score">0 pts</div>
+</header>
+
+<main>
+  <div id="clue-area"></div>
+  <div id="guess-history"></div>
+
+  <div id="guess-section">
+    <div id="timeline-wrap">
+      <div id="timeline-year-display">1910</div>
+      <div id="timeline-row">
+        <button class="year-adj-btn" id="year-dec" onclick="adjustYear(-1)">−</button>
+        <div id="timeline-track-wrap">
+          <div id="timeline-track">
+            <div id="timeline-fill"></div>
+            <div id="timeline-thumb"></div>
+          </div>
+        </div>
+        <button class="year-adj-btn" id="year-inc" onclick="adjustYear(1)">+</button>
+      </div>
+      <div id="timeline-ends">
+        <span>1800</span>
+        <span>2020</span>
+      </div>
+    </div>
+    <div id="guess-submit-row">
+      <button id="submit-btn" onclick="handleGuess()">Lock in Guess</button>
+    </div>
+    <div id="guesses-left">3 guesses remaining</div>
+  </div>
+
+  <div id="result-area"></div>
+  <p id="flip-hint" style="display:none">↩ Click any card to flip and read the story</p>
+  <button id="next-btn" style="display:none">Next Round &rarr;</button>
+</main>
+
+<script>
+
+// ── CONSTANTS ──
+const MAX_ROUNDS = 5;
+
+// ── DATA ──
+const EVENTS = [
+  {
+    year: 1815,
+    events: [
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Battle_of_Waterloo_1815.PNG', text: 'The Battle of Waterloo ends Napoleon Bonaparte\'s rule and reshapes the map of Europe', summary: 'On June 18, 1815, Napoleon\'s forces were decisively defeated by a coalition of British and Prussian troops near the Belgian village of Waterloo. This battle ended Napoleon\'s Hundred Days return to power and led to his exile to the remote island of Saint Helena. The Congress of Vienna subsequently redrew the borders of Europe, ushering in decades of relative peace.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Congress_of_Vienna.PNG', text: 'The Congress of Vienna concludes after reorganising Europe following the Napoleonic Wars', summary: 'The Congress of Vienna was a major international conference held from 1814 to 1815 that sought to restore order and balance of power in Europe after Napoleon\'s conquests. Diplomats from across the continent redrew national borders, restored monarchies, and created a framework for international cooperation. The settlement largely preserved European peace for nearly 40 years.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Tambora_1815_Eruption_map.svg', text: 'Mount Tambora in Indonesia erupts in the largest volcanic explosion in recorded history', summary: 'The eruption of Mount Tambora in April 1815 was the most powerful volcanic event in recorded history, killing an estimated 71,000 people directly. The massive amounts of ash and sulfur dioxide ejected into the atmosphere caused the "Year Without a Summer" in 1816, leading to widespread crop failures and famine across the Northern Hemisphere. The climate disruption contributed to political unrest in Europe and North America.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Treaty_of_Ghent_1814.jpg', text: 'The United States and Britain sign the Treaty of Ghent, formally ending the War of 1812', summary: 'The Treaty of Ghent, signed in December 1814, officially ended the War of 1812 between the United States and Great Britain, though news of the peace arrived after the Battle of New Orleans was fought in January 1815. The treaty restored pre-war borders and resolved none of the original disputes, yet it marked the beginning of a lasting peace between the two nations. The war is remembered in the US for inspiring "The Star-Spangled Banner."' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Davy_lamp.jpg', text: 'Humphry Davy invents the Davy lamp, dramatically improving safety in coal mines', summary: 'Sir Humphry Davy invented his eponymous safety lamp in 1815, designed to prevent the ignition of flammable gases (firedamp) in coal mines. The lamp used a wire gauze to surround the flame, allowing miners to work safely in environments that previously caused deadly explosions. The invention helped fuel the Industrial Revolution by making coal extraction safer and more productive.' }
+    ]
+  },
+  {
+    year: 1848,
+    events: [
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Gold_panning_at_Bonanza_Creek.jpg', text: 'Gold is discovered at Sutter\'s Mill in California, sparking the California Gold Rush', summary: 'On January 24, 1848, James Marshall found gold flakes at Sutter\'s Mill in Coloma, California, triggering one of the largest mass migrations in American history. Nearly 300,000 people, known as "Forty-Niners," flooded California in 1849 in search of fortune. The Gold Rush transformed California from a sparsely populated territory into a state by 1850 and permanently altered its demographics and economy.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Karl_Marx_001.jpg', text: 'Karl Marx and Friedrich Engels publish The Communist Manifesto in London', summary: 'Commissioned by the Communist League, "The Communist Manifesto" was published in February 1848 as a short political pamphlet outlining the principles of communism. Marx and Engels argued that history is driven by class struggle and called on the workers of the world to unite against the capitalist class. The document became one of the most influential political texts in history, inspiring revolutionary movements across the globe for over a century.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Barricade_on_the_rue_Saint-Maur_before_the_attack_(June_25,_1848).jpg', text: 'Revolutions sweep across Europe, toppling governments in France, Austria, and Germany', summary: 'In 1848, a wave of liberal and nationalist revolutions erupted across continental Europe, affecting over 50 countries in what historians call the "Spring of Nations." Citizens demanded constitutional governments, national self-determination, and social reforms. Though most revolutions were ultimately suppressed, they permanently changed the political landscape and accelerated the decline of absolute monarchies.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Elizabeth_Cady_Stanton_2.jpg', text: 'The Seneca Falls Convention, the first women\'s rights convention in the US, is held in New York', summary: 'Organised by Elizabeth Cady Stanton and Lucretia Mott, the Seneca Falls Convention took place on July 19–20, 1848, gathering 300 men and women to discuss the rights of American women. The convention produced the "Declaration of Sentiments," which demanded equal rights for women, including the right to vote. It is widely regarded as the starting point of the first wave of feminism in the United States.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Treaty_of_Guadalupe_Hidalgo.jpg', text: 'The Treaty of Guadalupe Hidalgo ends the Mexican-American War, with Mexico ceding vast territories', summary: 'Signed on February 2, 1848, the Treaty of Guadalupe Hidalgo ended the Mexican-American War and required Mexico to cede over half its territory to the United States, including present-day California, Nevada, Utah, and parts of several other states. The United States paid $15 million for the land and assumed $3.25 million in claims by American citizens against Mexico. The acquisition dramatically expanded American territory and intensified debates over the expansion of slavery.' }
+    ]
+  },
+  {
+    year: 1865,
+    events: [
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Appomattox_courthouse.jpg', text: 'The American Civil War ends as Confederate General Robert E. Lee surrenders at Appomattox', summary: 'On April 9, 1865, General Robert E. Lee surrendered the Army of Northern Virginia to General Ulysses S. Grant at Appomattox Court House in Virginia, effectively ending the Civil War. The four-year conflict had claimed over 620,000 lives, making it the deadliest war in American history. Lee\'s surrender was followed by the collapse of remaining Confederate resistance over the following weeks.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Abraham_Lincoln_head_on_shoulders_photo_portrait.jpg', text: 'President Abraham Lincoln is shot at Ford\'s Theatre and dies the following morning', summary: 'On the evening of April 14, 1865, just days after the Civil War effectively ended, President Abraham Lincoln was shot in the head by Confederate sympathiser John Wilkes Booth while attending a play at Ford\'s Theatre in Washington, D.C. Lincoln died the following morning without regaining consciousness, becoming the first US president to be assassinated. His death plunged the nation into mourning and complicated the process of Reconstruction.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/13th_Amendment_Pg1of1_AC.jpg', text: 'The 13th Amendment to the US Constitution formally abolishes slavery throughout the country', summary: 'Ratified on December 6, 1865, the 13th Amendment declared that "neither slavery nor involuntary servitude...shall exist within the United States." The amendment legally abolished the institution of slavery that had existed in parts of America for over 250 years and freed approximately 4 million enslaved people. It was a landmark moment in American history, though the struggle for racial equality would continue for generations.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Alice_par_John_Tenniel_02.png', text: 'Lewis Carroll publishes Alice\'s Adventures in Wonderland, creating an enduring literary classic', summary: 'Lewis Carroll\'s "Alice\'s Adventures in Wonderland" was published in July 1865, telling the story of a young girl who falls down a rabbit hole into a fantastical world of illogical characters. Originally told as an impromptu story to the young Alice Liddell during a boat trip, the book blended fantasy, satire, and wordplay in a manner unlike anything published before. It has never gone out of print and remains one of the most beloved and analysed children\'s books ever written.' },
+      { img: null, text: 'The Ku Klux Klan is founded in Pulaski, Tennessee by former Confederate soldiers', summary: 'The Ku Klux Klan was founded in December 1865 by six former Confederate officers in Pulaski, Tennessee, initially as a social fraternity. It quickly evolved into a white supremacist terrorist organisation that used violence, intimidation, and murder to suppress the rights of Black Americans and undermine Reconstruction governments across the South. The Klan\'s founding represents one of the darkest reactions to the end of the Civil War and the emancipation of enslaved people.' }
+    ]
+  },
+  {
+    year: 1903,
+    events: [
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/First_flight2.jpg', text: 'Orville and Wilbur Wright achieve the first successful powered airplane flight at Kitty Hawk', summary: 'On December 17, 1903, at Kitty Hawk, North Carolina, Orville Wright piloted the Flyer for 12 seconds covering 120 feet — the first sustained, controlled, powered, heavier-than-air flight in history. The brothers made four flights that day, with the longest lasting 59 seconds. Their achievement forever changed transportation, warfare, and the way humans relate to distance.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Garin.jpg', text: 'The first Tour de France bicycle race is held, won by Maurice Garin over six gruelling stages', summary: 'The inaugural Tour de France was organised by sports newspaper L\'Auto and held in July 1903, covering 2,428 kilometres across six stages around France. Maurice Garin won the race with a total time of 94 hours, winning four of the six stages. The event was created to boost newspaper sales but became one of the world\'s premier sporting events.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Henry_ford_1919.jpg', text: 'Henry Ford founds the Ford Motor Company, beginning a revolution in personal transportation', summary: 'Henry Ford incorporated the Ford Motor Company on June 16, 1903, with $28,000 in cash from 12 investors. The company would go on to introduce the Model T in 1908 and the moving assembly line in 1913, making cars affordable for ordinary Americans for the first time. Ford\'s innovations transformed not just transportation but the entire manufacturing industry.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Marie_Curie_c1920.jpg', text: 'Marie and Pierre Curie share the Nobel Prize in Physics for their work on radioactivity', summary: 'Marie and Pierre Curie shared the 1903 Nobel Prize in Physics with Henri Becquerel for their pioneering research on radiation. Marie Curie became the first woman ever to receive a Nobel Prize. Her work led to the discovery of two new elements, polonium and radium, and laid the foundation for nuclear physics and cancer radiotherapy.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/JackLondonYoung.jpg', text: 'Jack London publishes The Call of the Wild, a novel set during the Klondike Gold Rush', summary: 'Published in 1903, Jack London\'s "The Call of the Wild" tells the story of Buck, a domesticated dog who is stolen from his California home and taken to work as a sled dog in the Yukon during the Gold Rush. The novel explores themes of survival, nature, and the tension between civilisation and wildness. It became an instant bestseller and remains one of the most widely read American novels.' }
+    ]
+  },
+  {
+    year: 1912,
+    events: [
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/RMS_Titanic_3.jpg', text: 'The RMS Titanic strikes an iceberg and sinks on its maiden voyage, killing over 1,500 people', summary: 'On the night of April 14–15, 1912, the RMS Titanic, then the world\'s largest ship, struck an iceberg in the North Atlantic during its maiden voyage from Southampton to New York and sank within three hours. Of the 2,224 people on board, more than 1,500 perished, making it one of the deadliest peacetime maritime disasters in history. The tragedy led to sweeping changes in maritime safety regulations, including requirements for sufficient lifeboats and 24-hour radio watches.' },
+      { img: null, text: 'New Mexico and Arizona become the 47th and 48th US states, completing the continental United States', summary: 'New Mexico was admitted as the 47th US state on January 6, 1912, followed by Arizona on February 14, 1912, completing the 48 contiguous states of the continental United States. Both territories had sought statehood for decades, facing resistance partly due to concerns about their large Hispanic and Native American populations. Their admission ended the era of US territorial expansion in North America.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Juliette_Gordon_Low.jpg', text: 'Juliette Gordon Low founds the Girl Scouts of America in Savannah, Georgia', summary: 'On March 12, 1912, Juliette Gordon Low gathered 18 girls in Savannah, Georgia, for the first meeting of what would become the Girl Scouts of America. Inspired by the British Girl Guides, Low created an organisation that would give girls from all backgrounds the opportunity to develop leadership skills and confidence. Today the Girl Scouts has over 2.5 million members across the United States.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Alfred_Wegener_ca.1924-30.jpg', text: 'Alfred Wegener proposes the theory of continental drift, explaining the shapes of the continents', summary: 'German meteorologist and geologist Alfred Wegener presented his theory of continental drift in 1912, proposing that the continents were once joined together in a single landmass he called Pangaea and had slowly drifted apart. He supported his argument with evidence including the fit of continental coastlines, similar fossils found on different continents, and matching rock formations. Though initially rejected by the scientific community, his theory was eventually vindicated and became the foundation of plate tectonics.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Sun_Yat-sen,_1912.jpg', text: 'The Republic of China is proclaimed following the fall of the Qing Dynasty after 268 years of rule', summary: 'On January 1, 1912, the Republic of China was formally established following the Xinhai Revolution, which had overthrown the Qing Dynasty — the last imperial dynasty of China — after 268 years of rule. Sun Yat-sen was inaugurated as the first provisional president, though he quickly ceded power to General Yuan Shikai. The fall of the Qing ended over two thousand years of imperial rule in China.' }
+    ]
+  },
+  {
+    year: 1929,
+    events: [
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Crowd_outside_nyse.jpg', text: 'The Wall Street Crash of 1929 triggers the Great Depression, the worst economic crisis in history', summary: 'On Black Thursday (October 24) and Black Tuesday (October 29), 1929, the New York Stock Exchange collapsed as panicked investors sold a record 16 million shares. The crash wiped out billions in wealth and triggered the Great Depression, a decade-long global economic catastrophe that saw unemployment in the US reach 25%. The crisis reshaped economic policy worldwide and led to sweeping reforms in banking and financial regulation.' },
+      { img: null, text: 'The Museum of Modern Art (MoMA) opens its doors in New York City', summary: 'MoMA opened on November 7, 1929, in a rented space in the Heckscher Building on Fifth Avenue, founded by three wealthy women: Lillie P. Bliss, Mary Quinn Sullivan, and Abby Aldrich Rockefeller. The museum set out to champion modern and contemporary art at a time when such work was still controversial. It grew into one of the most influential and visited art museums in the world.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Vatican_City_aerial_photo.jpg', text: 'Vatican City becomes an independent state through the Lateran Treaty with Italy', summary: 'The Lateran Treaty, signed on February 11, 1929, between the Holy See and the Kingdom of Italy under Mussolini, established Vatican City as an independent sovereign state. The treaty resolved the long-standing "Roman Question" — the dispute arising from Italy\'s annexation of the Papal States in 1870. At just 44 hectares, Vatican City became the smallest internationally recognised independent state in the world.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Ernest_Hemingway_1923_passport_photo.jpg', text: 'Ernest Hemingway publishes A Farewell to Arms, based on his World War I experiences', summary: 'Published in 1929, Hemingway\'s "A Farewell to Arms" drew on his experiences as an ambulance driver on the Italian front during World War I to tell the story of an American soldier and a British nurse who fall in love amid the chaos of war. The novel\'s spare prose style and themes of love, death, and disillusionment made it an instant classic. It sold over 28,000 copies in its first six weeks.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Saint_Valentine_Massacre.jpg', text: "Al Capone's men massacre seven rivals in the St. Valentine's Day Massacre in Chicago", summary: 'On February 14, 1929, seven members and associates of the North Side Gang were murdered in a Chicago garage by men dressed as police officers acting on the orders of mobster Al Capone. The St. Valentine\'s Day Massacre shocked the American public with its brazenness and led to increased efforts to dismantle Capone\'s criminal empire. Though Capone was never charged with the killings, the massacre ultimately increased public pressure that led to his prosecution for tax evasion in 1931.' }
+    ]
+  },
+  {
+    year: 1939,
+    events: [
+      { img: null, text: 'Nazi Germany invades Poland on September 1st, triggering the start of World War II', summary: 'At 4:45 a.m. on September 1, 1939, German forces invaded Poland from the north, south, and west without a formal declaration of war. Britain and France responded with declarations of war against Germany two days later, beginning the Second World War. The invasion used blitzkrieg tactics — combining fast-moving tanks, artillery, and air power — to overwhelm Polish defences within weeks.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Judy_Garland_as_Dorothy_Gale_in_The_Wizard_of_Oz.jpg', text: 'The Wizard of Oz and Gone with the Wind premiere, making 1939 Hollywood\'s greatest year', summary: 'Both films premiered in 1939 and went on to become among the most beloved movies ever made. "The Wizard of Oz" introduced audiences to Technicolor and its iconic songs, while "Gone with the Wind" became the highest-grossing film in history (adjusted for inflation). Historians often call 1939 the greatest year in Hollywood history, with dozens of other classics also released that year.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/HP_garage.jpg', text: 'Hewlett-Packard is founded by two Stanford graduates in a garage in Palo Alto, California', summary: 'Bill Hewlett and Dave Packard founded Hewlett-Packard in January 1939, with initial capital of $538, in a small garage in Palo Alto that is now considered the birthplace of Silicon Valley. Their first product was an audio oscillator used by Walt Disney to test the sound system for "Fantasia." HP grew to become one of the world\'s largest technology companies, and the garage is now a California Historical Landmark.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Albert_Einstein_Head.jpg', text: 'Albert Einstein writes to President Roosevelt warning about the potential for an atomic bomb', summary: 'In August 1939, Albert Einstein co-authored a letter to President Franklin D. Roosevelt, warning that Germany might be developing nuclear weapons based on recent uranium fission research. The letter urged the US government to fund its own atomic research and control uranium supplies. Roosevelt\'s response to the letter set in motion a chain of events that eventually led to the Manhattan Project.' },
+      { img: null, text: 'DuPont introduces nylon stockings to the public, launching the era of synthetic fabrics', summary: 'On October 24, 1939, DuPont introduced nylon stockings to the public at the Golden Gate International Exposition in San Francisco, selling over 780,000 pairs on the first day of nationwide sales in May 1940. Nylon was the first synthetic polymer fibre, invented by DuPont chemist Wallace Carothers. The material revolutionised the textile industry and became a wartime staple when nylon was repurposed for parachutes during World War II.' }
+    ]
+  },
+  {
+    year: 1945,
+    events: [
+      { img: null, text: 'World War II ends in Europe on May 8th with Germany\'s unconditional surrender (V-E Day)', summary: 'On May 8, 1945, Nazi Germany signed an unconditional surrender, bringing World War II to an end in Europe. Celebrations broke out across Britain, the United States, and liberated Europe as crowds filled the streets. The war in Europe had lasted nearly six years, killing an estimated 40 million people across the continent including millions in the Holocaust.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Nagasakibomb.jpg', text: 'The United States drops atomic bombs on Hiroshima and Nagasaki, Japan', summary: 'On August 6, 1945, the US dropped an atomic bomb on Hiroshima, killing an estimated 70,000–80,000 people immediately; three days later a second bomb was dropped on Nagasaki, killing 40,000 more. The bombings led to Japan\'s surrender on August 15 and the end of World War II. The attacks remain the only use of nuclear weapons in warfare and fundamentally changed the nature of international conflict.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Flag_of_the_United_Nations.svg', text: 'The United Nations is founded with 51 member states to maintain international peace and security', summary: 'The United Nations Charter was signed on June 26, 1945, by 50 nations (Poland signed later, bringing the founding total to 51) at a conference in San Francisco, and the organisation formally came into existence on October 24, 1945. Created to prevent another world war through diplomacy, peacekeeping, and international law, the UN replaced the failed League of Nations. It now has 193 member states and remains the primary international body for global cooperation.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/George_Orwell_press_photo.jpg', text: 'George Orwell publishes Animal Farm, an allegory satirising the Soviet Union under Stalin', summary: '"Animal Farm," published in August 1945, uses the story of farm animals who overthrow their human farmer — only to have the pigs become oppressors themselves — to critique the Soviet Union and the betrayal of socialist ideals. Orwell had difficulty finding a publisher willing to release the book during the war, when the USSR was a British ally. The novella became one of the best-selling and most widely translated books of the 20th century.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Nuremberg_Trials.jpg', text: 'The Nuremberg Trials begin, prosecuting Nazi leaders for war crimes and crimes against humanity', summary: 'The Nuremberg Trials began on November 20, 1945, in the German city of Nuremberg, where 24 senior Nazi officials were tried by an International Military Tribunal for war crimes, crimes against peace, and crimes against humanity. The trials established the legal principle that "following orders" is not a sufficient defence for committing atrocities. Twelve defendants were sentenced to death, and the trials established foundations for international law and later tribunals like the International Criminal Court.' }
+    ]
+  },
+  {
+    year: 1963,
+    events: [
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/JFK_limousine.png', text: 'President John F. Kennedy is assassinated in Dallas, Texas on November 22nd', summary: 'President John F. Kennedy was shot twice while riding in a presidential motorcade through Dealey Plaza in Dallas, Texas on November 22, 1963, and was pronounced dead 30 minutes later. Lee Harvey Oswald was arrested for the murder but was shot and killed by nightclub owner Jack Ruby before he could stand trial. The assassination shocked the world and has been the subject of intense scrutiny and conspiracy theories ever since.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Martin_Luther_King_-_March_on_Washington.jpg', text: 'Martin Luther King Jr. delivers his "I Have a Dream" speech at the March on Washington', summary: 'On August 28, 1963, over 250,000 people gathered at the National Mall in Washington, D.C. for the March on Washington for Jobs and Freedom. At the Lincoln Memorial, Martin Luther King Jr. delivered his historic "I Have a Dream" speech, calling for an end to racism and envisioning a future of racial equality. The speech is considered one of the greatest in American history and helped build momentum for the Civil Rights Act of 1964.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Beatles_ad_1965_just_the_beatles_crop.jpg', text: 'The Beatles release their debut album Please Please Me in the UK, launching Beatlemania', summary: 'Released on March 22, 1963, "Please Please Me" was recorded by The Beatles in a single marathon day and reached number one on the UK charts. The album launched Beatlemania — a phenomenon of intense fan frenzy that would sweep the UK and then the United States the following year. The Beatles went on to become the best-selling music artists of all time.' },
+      { img: null, text: 'The United States sharply escalates military involvement in Vietnam following a series of crises', summary: 'In 1963, the Kennedy administration significantly increased the number of US military advisors in South Vietnam from around 700 to over 16,000 as South Vietnam\'s government became increasingly unstable. The year saw the assassination of South Vietnamese president Ngô Đình Diệm in a US-backed coup. US involvement would continue to escalate dramatically in the following years, eventually drawing hundreds of thousands of American troops into a prolonged and divisive war.' },
+      { img: null, text: 'The United States introduces the ZIP code postal system to handle rapidly growing mail volumes', summary: 'On July 1, 1963, the United States Postal Service introduced the Zone Improvement Plan (ZIP) code system, assigning five-digit codes to every delivery address in the country. The system was designed to allow mail to be sorted mechanically, dramatically speeding up delivery as mail volumes exploded in the post-war boom. The ZIP code became so embedded in American life that it is now also used for demographic and marketing purposes.' }
+    ]
+  },
+  {
+    year: 1969,
+    events: [
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Aldrin_Apollo_11_original.jpg', text: 'Apollo 11 astronauts Neil Armstrong and Buzz Aldrin become the first humans to walk on the Moon', summary: 'On July 20, 1969, the Apollo 11 lunar module Eagle landed on the Moon\'s Sea of Tranquility, and Neil Armstrong became the first human to walk on the lunar surface, uttering the words: "That\'s one small step for man, one giant leap for mankind." Buzz Aldrin joined him shortly after, while Michael Collins orbited above in the command module. The mission fulfilled President Kennedy\'s 1961 challenge to land a man on the Moon before the decade\'s end.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Woodstock_redmond_stage.JPG', text: 'The Woodstock Music Festival draws 400,000 people to a farm in upstate New York', summary: 'The Woodstock Music and Art Fair took place August 15–17, 1969, on a dairy farm in Bethel, New York, attracting an estimated 400,000 attendees — far exceeding the 50,000 expected. Performers included Jimi Hendrix, Janis Joplin, The Who, and Jefferson Airplane. Woodstock became a defining cultural moment of the 1960s, symbolising the counterculture movement\'s values of peace, music, and communal living.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Stonewall_Inn_2019.jpg', text: 'The Stonewall Riots in New York City spark the modern LGBTQ+ rights movement', summary: 'On the night of June 27–28, 1969, patrons of the Stonewall Inn, a gay bar in Greenwich Village, New York, fought back against a police raid, sparking several nights of protests. The riots galvanised the LGBTQ+ community and led to the formation of numerous activist organisations. The following year, the first gay pride marches were held in New York, Los Angeles, San Francisco, and Chicago to commemorate the anniversary of Stonewall.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Arpanet_1974.svg', text: 'ARPANET, the precursor to the internet, successfully sends its first message between computers', summary: 'On October 29, 1969, the first message was sent over ARPANET (Advanced Research Projects Agency Network), the US Defence Department\'s experimental computer network. The transmission between UCLA and Stanford Research Institute crashed after just two letters ("lo" of the intended "login"), but the second attempt succeeded. ARPANET established the foundational protocols and network architecture that would evolve into the global internet.' },
+      { img: null, text: 'Monty Python\'s Flying Circus premieres on the BBC, revolutionising British comedy', summary: 'The first episode of Monty Python\'s Flying Circus aired on BBC One on October 5, 1969, introducing the surreal, absurdist comedy of Graham Chapman, John Cleese, Terry Gilliam, Eric Idle, Terry Jones, and Michael Palin. The show broke with conventional comedy formats by abandoning punchlines and narrative structure, influencing virtually every comedian who came after them. Their "Dead Parrot" sketch, "Spanish Inquisition," and "Ministry of Silly Walks" entered the permanent lexicon of popular culture.' }
+    ]
+  },
+  {
+    year: 1986,
+    events: [
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Chernobyl_nuclear_power_plant.jpg', text: 'The Chernobyl Nuclear Power Plant in Ukraine explodes, causing the worst nuclear disaster in history', summary: 'On April 26, 1986, a safety test at Reactor No. 4 of the Chernobyl Nuclear Power Plant in Soviet Ukraine went catastrophically wrong, causing a massive explosion and fire that released radioactive contamination across Europe. The immediate area around the plant was permanently evacuated, creating the Chernobyl Exclusion Zone, and an estimated 350,000 people were displaced. The disaster accelerated the decline of public trust in Soviet institutions and is cited as a factor in the eventual collapse of the USSR.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Space_Shuttle_Challenger_explosion.jpg', text: 'The Space Shuttle Challenger breaks apart 73 seconds after launch, killing all seven crew members', summary: 'On January 28, 1986, the Space Shuttle Challenger disintegrated 73 seconds after launch from Cape Canaveral, Florida, killing all seven crew members including Christa McAuliffe, a high school teacher selected to be the first civilian in space. The cause was the failure of an O-ring seal in cold temperatures. The disaster led to a 32-month suspension of the Space Shuttle program and a thorough review of NASA\'s safety culture and decision-making processes.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Oprah_Winfrey_at_the_White_House_(cropped).jpg', text: 'The Oprah Winfrey Show goes into national syndication, beginning its record-breaking 25-year run', summary: 'The Oprah Winfrey Show went into national syndication on September 8, 1986, after a successful local run in Chicago, quickly becoming the highest-rated talk show in US television history. Over 25 years, Oprah Winfrey\'s interviews, book club recommendations, and philanthropic efforts made her one of the most influential figures in American media and culture. She was the first Black female billionaire and remains one of the most powerful media personalities in history.' },
+      { img: null, text: 'Pixar Animation Studios is founded by Steve Jobs after he purchases it from George Lucas', summary: 'Steve Jobs purchased the Graphics Group from Lucasfilm in 1986 for $5 million and renamed it Pixar, initially focusing on computer hardware before pivoting to animation. Nine years later, Pixar released "Toy Story" — the first fully computer-animated feature film — which transformed the animation industry. The studio went on to produce some of the most critically acclaimed and commercially successful animated films in history.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Halleys_Comet_1986.jpg', text: "Halley's Comet makes its closest approach to Earth since 1910, visible to the naked eye worldwide", summary: 'Halley\'s Comet reached perihelion (its closest point to the Sun) on February 9, 1986, making its first return since 1910 and drawing massive public interest worldwide. It was the first comet to be studied by spacecraft, with five probes including the European Space Agency\'s Giotto mission passing through its coma. Unfortunately, its approach was one of the least favourable in 2,000 years, disappointing many observers who had expected a more spectacular display.' }
+    ]
+  },
+  {
+    year: 1989,
+    events: [
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Thefalloftheberlinwall1989.JPG', text: 'The Berlin Wall falls on November 9th, leading to the reunification of Germany', summary: 'On November 9, 1989, the East German government announced that citizens could cross the Berlin Wall freely, and jubilant crowds began demolishing the barrier that had divided the city since 1961. The fall of the Wall symbolised the end of the Cold War and led directly to the reunification of East and West Germany on October 3, 1990. It was one of the defining moments of the 20th century, marking the collapse of Soviet influence over Eastern Europe.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Tank_Man_(Tiananmen_Square_protester).jpg', text: 'Pro-democracy protesters are violently suppressed in Tiananmen Square, Beijing, China', summary: 'Beginning in April 1989, up to one million pro-democracy protesters, mostly students, gathered in Tiananmen Square in Beijing. On June 3–4, the Chinese government declared martial law and sent military tanks and troops to clear the square, resulting in hundreds or possibly thousands of deaths. The iconic photograph of a lone man blocking a column of tanks became one of the most recognisable images of the 20th century.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Tim_Berners-Lee.jpg', text: 'Tim Berners-Lee writes his proposal for the World Wide Web while working at CERN', summary: 'In March 1989, British scientist Tim Berners-Lee submitted a proposal to his supervisors at CERN titled "Information Management: A Proposal," which outlined a system for linking documents across a network using hypertext. His supervisor returned it with the comment "vague but exciting." Berners-Lee continued developing the idea, and by 1991 the World Wide Web was publicly available, transforming how humanity communicates and accesses information.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Exxon_Valdez.jpg', text: 'The Exxon Valdez oil tanker runs aground in Alaska, causing a massive environmental disaster', summary: 'On March 24, 1989, the oil tanker Exxon Valdez ran aground on Bligh Reef in Prince William Sound, Alaska, spilling 11 million gallons of crude oil into the sea. The spill devastated the local ecosystem, killing hundreds of thousands of seabirds, tens of thousands of marine mammals, and billions of salmon and herring eggs. The disaster prompted the passage of the Oil Pollution Act of 1990 and permanently changed how oil companies managed tanker safety.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Game-Boy-FL.jpg', text: 'Nintendo releases the Game Boy, launching the era of handheld gaming', summary: 'The Nintendo Game Boy was released in Japan on April 21, 1989, featuring a monochrome screen and four-button controls, bundled with the game Tetris. Despite being technically inferior to competing handhelds, its long battery life, durable design, and software library made it a massive commercial success. The Game Boy and its successors sold over 200 million units and defined the market for portable gaming for decades.' }
+    ]
+  },
+  {
+    year: 2001,
+    events: [
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/National_Park_Service_9-11_Statue_of_Liberty_and_WTC_fire.jpg', text: 'Terrorists attack the World Trade Center and Pentagon on September 11th, killing nearly 3,000 people', summary: 'On September 11, 2001, 19 al-Qaeda terrorists hijacked four commercial aircraft and flew two into the Twin Towers of the World Trade Center in New York City, one into the Pentagon, and one crashed into a field in Pennsylvania after passengers fought back. The Twin Towers collapsed within two hours, and the attacks killed 2,977 victims. The event triggered the US-led War on Terror, including the invasion of Afghanistan and ultimately Iraq, reshaping global geopolitics for decades.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Wikipedia-logo-v2.svg', text: 'Wikipedia is launched as a free online encyclopaedia by Jimmy Wales and Larry Sanger', summary: 'Wikipedia was launched on January 15, 2001, as a collaboratively edited, free online encyclopaedia that anyone could write or edit. Starting with just a handful of articles, it grew explosively — reaching 20,000 articles in English within a year. Today it is one of the most visited websites in the world with over 60 million articles in hundreds of languages, fundamentally changing how people access and contribute to knowledge.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/1st_Gen_iPod.jpg', text: 'Apple introduces the first iPod, beginning a revolution in the way people listen to music', summary: 'On October 23, 2001, Steve Jobs unveiled the first iPod at a special event in Cupertino, California, with the tagline "1,000 songs in your pocket." Priced at $399, it held 5GB of music and was compatible only with Macs. The iPod transformed the music industry — alongside iTunes — by making digital music portable and mainstream, and it laid the cultural and technical groundwork for the iPhone six years later.' },
+      { img: null, text: 'The US-led coalition invades Afghanistan in Operation Enduring Freedom following the 9/11 attacks', summary: 'On October 7, 2001, the United States and British forces launched airstrikes against Afghanistan\'s Taliban government, which had refused to hand over al-Qaeda leader Osama bin Laden after the September 11 attacks. The Taliban regime collapsed within weeks, but a prolonged insurgency followed. The Afghanistan War became the longest war in US history, lasting until 2021 when US forces withdrew and the Taliban retook control of the country.' },
+      { img: null, text: 'Anthrax spores are mailed to news organisations and US Senators, killing five people and infecting 17', summary: 'Beginning one week after the September 11 attacks, letters containing anthrax spores were mailed to several news media offices and two Democratic US senators. The attacks killed five people and infected 17 others, causing widespread public fear and prompting mass antibiotic distribution. The FBI investigation lasted seven years; scientist Bruce E. Ivins was identified as the prime suspect before his death in 2008.' }
+    ]
+  },
+  {
+    year: 2008,
+    events: [
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Obama_portrait_crop.jpg', text: 'Barack Obama is elected the 44th President of the United States, the first African American to hold the office', summary: 'On November 4, 2008, Barack Obama defeated Republican candidate John McCain to become the 44th President of the United States — the first African American ever to hold the office. Obama won with 365 electoral votes and captured over 69 million popular votes, then a record. His election was celebrated around the world as a historic milestone for racial equality in America.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Lehman_Brothers_Times_Square_by_David_Shankbone.jpg', text: 'The global financial crisis reaches its peak with the collapse of Lehman Brothers', summary: 'On September 15, 2008, Lehman Brothers, one of the world\'s largest investment banks, filed for bankruptcy with $619 billion in debt — the largest bankruptcy filing in US history. The collapse triggered a global financial crisis that froze credit markets worldwide, wiped out trillions in wealth, and led to the deepest global recession since the Great Depression. Governments around the world spent trillions on bank bailouts and stimulus packages in response.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Beijing_National_Stadium_(Bird%27s_Nest).jpg', text: 'China hosts the Summer Olympics in Beijing, opening with a spectacular ceremony watched by billions', summary: 'The 2008 Summer Olympics were held in Beijing from August 8 to 24, with an opening ceremony involving 15,000 performers that was watched by an estimated 4 billion people worldwide. China won the most gold medals of any country (51), signalling its emergence as a global sporting powerhouse. The Games were preceded by international controversy over human rights and Tibet, but proceeded without major incident.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Falcon_1_Flight_4.jpg', text: 'SpaceX successfully launches its Falcon 1 rocket into Earth orbit on the fourth attempt', summary: 'On September 28, 2008, SpaceX\'s Falcon 1 became the first privately developed liquid-fuelled rocket to reach Earth orbit, on its fourth attempt after three failures. The company had almost run out of money after the earlier failures, and founder Elon Musk later said a fourth failure would have meant the end of SpaceX. The success validated private spaceflight and set SpaceX on a path to become one of the most consequential aerospace companies in history.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/CERN_LHC_Tunnel1.jpg', text: 'The Large Hadron Collider at CERN is activated, beginning the search for the Higgs boson particle', summary: 'The Large Hadron Collider (LHC) at CERN near Geneva was activated on September 10, 2008, becoming the world\'s largest and most powerful particle accelerator. Built over a decade at a cost of over €6 billion, the 27-kilometre ring was designed to accelerate particles to near the speed of light and recreate conditions just after the Big Bang. In 2012, scientists at CERN announced the discovery of the Higgs boson — the "God particle" — confirming a key part of the Standard Model of physics.' }
+    ]
+  },
+  {
+    year: 2020,
+    events: [
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/SARS-CoV-2_without_background.png', text: 'The COVID-19 pandemic sweeps the globe, causing over 1.8 million deaths and unprecedented lockdowns', summary: 'A novel coronavirus (SARS-CoV-2), first detected in Wuhan, China in late 2019, spread worldwide in early 2020, prompting the WHO to declare it a pandemic on March 11. Countries across the world enacted lockdowns, closed schools and businesses, and grounded international travel in an effort to slow transmission. By the end of 2020, over 83 million people had been infected and 1.8 million had died, with vaccines only beginning to be distributed in the final weeks of the year.' },
+      { img: null, text: 'George Floyd is killed by Minneapolis police, igniting worldwide Black Lives Matter protests', summary: 'On May 25, 2020, George Floyd, a 46-year-old Black man, died in Minneapolis after a police officer knelt on his neck for over nine minutes during an arrest. Video of the incident circulated worldwide and sparked the largest protest movement in US history, with demonstrations in all 50 states and over 60 countries. The protests reignited global debate about systemic racism, police brutality, and the demand for racial justice.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Joe_Biden_presidential_portrait.jpg', text: 'Joe Biden defeats Donald Trump in the US presidential election, winning 306 electoral votes', summary: 'Democratic candidate Joe Biden defeated incumbent President Donald Trump in the November 2020 presidential election, winning 306 electoral votes and over 81 million popular votes — more than any candidate in history. Biden also became the oldest person ever elected US president at age 77. Trump refused to concede and made unfounded claims of widespread fraud, culminating in the January 6, 2021 storming of the US Capitol by his supporters.' },
+      { img: 'https://en.wikipedia.org/wiki/Special:FilePath/Crew_Dragon_C206_in_orbit.jpg', text: "SpaceX Crew Dragon carries NASA astronauts to the ISS, the first crewed orbital flight from US soil since 2011", summary: 'On May 30, 2020, astronauts Robert Behnken and Douglas Hurley lifted off from Kennedy Space Center aboard SpaceX\'s Crew Dragon capsule, marking the first crewed orbital launch from US soil since the Space Shuttle retired in 2011. The mission demonstrated the viability of commercially built spacecraft for crewed missions. It represented a new era in space exploration where NASA relies on private companies to transport astronauts to the International Space Station.' },
+      { img: null, text: 'Australian bushfires kill an estimated 3 billion animals and burn over 18 million hectares', summary: 'Australia\'s 2019–20 bushfire season, known as the "Black Summer," was the worst on record, burning over 18 million hectares across the country, destroying over 3,000 homes, and killing 34 people directly. Scientists estimated 3 billion animals were killed or displaced, pushing several species to the brink of extinction. The fires, linked to record temperatures and drought conditions worsened by climate change, prompted renewed debate about Australia\'s environmental policies.' }
+    ]
+  }
+];
+
+// ── STATE ──
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let sessionScore = 0;
+let roundNum    = 0;
+let playerName  = '';
+let currentYearData, currentPool, revealedCount, guessCount, roundOver;
+let guessHistory = [];
+let playedYears  = new Set();
+
+// ── LEADERBOARD ──
+function loadLeaderboard() {
+  try { return JSON.parse(localStorage.getItem('historia_lb') || '[]'); }
+  catch { return []; }
+}
+
+function saveToLeaderboard(name, score) {
+  const lb = loadLeaderboard();
+  lb.push({ name, score });
+  lb.sort((a, b) => b.score - a.score);
+  // Keep best score per player, then top 10 overall
+  const seen = new Set();
+  const deduped = lb.filter(e => {
+    if (seen.has(e.name)) return false;
+    seen.add(e.name);
+    return true;
+  });
+  localStorage.setItem('historia_lb', JSON.stringify(deduped.slice(0, 10)));
+  return deduped;
+}
+
+function renderLeaderboard(containerId, highlightName, highlightScore) {
+  const lb  = loadLeaderboard();
+  const top = lb.slice(0, 5);
+  const el  = document.getElementById(containerId);
+  if (top.length === 0) {
+    el.innerHTML = '<div class="lb-empty">No scores yet — be the first!</div>';
+    return;
+  }
+  const medals = ['🥇', '🥈', '🥉', '4', '5'];
+  el.innerHTML = top.map((e, i) => {
+    const isYou = highlightName && e.name === highlightName && e.score === highlightScore;
+    return `<div class="lb-row${isYou ? ' lb-you' : ''}">
+      <span class="lb-rank">${medals[i]}</span>
+      <span class="lb-name">${e.name}${isYou ? ' 👈' : ''}</span>
+      <span class="lb-score">${e.score} pts</span>
+    </div>`;
+  }).join('');
+}
+
+// ── START SCREEN ──
+function onNameInput() {
+  const val = document.getElementById('name-input').value.trim();
+  document.getElementById('play-btn').disabled = val.length === 0;
+}
+
+function beginGame() {
+  const name = document.getElementById('name-input').value.trim();
+  if (!name) return;
+  playerName   = name;
+  sessionScore = 0;
+  roundNum     = 0;
+  playedYears.clear();
+  document.getElementById('header-score').textContent = '0 pts';
+  document.getElementById('start-screen').style.display = 'none';
+  startRound();
+}
+
+// ── END SCREEN ──
+function showEndScreen() {
+  const lb   = saveToLeaderboard(playerName, sessionScore);
+  const rank = lb.findIndex(e => e.name === playerName && e.score === sessionScore) + 1;
+
+  document.getElementById('end-name-display').textContent = playerName;
+  document.getElementById('end-score-num').textContent    = sessionScore;
+
+  const rankMsg = document.getElementById('end-rank-msg');
+  if (rank >= 1 && rank <= 5) {
+    rankMsg.textContent = `You entered the Top 5 at #${rank}!`;
+  } else if (rank > 0) {
+    rankMsg.textContent = `You ranked #${rank} overall.`;
+  } else {
+    rankMsg.textContent = '';
+  }
+
+  const lbSection = document.getElementById('end-leaderboard');
+  lbSection.innerHTML = '<div class="lb-heading">🏆 Top Players</div>';
+  const lbRows = document.createElement('div');
+  lbRows.id = 'end-lb-rows';
+  lbSection.appendChild(lbRows);
+  renderLeaderboard('end-lb-rows', playerName, sessionScore);
+
+  document.getElementById('end-screen').style.display = 'flex';
+}
+
+function restartGame() {
+  document.getElementById('end-screen').style.display = 'none';
+  document.getElementById('name-input').value = playerName;
+  document.getElementById('play-btn').disabled = false;
+  renderStartLeaderboard();
+  document.getElementById('start-screen').style.display = 'flex';
+}
+
+function renderStartLeaderboard() {
+  const lb = loadLeaderboard();
+  const wrap = document.getElementById('start-leaderboard');
+  if (lb.length === 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  wrap.innerHTML = '<div class="lb-heading">🏆 Top Players</div>';
+  const rows = document.createElement('div');
+  rows.id = 'start-lb-rows';
+  wrap.appendChild(rows);
+  renderLeaderboard('start-lb-rows', null, null);
+}
+
+// ── SLIDER ──
+const SLIDER_MIN = 1800;
+const SLIDER_MAX = 2020;
+let sliderYear   = 1910;
+let sliderDragging = false;
+
+function updateSliderUI() {
+  const pct = (sliderYear - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN) * 100;
+  document.getElementById('timeline-thumb').style.left = pct + '%';
+  document.getElementById('timeline-fill').style.width = pct + '%';
+  document.getElementById('timeline-year-display').textContent = sliderYear;
+}
+
+function resetSlider() {
+  sliderYear = 1910;
+  updateSliderUI();
+}
+
+function yearFromPointer(e, trackEl) {
+  const rect    = trackEl.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const pct     = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  return Math.round(SLIDER_MIN + pct * (SLIDER_MAX - SLIDER_MIN));
+}
+
+function initSlider() {
+  const trackWrap = document.getElementById('timeline-track-wrap');
+  const track     = document.getElementById('timeline-track');
+  const thumb     = document.getElementById('timeline-thumb');
+
+  function startDrag(e) {
+    if (roundOver) return;
+    sliderDragging = true;
+    thumb.classList.add('dragging');
+    sliderYear = yearFromPointer(e, track);
+    updateSliderUI();
+    e.preventDefault();
+  }
+  function onDrag(e) {
+    if (!sliderDragging) return;
+    sliderYear = yearFromPointer(e, track);
+    updateSliderUI();
+    e.preventDefault();
+  }
+  function endDrag() { sliderDragging = false; thumb.classList.remove('dragging'); }
+
+  trackWrap.addEventListener('mousedown',  startDrag);
+  document.addEventListener ('mousemove',  onDrag);
+  document.addEventListener ('mouseup',    endDrag);
+  trackWrap.addEventListener('touchstart', startDrag, { passive: false });
+  document.addEventListener ('touchmove',  onDrag,    { passive: false });
+  document.addEventListener ('touchend',   endDrag);
+
+  updateSliderUI();
+}
+
+function adjustYear(delta) {
+  if (roundOver) return;
+  sliderYear = Math.max(SLIDER_MIN, Math.min(SLIDER_MAX, sliderYear + delta));
+  updateSliderUI();
+}
+
+// ── AUDIO ──
+function playGuessSound() {
+  const osc = audioCtx.createOscillator();
+  const g   = audioCtx.createGain();
+  osc.connect(g); g.connect(audioCtx.destination);
+  osc.type = 'sine'; osc.frequency.value = 520;
+  g.gain.setValueAtTime(0.25, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+}
+
+function playRevealSound() {
+  const buf  = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.25, audioCtx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+  const src  = audioCtx.createBufferSource();
+  src.buffer = buf;
+  const filt = audioCtx.createBiquadFilter();
+  filt.type = 'bandpass';
+  filt.frequency.setValueAtTime(300, audioCtx.currentTime);
+  filt.frequency.linearRampToValueAtTime(1800, audioCtx.currentTime + 0.25);
+  filt.Q.value = 0.8;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+  src.connect(filt); filt.connect(g); g.connect(audioCtx.destination);
+  src.start();
+}
+
+function playWinSound() {
+  [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const g   = audioCtx.createGain();
+    osc.connect(g); g.connect(audioCtx.destination);
+    osc.type = 'sine'; osc.frequency.value = freq;
+    const t = audioCtx.currentTime + i * 0.09;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.28, t + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+    osc.start(t); osc.stop(t + 0.7);
+  });
+}
+
+function playLoseSound() {
+  const osc = audioCtx.createOscillator();
+  const g   = audioCtx.createGain();
+  osc.connect(g); g.connect(audioCtx.destination);
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(380, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(90, audioCtx.currentTime + 0.9);
+  g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.9);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.9);
+}
+
+// ── CONFETTI ──
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx    = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.display = 'block';
+  const colors = ['#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#a855f7','#ec4899'];
+  const pieces = Array.from({ length: 160 }, () => ({
+    x: Math.random() * canvas.width, y: -10 - Math.random() * 40,
+    w: Math.random() * 10 + 5, h: Math.random() * 6 + 3,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    vx: (Math.random() - 0.5) * 5, vy: Math.random() * 3 + 2,
+    angle: Math.random() * Math.PI * 2, spin: (Math.random() - 0.5) * 0.2
+  }));
+  let raf;
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let any = false;
+    pieces.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.angle += p.spin;
+      if (p.y < canvas.height + 20) any = true;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle);
+      ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    });
+    if (any) raf = requestAnimationFrame(tick);
+    else canvas.style.display = 'none';
+  }
+  tick();
+  setTimeout(() => { cancelAnimationFrame(raf); canvas.style.display = 'none'; }, 6000);
+}
+
+// ── FLASH ──
+function flash(color) {
+  const el = document.getElementById('flash-overlay');
+  el.style.background = color; el.style.opacity = '0.35';
+  setTimeout(() => { el.style.opacity = '0'; }, 350);
+}
+
+// ── PROXIMITY COLOR ──
+function proximityColor(yearsOff) {
+  if (yearsOff === 0) return { bg: 'hsl(130,75%,42%)', text: '#fff' };
+  if (yearsOff <= 30) {
+    const t = yearsOff / 30;
+    const hue = Math.round(130 - 75 * t);
+    const sat = Math.round(75 + 20 * t);
+    const lit = Math.round(42 + 10 * t);
+    return { bg: `hsl(${hue},${sat}%,${lit}%)`, text: hue < 90 ? '#3a2e00' : '#fff' };
+  }
+  const t = Math.min((yearsOff - 30) / 80, 1);
+  const hue = Math.round(55 * (1 - t));
+  const sat = Math.round(95 - 25 * t);
+  const lit = Math.round(52 - 16 * t);
+  return { bg: `hsl(${hue},${sat}%,${lit}%)`, text: hue > 25 ? '#3a2e00' : '#fff' };
+}
+
+// ── GAME LOGIC ──
+function startRound() {
+  roundNum++;
+
+  let pool = EVENTS.filter(e => !playedYears.has(e.year));
+  if (pool.length === 0) { playedYears.clear(); pool = [...EVENTS]; }
+  currentYearData = pool[Math.floor(Math.random() * pool.length)];
+  playedYears.add(currentYearData.year);
+
+  currentPool   = [...currentYearData.events].sort(() => Math.random() - 0.5);
+  revealedCount = 1;
+  guessCount    = 0;
+  roundOver     = false;
+  guessHistory  = [];
+
+  document.getElementById('clue-area').innerHTML     = '';
+  document.getElementById('guess-history').innerHTML = '';
+  document.getElementById('result-area').innerHTML   = '';
+  document.getElementById('flip-hint').style.display = 'none';
+  document.getElementById('next-btn').style.display  = 'none';
+  document.getElementById('guess-section').style.display = '';
+  document.getElementById('submit-btn').disabled = false;
+  resetSlider();
+
+  document.getElementById('header-round').textContent =
+    `${playerName} · Round ${roundNum} / ${MAX_ROUNDS}`;
+  updateGuessesLeft();
+  addClueCard(0, false);
+}
+
+function handleGuess() {
+  if (roundOver) return;
+  audioCtx.resume();
+
+  const guessed  = sliderYear;
+  const year     = currentYearData.year;
+  const yearsOff = Math.abs(guessed - year);
+
+  playGuessSound();
+  guessCount++;
+
+  if (guessed === year) { win(); return; }
+
+  addGuessRow(guessed, year, yearsOff);
+
+  if (guessCount >= 3) {
+    if (revealedCount < currentPool.length) {
+      setTimeout(() => { addClueCard(revealedCount, true); revealedCount++; }, 300);
+    }
+    setTimeout(() => lose(), 700);
+    return;
+  }
+
+  if (revealedCount < currentPool.length) {
+    setTimeout(() => {
+      playRevealSound();
+      addClueCard(revealedCount, true);
+      revealedCount++;
+    }, 350);
+  }
+
+  updateGuessesLeft();
+}
+
+function win() {
+  roundOver = true;
+  const pts = (4 - guessCount) * 100;
+  sessionScore += pts;
+  playWinSound(); launchConfetti(); flash('#22c55e');
+  document.getElementById('header-score').textContent = `${sessionScore} pts`;
+  showResult(true, pts);
+  endRound();
+}
+
+function lose() {
+  roundOver = true;
+  playLoseSound(); flash('#ef4444');
+  showResult(false, 0);
+  endRound();
+}
+
+function endRound() {
+  document.getElementById('guess-section').style.display = 'none';
+  document.getElementById('flip-hint').style.display     = 'block';
+
+  const isLastRound = roundNum >= MAX_ROUNDS;
+  const btn = document.getElementById('next-btn');
+  btn.textContent = isLastRound ? 'See Results →' : 'Next Round →';
+  btn.onclick     = isLastRound ? showEndScreen : startRound;
+  btn.style.display = 'block';
+
+  const cards = document.querySelectorAll('.card');
+  cards.forEach((c, i) => {
+    c.classList.add('flippable');
+    setTimeout(() => {
+      const inner = c.querySelector('.card-inner');
+      const back  = c.querySelector('.card-back');
+      c.classList.add('flipped');
+      inner.style.height = back.offsetHeight + 'px';
+    }, 400 + i * 180);
+  });
+}
+
+// ── RENDER ──
+function addClueCard(idx, isNew) {
+  const ev   = currentPool[idx];
+  const card = document.createElement('div');
+  card.className = 'card' + (isNew ? ' new' : '');
+
+  const label = idx === 0 ? 'Historical Event' : `Bonus Clue ${idx}`;
+
+  card.innerHTML = `
+    <div class="card-inner">
+      <div class="card-front">
+        <div class="card-body">
+          <div class="card-label">${label}</div>
+          <div class="card-text">${ev.text}</div>
+        </div>
+      </div>
+      <div class="card-back">
+        <p>${ev.summary}</p>
+      </div>
+    </div>`;
+
+  card.addEventListener('click', () => {
+    if (!roundOver) return;
+    const inner = card.querySelector('.card-inner');
+    const front = card.querySelector('.card-front');
+    const back  = card.querySelector('.card-back');
+    if (card.classList.contains('flipped')) {
+      card.classList.remove('flipped');
+      inner.style.height = front.offsetHeight + 'px';
+    } else {
+      card.classList.add('flipped');
+      inner.style.height = back.offsetHeight + 'px';
+    }
+  });
+
+  document.getElementById('clue-area').appendChild(card);
+  // Lock front height on card-inner so the CSS height transition has a defined start
+  requestAnimationFrame(() => {
+    const inner = card.querySelector('.card-inner');
+    const front = card.querySelector('.card-front');
+    if (inner && front) inner.style.height = front.offsetHeight + 'px';
+  });
+}
+
+function addGuessRow(guessed, correctYear, yearsOff) {
+  guessHistory.push({ guessed, yearsOff, dir: guessed > correctYear ? '↓ Too high' : '↑ Too low' });
+  renderGuessHistory();
+}
+
+function renderGuessHistory() {
+  const area = document.getElementById('guess-history');
+  area.innerHTML = '';
+  guessHistory.forEach(g => {
+    const c   = proximityColor(g.yearsOff);
+    const row = document.createElement('div');
+    row.className = 'guess-row';
+    row.style.background = c.bg;
+    row.style.color = c.text;
+    row.innerHTML = `<span class="guess-year">${g.guessed}</span><span class="guess-dir">${g.dir}</span>`;
+    area.appendChild(row);
+  });
+}
+
+function showResult(isWin, pts) {
+  const area = document.getElementById('result-area');
+  if (isWin) {
+    area.innerHTML = `
+      <div class="result-banner win">
+        <h2>🎉 Correct!</h2>
+        <div class="delta">+${pts} pts</div>
+        <div class="answer">The year was <strong>${currentYearData.year}</strong> — solved in ${guessCount} guess${guessCount !== 1 ? 'es' : ''}</div>
+      </div>`;
+  } else {
+    area.innerHTML = `
+      <div class="result-banner lose">
+        <h2>No more guesses</h2>
+        <div class="delta">+0 pts</div>
+        <div class="answer">The answer was <strong>${currentYearData.year}</strong></div>
+      </div>`;
+  }
+}
+
+function updateGuessesLeft() {
+  const left = 3 - guessCount;
+  document.getElementById('guesses-left').textContent =
+    left === 3 ? '3 guesses remaining' : left === 1 ? 'Last guess!' : `${left} guesses remaining`;
+}
+
+// ── HELPERS ──
+function eraIcon(year) {
+  if (year < 1850) return '⚓';
+  if (year < 1900) return '🏭';
+  if (year < 1920) return '✈️';
+  if (year < 1945) return '⚔️';
+  if (year < 1970) return '☢️';
+  if (year < 1990) return '🚀';
+  if (year < 2000) return '📺';
+  return '💻';
+}
+function eraBg(year) {
+  if (year < 1850) return '#dde4ec';
+  if (year < 1900) return '#e0d9d0';
+  if (year < 1945) return '#d9dde0';
+  if (year < 1970) return '#d8e0d9';
+  if (year < 1990) return '#d9d8e0';
+  if (year < 2000) return '#dfd8e0';
+  return '#d8e0de';
+}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const startVisible = document.getElementById('start-screen').style.display !== 'none';
+    const endVisible   = document.getElementById('end-screen').style.display   !== 'none';
+    if (startVisible) { beginGame(); return; }
+    if (endVisible)   { restartGame(); return; }
+    if (!roundOver)   { handleGuess(); return; }
+    if (document.getElementById('next-btn').style.display !== 'none') {
+      document.getElementById('next-btn').onclick();
+    }
+  }
+});
+
+// ── INIT ──
+initSlider();
+renderStartLeaderboard();
+
+</script>
+</body>
+</html>
