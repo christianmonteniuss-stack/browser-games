@@ -123,17 +123,6 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 #timeline-track-wrap {
   flex: 1; padding: 14px 0; cursor: pointer; position: relative;
 }
-.year-adj-btn {
-  width: 38px; height: 38px; flex-shrink: 0;
-  background: #3b82f6; color: #fff;
-  border: none; border-radius: 9px;
-  font-size: 1.1rem; font-weight: 900;
-  cursor: pointer; line-height: 1;
-  transition: background 0.15s, transform 0.1s;
-}
-.year-adj-btn:hover { background: #2563eb; }
-.year-adj-btn:active { transform: scale(0.91); }
-.year-adj-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 #timeline-track {
   height: 8px; background: #e2e8f0; border-radius: 4px; position: relative;
 }
@@ -152,11 +141,17 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 }
 #timeline-thumb.dragging { cursor: grabbing; box-shadow: 0 3px 18px rgba(59,130,246,0.65); }
 
-/* decade tick marks */
-.decade-tick {
-  position: absolute; top: 0; width: 1px; height: 8px;
-  background: rgba(255,255,255,0.6); pointer-events: none;
+.year-adj-btn {
+  width: 38px; height: 38px; flex-shrink: 0;
+  background: #3b82f6; color: #fff;
+  border: none; border-radius: 9px;
+  font-size: 1.1rem; font-weight: 900;
+  cursor: pointer; line-height: 1;
+  transition: background 0.15s, transform 0.1s;
 }
+.year-adj-btn:hover { background: #2563eb; }
+.year-adj-btn:active { transform: scale(0.91); }
+.year-adj-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
 
 #timeline-ends {
   display: flex; justify-content: space-between;
@@ -211,6 +206,90 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
   position: fixed; inset: 0; pointer-events: none; z-index: 100; display: none;
 }
 
+/* ── START SCREEN ── */
+#start-screen {
+  position: fixed; inset: 0; z-index: 200;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+#start-card {
+  background: #fff; border-radius: 20px;
+  padding: 36px 32px; width: 100%; max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  text-align: center;
+}
+.start-logo { font-size: 2.8rem; font-weight: 900; letter-spacing: -2px; color: #3b82f6; margin-bottom: 4px; }
+.start-subtitle { font-size: 0.9rem; color: #94a3b8; font-weight: 600; margin-bottom: 28px; }
+#name-input {
+  width: 100%; padding: 13px 16px;
+  border: 2px solid #e2e8f0; border-radius: 10px;
+  font-size: 1rem; font-weight: 600; color: #1a1a2e;
+  outline: none; margin-bottom: 12px;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+#name-input:focus { border-color: #3b82f6; }
+#play-btn {
+  width: 100%; padding: 14px;
+  background: #3b82f6; color: #fff;
+  border: none; border-radius: 10px;
+  font-size: 1.05rem; font-weight: 800;
+  cursor: pointer; transition: background 0.15s;
+  margin-bottom: 24px; font-family: inherit;
+}
+#play-btn:hover { background: #2563eb; }
+#play-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+/* ── END SCREEN ── */
+#end-screen {
+  position: fixed; inset: 0; z-index: 200;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px; overflow-y: auto;
+}
+#end-card {
+  background: #fff; border-radius: 20px;
+  padding: 36px 32px; width: 100%; max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  text-align: center;
+}
+.end-title { font-size: 1.3rem; font-weight: 700; color: #64748b; margin-bottom: 4px; }
+.end-name  { font-size: 1.7rem; font-weight: 900; color: #1a1a2e; margin-bottom: 16px; }
+.end-score-num   { font-size: 3.2rem; font-weight: 900; letter-spacing: -2px; color: #3b82f6; line-height: 1; }
+.end-score-label { font-size: 0.85rem; color: #94a3b8; font-weight: 600; margin-bottom: 6px; }
+.end-rank-msg { font-size: 0.95rem; font-weight: 700; color: #22c55e; margin-bottom: 20px; min-height: 1.4em; }
+#play-again-btn {
+  width: 100%; padding: 14px;
+  background: #3b82f6; color: #fff;
+  border: none; border-radius: 10px;
+  font-size: 1.05rem; font-weight: 800;
+  cursor: pointer; transition: background 0.15s;
+  font-family: inherit;
+}
+#play-again-btn:hover { background: #2563eb; }
+
+/* ── LEADERBOARD ── */
+.lb-section { text-align: left; margin-bottom: 20px; }
+.lb-heading {
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;
+  color: #94a3b8; text-transform: uppercase; margin-bottom: 10px;
+}
+.lb-empty { font-size: 0.9rem; color: #cbd5e1; text-align: center; padding: 12px 0; }
+.lb-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 9px;
+  margin-bottom: 5px;
+}
+.lb-row:nth-child(odd) { background: #f8fafc; }
+.lb-row.lb-you { background: #dbeafe; border: 2px solid #3b82f6; }
+.lb-rank  { font-size: 0.95rem; font-weight: 900; color: #94a3b8; min-width: 24px; text-align: center; }
+.lb-name  { flex: 1; font-size: 0.9rem; font-weight: 600; color: #1a1a2e; text-align: left; }
+.lb-score { font-size: 0.9rem; font-weight: 800; color: #3b82f6; }
+.lb-row.lb-you .lb-rank,
+.lb-row.lb-you .lb-name,
+.lb-row.lb-you .lb-score { color: #1e40af; }
+
 </style>
 </head>
 <body>
@@ -218,10 +297,35 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 <canvas id="confetti-canvas"></canvas>
 <div id="flash-overlay"></div>
 
+<!-- ── START SCREEN ── -->
+<div id="start-screen">
+  <div id="start-card">
+    <div class="start-logo">Historia</div>
+    <div class="start-subtitle">Guess the Year &mdash; 5 Rounds</div>
+    <input id="name-input" type="text" placeholder="Your name" maxlength="20" autocomplete="off"
+           oninput="onNameInput()" onkeydown="if(event.key==='Enter')beginGame()">
+    <button id="play-btn" onclick="beginGame()" disabled>Play &rarr;</button>
+    <div id="start-leaderboard" class="lb-section" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ── END SCREEN ── -->
+<div id="end-screen">
+  <div id="end-card">
+    <div class="end-title">Game over,</div>
+    <div class="end-name" id="end-name-display"></div>
+    <div class="end-score-num" id="end-score-num">0</div>
+    <div class="end-score-label">points across 5 rounds</div>
+    <div class="end-rank-msg" id="end-rank-msg"></div>
+    <div id="end-leaderboard" class="lb-section"></div>
+    <button id="play-again-btn" onclick="restartGame()">Play Again &rarr;</button>
+  </div>
+</div>
+
 <header>
   <div>
     <div class="logo">Historia</div>
-    <div class="header-meta" id="header-round">Round 1</div>
+    <div class="header-meta" id="header-round">Round 1 / 5</div>
   </div>
   <div id="header-score">0 pts</div>
 </header>
@@ -256,10 +360,13 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 
   <div id="result-area"></div>
   <p id="flip-hint" style="display:none">↩ Click any card to flip and read the story</p>
-  <button id="next-btn" style="display:none" onclick="startRound()">Next Round →</button>
+  <button id="next-btn" style="display:none">Next Round &rarr;</button>
 </main>
 
 <script>
+
+// ── CONSTANTS ──
+const MAX_ROUNDS = 5;
 
 // ── DATA ──
 const EVENTS = [
@@ -419,9 +526,115 @@ const EVENTS = [
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let sessionScore = 0;
 let roundNum    = 0;
+let playerName  = '';
 let currentYearData, currentPool, revealedCount, guessCount, roundOver;
 let guessHistory = [];
 let playedYears  = new Set();
+
+// ── LEADERBOARD ──
+function loadLeaderboard() {
+  try { return JSON.parse(localStorage.getItem('historia_lb') || '[]'); }
+  catch { return []; }
+}
+
+function saveToLeaderboard(name, score) {
+  const lb = loadLeaderboard();
+  lb.push({ name, score });
+  lb.sort((a, b) => b.score - a.score);
+  // Keep best score per player, then top 10 overall
+  const seen = new Set();
+  const deduped = lb.filter(e => {
+    if (seen.has(e.name)) return false;
+    seen.add(e.name);
+    return true;
+  });
+  localStorage.setItem('historia_lb', JSON.stringify(deduped.slice(0, 10)));
+  return deduped;
+}
+
+function renderLeaderboard(containerId, highlightName, highlightScore) {
+  const lb  = loadLeaderboard();
+  const top = lb.slice(0, 5);
+  const el  = document.getElementById(containerId);
+  if (top.length === 0) {
+    el.innerHTML = '<div class="lb-empty">No scores yet — be the first!</div>';
+    return;
+  }
+  const medals = ['🥇', '🥈', '🥉', '4', '5'];
+  el.innerHTML = top.map((e, i) => {
+    const isYou = highlightName && e.name === highlightName && e.score === highlightScore;
+    return `<div class="lb-row${isYou ? ' lb-you' : ''}">
+      <span class="lb-rank">${medals[i]}</span>
+      <span class="lb-name">${e.name}${isYou ? ' 👈' : ''}</span>
+      <span class="lb-score">${e.score} pts</span>
+    </div>`;
+  }).join('');
+}
+
+// ── START SCREEN ──
+function onNameInput() {
+  const val = document.getElementById('name-input').value.trim();
+  document.getElementById('play-btn').disabled = val.length === 0;
+}
+
+function beginGame() {
+  const name = document.getElementById('name-input').value.trim();
+  if (!name) return;
+  playerName   = name;
+  sessionScore = 0;
+  roundNum     = 0;
+  playedYears.clear();
+  document.getElementById('header-score').textContent = '0 pts';
+  document.getElementById('start-screen').style.display = 'none';
+  startRound();
+}
+
+// ── END SCREEN ──
+function showEndScreen() {
+  const lb   = saveToLeaderboard(playerName, sessionScore);
+  const rank = lb.findIndex(e => e.name === playerName && e.score === sessionScore) + 1;
+
+  document.getElementById('end-name-display').textContent = playerName;
+  document.getElementById('end-score-num').textContent    = sessionScore;
+
+  const rankMsg = document.getElementById('end-rank-msg');
+  if (rank >= 1 && rank <= 5) {
+    rankMsg.textContent = `You entered the Top 5 at #${rank}!`;
+  } else if (rank > 0) {
+    rankMsg.textContent = `You ranked #${rank} overall.`;
+  } else {
+    rankMsg.textContent = '';
+  }
+
+  const lbSection = document.getElementById('end-leaderboard');
+  lbSection.innerHTML = '<div class="lb-heading">🏆 Top Players</div>';
+  const lbRows = document.createElement('div');
+  lbRows.id = 'end-lb-rows';
+  lbSection.appendChild(lbRows);
+  renderLeaderboard('end-lb-rows', playerName, sessionScore);
+
+  document.getElementById('end-screen').style.display = 'flex';
+}
+
+function restartGame() {
+  document.getElementById('end-screen').style.display = 'none';
+  document.getElementById('name-input').value = playerName;
+  document.getElementById('play-btn').disabled = false;
+  renderStartLeaderboard();
+  document.getElementById('start-screen').style.display = 'flex';
+}
+
+function renderStartLeaderboard() {
+  const lb = loadLeaderboard();
+  const wrap = document.getElementById('start-leaderboard');
+  if (lb.length === 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  wrap.innerHTML = '<div class="lb-heading">🏆 Top Players</div>';
+  const rows = document.createElement('div');
+  rows.id = 'start-lb-rows';
+  wrap.appendChild(rows);
+  renderLeaderboard('start-lb-rows', null, null);
+}
 
 // ── SLIDER ──
 const SLIDER_MIN = 1800;
@@ -442,9 +655,9 @@ function resetSlider() {
 }
 
 function yearFromPointer(e, trackEl) {
-  const rect = trackEl.getBoundingClientRect();
+  const rect    = trackEl.getBoundingClientRect();
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  const pct     = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
   return Math.round(SLIDER_MIN + pct * (SLIDER_MAX - SLIDER_MIN));
 }
 
@@ -467,10 +680,7 @@ function initSlider() {
     updateSliderUI();
     e.preventDefault();
   }
-  function endDrag() {
-    sliderDragging = false;
-    thumb.classList.remove('dragging');
-  }
+  function endDrag() { sliderDragging = false; thumb.classList.remove('dragging'); }
 
   trackWrap.addEventListener('mousedown',  startDrag);
   document.addEventListener ('mousemove',  onDrag);
@@ -479,6 +689,12 @@ function initSlider() {
   document.addEventListener ('touchmove',  onDrag,    { passive: false });
   document.addEventListener ('touchend',   endDrag);
 
+  updateSliderUI();
+}
+
+function adjustYear(delta) {
+  if (roundOver) return;
+  sliderYear = Math.max(SLIDER_MIN, Math.min(SLIDER_MAX, sliderYear + delta));
   updateSliderUI();
 }
 
@@ -497,7 +713,7 @@ function playRevealSound() {
   const buf  = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.25, audioCtx.sampleRate);
   const data = buf.getChannelData(0);
   for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
-  const src = audioCtx.createBufferSource();
+  const src  = audioCtx.createBufferSource();
   src.buffer = buf;
   const filt = audioCtx.createBiquadFilter();
   filt.type = 'bandpass';
@@ -546,15 +762,11 @@ function launchConfetti() {
   canvas.style.display = 'block';
   const colors = ['#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#a855f7','#ec4899'];
   const pieces = Array.from({ length: 160 }, () => ({
-    x: Math.random() * canvas.width,
-    y: -10 - Math.random() * 40,
-    w: Math.random() * 10 + 5,
-    h: Math.random() * 6 + 3,
+    x: Math.random() * canvas.width, y: -10 - Math.random() * 40,
+    w: Math.random() * 10 + 5, h: Math.random() * 6 + 3,
     color: colors[Math.floor(Math.random() * colors.length)],
-    vx: (Math.random() - 0.5) * 5,
-    vy: Math.random() * 3 + 2,
-    angle: Math.random() * Math.PI * 2,
-    spin: (Math.random() - 0.5) * 0.2
+    vx: (Math.random() - 0.5) * 5, vy: Math.random() * 3 + 2,
+    angle: Math.random() * Math.PI * 2, spin: (Math.random() - 0.5) * 0.2
   }));
   let raf;
   function tick() {
@@ -563,10 +775,8 @@ function launchConfetti() {
     pieces.forEach(p => {
       p.x += p.vx; p.y += p.vy; p.vy += 0.06; p.angle += p.spin;
       if (p.y < canvas.height + 20) any = true;
-      ctx.save();
-      ctx.translate(p.x, p.y); ctx.rotate(p.angle);
-      ctx.fillStyle = p.color;
-      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle);
+      ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
       ctx.restore();
     });
     if (any) raf = requestAnimationFrame(tick);
@@ -576,11 +786,10 @@ function launchConfetti() {
   setTimeout(() => { cancelAnimationFrame(raf); canvas.style.display = 'none'; }, 6000);
 }
 
-// ── FLASH OVERLAY ──
+// ── FLASH ──
 function flash(color) {
   const el = document.getElementById('flash-overlay');
-  el.style.background = color;
-  el.style.opacity = '0.35';
+  el.style.background = color; el.style.opacity = '0.35';
   setTimeout(() => { el.style.opacity = '0'; }, 350);
 }
 
@@ -610,21 +819,23 @@ function startRound() {
   currentYearData = pool[Math.floor(Math.random() * pool.length)];
   playedYears.add(currentYearData.year);
 
-  currentPool  = [...currentYearData.events].sort(() => Math.random() - 0.5);
+  currentPool   = [...currentYearData.events].sort(() => Math.random() - 0.5);
   revealedCount = 1;
   guessCount    = 0;
   roundOver     = false;
   guessHistory  = [];
 
-  document.getElementById('clue-area').innerHTML    = '';
+  document.getElementById('clue-area').innerHTML     = '';
   document.getElementById('guess-history').innerHTML = '';
-  document.getElementById('result-area').innerHTML  = '';
+  document.getElementById('result-area').innerHTML   = '';
+  document.getElementById('flip-hint').style.display = 'none';
   document.getElementById('next-btn').style.display  = 'none';
   document.getElementById('guess-section').style.display = '';
   document.getElementById('submit-btn').disabled = false;
   resetSlider();
 
-  document.getElementById('header-round').textContent = `Round ${roundNum}`;
+  document.getElementById('header-round').textContent =
+    `${playerName} · Round ${roundNum} / ${MAX_ROUNDS}`;
   updateGuessesLeft();
   addClueCard(0, false);
 }
@@ -640,10 +851,7 @@ function handleGuess() {
   playGuessSound();
   guessCount++;
 
-  if (guessed === year) {
-    win();
-    return;
-  }
+  if (guessed === year) { win(); return; }
 
   addGuessRow(guessed, year, yearsOff);
 
@@ -670,11 +878,7 @@ function win() {
   roundOver = true;
   const pts = (7 - guessCount) * 100;
   sessionScore += pts;
-
-  playWinSound();
-  launchConfetti();
-  flash('#22c55e');
-
+  playWinSound(); launchConfetti(); flash('#22c55e');
   document.getElementById('header-score').textContent = `${sessionScore} pts`;
   showResult(true, pts);
   endRound();
@@ -682,8 +886,7 @@ function win() {
 
 function lose() {
   roundOver = true;
-  playLoseSound();
-  flash('#ef4444');
+  playLoseSound(); flash('#ef4444');
   showResult(false, 0);
   endRound();
 }
@@ -691,7 +894,12 @@ function lose() {
 function endRound() {
   document.getElementById('guess-section').style.display = 'none';
   document.getElementById('flip-hint').style.display     = 'block';
-  document.getElementById('next-btn').style.display      = 'block';
+
+  const isLastRound = roundNum >= MAX_ROUNDS;
+  const btn = document.getElementById('next-btn');
+  btn.textContent = isLastRound ? 'See Results →' : 'Next Round →';
+  btn.onclick     = isLastRound ? showEndScreen : startRound;
+  btn.style.display = 'block';
 
   const cards = document.querySelectorAll('.card');
   cards.forEach((c, i) => {
@@ -744,21 +952,19 @@ function renderGuessHistory() {
   const area = document.getElementById('guess-history');
   area.innerHTML = '';
   guessHistory.forEach(g => {
-    const c = proximityColor(g.yearsOff);
+    const c   = proximityColor(g.yearsOff);
     const row = document.createElement('div');
     row.className = 'guess-row';
     row.style.background = c.bg;
     row.style.color = c.text;
-    row.innerHTML = `
-      <span class="guess-year">${g.guessed}</span>
-      <span class="guess-dir">${g.dir}</span>`;
+    row.innerHTML = `<span class="guess-year">${g.guessed}</span><span class="guess-dir">${g.dir}</span>`;
     area.appendChild(row);
   });
 }
 
-function showResult(win, pts) {
+function showResult(isWin, pts) {
   const area = document.getElementById('result-area');
-  if (win) {
+  if (isWin) {
     area.innerHTML = `
       <div class="result-banner win">
         <h2>🎉 Correct!</h2>
@@ -778,9 +984,7 @@ function showResult(win, pts) {
 function updateGuessesLeft() {
   const left = 6 - guessCount;
   document.getElementById('guesses-left').textContent =
-    left === 6 ? '6 guesses remaining'
-    : left === 1 ? 'Last guess!'
-    : `${left} guesses remaining`;
+    left === 6 ? '6 guesses remaining' : left === 1 ? 'Last guess!' : `${left} guesses remaining`;
 }
 
 // ── HELPERS ──
@@ -804,24 +1008,23 @@ function eraBg(year) {
   return '#d8e0de';
 }
 
-// ── YEAR ADJUST BUTTONS ──
-function adjustYear(delta) {
-  if (roundOver) return;
-  sliderYear = Math.max(SLIDER_MIN, Math.min(SLIDER_MAX, sliderYear + delta));
-  updateSliderUI();
-}
-
 // ── KEYBOARD ──
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
-    if (!roundOver) handleGuess();
-    else if (document.getElementById('next-btn').style.display !== 'none') startRound();
+    const startVisible = document.getElementById('start-screen').style.display !== 'none';
+    const endVisible   = document.getElementById('end-screen').style.display   !== 'none';
+    if (startVisible) { beginGame(); return; }
+    if (endVisible)   { restartGame(); return; }
+    if (!roundOver)   { handleGuess(); return; }
+    if (document.getElementById('next-btn').style.display !== 'none') {
+      document.getElementById('next-btn').onclick();
+    }
   }
 });
 
 // ── INIT ──
 initSlider();
-startRound();
+renderStartLeaderboard();
 
 </script>
 </body>
