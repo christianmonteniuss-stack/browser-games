@@ -103,32 +103,55 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
   animation: slideUp 0.25s ease-out;
 }
 .guess-year { font-size: 1.15rem; min-width: 50px; }
-.guess-dir  { font-size: 1.1rem; }
-.guess-dist { margin-left: auto; font-size: 0.8rem; opacity: 0.85; }
+.guess-dir  { font-size: 1.1rem; margin-left: auto; }
 
-/* ── INPUT AREA ── */
-#guess-section { margin-bottom: 14px; }
-.guess-input-row { display: flex; gap: 10px; }
-#year-input {
-  flex: 1; padding: 13px 16px; font-size: 1.05rem;
-  border: 2px solid #e2e8f0; border-radius: 10px;
-  outline: none; font-family: inherit;
-  transition: border-color 0.2s;
-  -moz-appearance: textfield;
+/* ── TIMELINE SLIDER ── */
+#guess-section { margin-bottom: 14px; user-select: none; -webkit-user-select: none; }
+
+#timeline-year-display {
+  text-align: center;
+  font-size: 2.6rem; font-weight: 900; letter-spacing: -2px;
+  color: #1a1a2e; margin-bottom: 14px;
+  font-variant-numeric: tabular-nums;
 }
-#year-input::-webkit-outer-spin-button,
-#year-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-#year-input:focus { border-color: #3b82f6; }
-#year-input.shake { animation: shake 0.4s; }
-@keyframes shake {
-  0%,100%{ transform:translateX(0) }
-  20%{ transform:translateX(-8px) }
-  60%{ transform:translateX(8px) }
+
+#timeline-track-wrap {
+  padding: 14px 0; cursor: pointer; position: relative;
 }
+#timeline-track {
+  height: 8px; background: #e2e8f0; border-radius: 4px; position: relative;
+}
+#timeline-fill {
+  height: 100%; background: #3b82f6; border-radius: 4px;
+  width: 50%; pointer-events: none;
+}
+#timeline-thumb {
+  width: 28px; height: 28px;
+  background: #3b82f6; border: 3px solid #fff;
+  box-shadow: 0 2px 10px rgba(59,130,246,0.45);
+  border-radius: 50%; position: absolute;
+  top: 50%; transform: translate(-50%, -50%);
+  cursor: grab; left: 50%;
+  transition: box-shadow 0.15s;
+}
+#timeline-thumb.dragging { cursor: grabbing; box-shadow: 0 3px 18px rgba(59,130,246,0.65); }
+
+/* decade tick marks */
+.decade-tick {
+  position: absolute; top: 0; width: 1px; height: 8px;
+  background: rgba(255,255,255,0.6); pointer-events: none;
+}
+
+#timeline-ends {
+  display: flex; justify-content: space-between;
+  font-size: 0.78rem; color: #94a3b8; font-weight: 700; margin-top: 2px;
+}
+
+#guess-submit-row { display: flex; justify-content: center; margin-top: 16px; }
 #submit-btn {
-  padding: 13px 22px; background: #3b82f6; color: #fff;
+  padding: 13px 44px; background: #3b82f6; color: #fff;
   border: none; border-radius: 10px; font-size: 1rem; font-weight: 700;
-  cursor: pointer; transition: background 0.15s, transform 0.1s;
+  cursor: pointer; transition: background 0.15s, transform 0.1s; min-width: 180px;
 }
 #submit-btn:hover:not(:disabled) { background: #2563eb; }
 #submit-btn:active:not(:disabled) { transform: scale(0.96); }
@@ -136,7 +159,7 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 
 #guesses-left {
   text-align: center; font-size: 0.82rem; color: #94a3b8;
-  margin-top: 8px; font-weight: 600;
+  margin-top: 10px; font-weight: 600;
 }
 
 /* ── RESULT BANNER ── */
@@ -192,9 +215,21 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
   <div id="guess-history"></div>
 
   <div id="guess-section">
-    <div class="guess-input-row">
-      <input type="number" id="year-input" min="1800" max="2020" placeholder="Enter a year (1800–2020)">
-      <button id="submit-btn" onclick="handleGuess()">Guess</button>
+    <div id="timeline-wrap">
+      <div id="timeline-year-display">1910</div>
+      <div id="timeline-track-wrap">
+        <div id="timeline-track">
+          <div id="timeline-fill"></div>
+          <div id="timeline-thumb"></div>
+        </div>
+      </div>
+      <div id="timeline-ends">
+        <span>1800</span>
+        <span>2020</span>
+      </div>
+    </div>
+    <div id="guess-submit-row">
+      <button id="submit-btn" onclick="handleGuess()">Lock in Guess</button>
     </div>
     <div id="guesses-left">6 guesses remaining</div>
   </div>
@@ -384,6 +419,65 @@ let currentYearData, currentPool, revealedCount, guessCount, roundOver;
 let guessHistory = [];
 let playedYears  = new Set();
 
+// ── SLIDER ──
+const SLIDER_MIN = 1800;
+const SLIDER_MAX = 2020;
+let sliderYear   = 1910;
+let sliderDragging = false;
+
+function updateSliderUI() {
+  const pct = (sliderYear - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN) * 100;
+  document.getElementById('timeline-thumb').style.left = pct + '%';
+  document.getElementById('timeline-fill').style.width = pct + '%';
+  document.getElementById('timeline-year-display').textContent = sliderYear;
+}
+
+function resetSlider() {
+  sliderYear = 1910;
+  updateSliderUI();
+}
+
+function yearFromPointer(e, trackEl) {
+  const rect = trackEl.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  return Math.round(SLIDER_MIN + pct * (SLIDER_MAX - SLIDER_MIN));
+}
+
+function initSlider() {
+  const trackWrap = document.getElementById('timeline-track-wrap');
+  const track     = document.getElementById('timeline-track');
+  const thumb     = document.getElementById('timeline-thumb');
+
+  function startDrag(e) {
+    if (roundOver) return;
+    sliderDragging = true;
+    thumb.classList.add('dragging');
+    sliderYear = yearFromPointer(e, track);
+    updateSliderUI();
+    e.preventDefault();
+  }
+  function onDrag(e) {
+    if (!sliderDragging) return;
+    sliderYear = yearFromPointer(e, track);
+    updateSliderUI();
+    e.preventDefault();
+  }
+  function endDrag() {
+    sliderDragging = false;
+    thumb.classList.remove('dragging');
+  }
+
+  trackWrap.addEventListener('mousedown',  startDrag);
+  document.addEventListener ('mousemove',  onDrag);
+  document.addEventListener ('mouseup',    endDrag);
+  trackWrap.addEventListener('touchstart', startDrag, { passive: false });
+  document.addEventListener ('touchmove',  onDrag,    { passive: false });
+  document.addEventListener ('touchend',   endDrag);
+
+  updateSliderUI();
+}
+
 // ── AUDIO ──
 function playGuessSound() {
   const osc = audioCtx.createOscillator();
@@ -487,14 +581,22 @@ function flash(color) {
 }
 
 // ── PROXIMITY COLOR ──
-// Smooth gradient: 0 years off = bright green, 110+ years off = dark red
 function proximityColor(yearsOff) {
-  const t   = Math.min(yearsOff / 110, 1);
-  const hue = Math.round(140 * (1 - t));
-  const sat = 75;
-  const lit = Math.round(44 - 10 * t);
-  const textLight = hue > 55 && lit > 42;
-  return { bg: `hsl(${hue},${sat}%,${lit}%)`, text: textLight ? '#1a3a00' : '#fff' };
+  if (yearsOff === 0) return { bg: 'hsl(130,75%,42%)', text: '#fff' };
+  if (yearsOff <= 30) {
+    // green → yellow: hue 130 → 55
+    const t = yearsOff / 30;
+    const hue = Math.round(130 - 75 * t);
+    const sat = Math.round(75 + 20 * t);
+    const lit = Math.round(42 + 10 * t);
+    return { bg: `hsl(${hue},${sat}%,${lit}%)`, text: hue < 90 ? '#3a2e00' : '#fff' };
+  }
+  // yellow → dark red: hue 55 → 0
+  const t = Math.min((yearsOff - 30) / 80, 1);
+  const hue = Math.round(55 * (1 - t));
+  const sat = Math.round(95 - 25 * t);
+  const lit = Math.round(52 - 16 * t);
+  return { bg: `hsl(${hue},${sat}%,${lit}%)`, text: hue > 25 ? '#3a2e00' : '#fff' };
 }
 
 // ── GAME LOGIC ──
@@ -520,27 +622,19 @@ function startRound() {
   document.getElementById('flip-hint').style.display = 'none';
   document.getElementById('next-btn').style.display  = 'none';
   document.getElementById('guess-section').style.display = '';
-  document.getElementById('year-input').value = '';
   document.getElementById('submit-btn').disabled = false;
+  resetSlider();
 
   document.getElementById('header-round').textContent = `Round ${roundNum}`;
   updateGuessesLeft();
   addClueCard(0, false);
-  document.getElementById('year-input').focus();
 }
 
 function handleGuess() {
   if (roundOver) return;
-  audioCtx.resume(); // unblock audio on first interaction
+  audioCtx.resume();
 
-  const input   = document.getElementById('year-input');
-  const guessed = parseInt(input.value, 10);
-
-  if (isNaN(guessed) || guessed < 1800 || guessed > 2020) {
-    input.classList.add('shake');
-    setTimeout(() => input.classList.remove('shake'), 420);
-    return;
-  }
+  const guessed = sliderYear;
 
   guessCount++;
   const year     = currentYearData.year;
@@ -548,7 +642,6 @@ function handleGuess() {
 
   playGuessSound();
   addGuessRow(guessed, year, yearsOff);
-  input.value = '';
 
   if (guessed === year) {
     win();
@@ -658,8 +751,7 @@ function renderGuessHistory() {
     row.style.color = c.text;
     row.innerHTML = `
       <span class="guess-year">${g.guessed}</span>
-      <span class="guess-dir">${g.dir}</span>
-      <span class="guess-dist">${g.yearsOff} yr${g.yearsOff !== 1 ? 's' : ''} off</span>`;
+      <span class="guess-dir">${g.dir}</span>`;
     area.appendChild(row);
   });
 }
@@ -721,6 +813,7 @@ document.addEventListener('keydown', e => {
 });
 
 // ── INIT ──
+initSlider();
 startRound();
 
 </script>
