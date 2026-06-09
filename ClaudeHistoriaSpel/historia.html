@@ -111,14 +111,14 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
   font-variant-numeric: tabular-nums;
 }
 
-#timeline-row {
-  display: flex; align-items: center; gap: 20px;
-}
-.adj-col {
-  display: flex; flex-direction: column; align-items: center; gap: 5px; flex-shrink: 0;
+#slider-grid {
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  align-items: center;
+  gap: 6px 20px;
 }
 .adj-label {
-  font-size: 0.72rem; color: #94a3b8; font-weight: 700;
+  font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-align: center;
 }
 #timeline-track-wrap {
   flex: 1; padding: 14px 0; cursor: pointer; position: relative;
@@ -193,6 +193,63 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
   cursor: pointer; transition: background 0.15s;
 }
 #next-btn:hover { background: #2563eb; }
+
+/* ── HELP BUTTON ── */
+#help-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #f0f4f8; border: 2px solid #e2e8f0;
+  color: #64748b; font-size: 1rem; font-weight: 900;
+  cursor: pointer; flex-shrink: 0; margin-left: 10px;
+  transition: background 0.15s, color 0.15s;
+}
+#help-btn:hover { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+
+/* ── HELP MODAL ── */
+#help-modal {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,0.55); align-items: center; justify-content: center; padding: 20px;
+}
+#help-modal.open { display: flex; }
+#help-card {
+  background: #fff; border-radius: 18px; padding: 30px 28px;
+  width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  position: relative;
+}
+#help-close {
+  position: absolute; top: 14px; right: 16px;
+  background: none; border: none; font-size: 1.5rem; color: #94a3b8;
+  cursor: pointer; line-height: 1;
+}
+#help-close:hover { color: #1a1a2e; }
+#help-card h2 { font-size: 1.3rem; font-weight: 900; color: #1a1a2e; margin-bottom: 12px; }
+#help-card p  { font-size: 0.92rem; line-height: 1.65; color: #475569; margin-bottom: 20px; }
+#color-scale-wrap {
+  border: 2px solid rgba(255,255,255,0.6);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f8fafc, #eff6ff);
+  padding: 16px 18px;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.05);
+}
+#color-scale-wrap p {
+  font-size: 0.8rem; font-weight: 700; color: #64748b;
+  margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+}
+#color-gradient-bar {
+  height: 22px; border-radius: 8px;
+  background: linear-gradient(to right,
+    hsl(0,70%,36%),
+    hsl(15,82%,42%),
+    hsl(30,90%,48%),
+    hsl(45,95%,52%),
+    hsl(75,90%,46%),
+    hsl(130,75%,42%)
+  );
+  margin-bottom: 6px;
+}
+#color-scale-labels {
+  display: flex; justify-content: space-between;
+  font-size: 0.72rem; font-weight: 700; color: #94a3b8;
+}
 
 /* ── OVERLAYS ── */
 #flash-overlay {
@@ -324,8 +381,30 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
     <div class="logo">Historia</div>
     <div class="header-meta" id="header-round">Round 1 / 5</div>
   </div>
-  <div id="header-score">0 pts</div>
+  <div style="display:flex;align-items:center">
+    <div id="header-score">0 pts</div>
+    <button id="help-btn" onclick="toggleHelp()">?</button>
+  </div>
 </header>
+
+<div id="help-modal">
+  <div id="help-card">
+    <button id="help-close" onclick="toggleHelp()">×</button>
+    <h2>How to Play</h2>
+    <p>You'll be shown a historical event. Use the slider — or the − and + buttons — to pick the year you think it happened, then press <strong>Guess</strong>.<br><br>
+    You have <strong>3 guesses</strong> per round. After each wrong guess a new clue appears. Guess faster to score more points: <strong>200</strong> for the first try, <strong>100</strong> for the second, <strong>50</strong> for the third.<br><br>
+    The game lasts <strong>5 rounds</strong>. Try to get the highest score!</p>
+    <div id="color-scale-wrap">
+      <p>How close is your guess?</p>
+      <div id="color-gradient-bar"></div>
+      <div id="color-scale-labels">
+        <span>Far off</span>
+        <span>Getting warm</span>
+        <span>Exact!</span>
+      </div>
+    </div>
+  </div>
+</div>
 
 <main>
   <div id="clue-area"></div>
@@ -334,21 +413,18 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
   <div id="guess-section">
     <div id="timeline-wrap">
       <div id="timeline-year-display">1910</div>
-      <div id="timeline-row">
-        <div class="adj-col">
-          <button class="year-adj-btn" id="year-dec">−</button>
-          <span class="adj-label">Past</span>
-        </div>
+      <div id="slider-grid">
+        <button class="year-adj-btn" id="year-dec">−</button>
         <div id="timeline-track-wrap">
           <div id="timeline-track">
             <div id="timeline-fill"></div>
             <div id="timeline-thumb"></div>
           </div>
         </div>
-        <div class="adj-col">
-          <button class="year-adj-btn" id="year-inc">+</button>
-          <span class="adj-label">Present</span>
-        </div>
+        <button class="year-adj-btn" id="year-inc">+</button>
+        <span class="adj-label">Past</span>
+        <span></span>
+        <span class="adj-label">Present</span>
       </div>
     </div>
     <div id="guess-submit-row">
@@ -1041,6 +1117,14 @@ function eraBg(year) {
   if (year < 2000) return '#dfd8e0';
   return '#d8e0de';
 }
+
+// ── HELP ──
+function toggleHelp() {
+  document.getElementById('help-modal').classList.toggle('open');
+}
+document.getElementById('help-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('help-modal')) toggleHelp();
+});
 
 // ── KEYBOARD ──
 document.addEventListener('keydown', e => {
