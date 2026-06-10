@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FX Market Structure Map</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a1628;
+      color: #c8e8f8;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── HEADER ─────────────────────────────────── */
+    .hdr {
+      flex-shrink: 0;
+      padding: 13px 24px;
+      border-bottom: 1px solid #162840;
+      background: #0b1c2e;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .hdr-icon {
+      width: 34px; height: 34px;
+      background: #0d2a40;
+      border: 1px solid #1e4a6a;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .hdr-title { font-size: 1rem; font-weight: 700; color: #5bc8f5; letter-spacing: 0.02em; }
+    .hdr-sub { font-size: 0.72rem; color: #3a6a8a; margin-top: 1px; }
+    .hdr-pill {
+      margin-left: auto;
+      background: #0d2235; border: 1px solid #1e4060;
+      color: #4ab8d8; font-size: 0.6rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 4px 12px; border-radius: 20px;
+    }
+
+    /* ── MAIN SPLIT ─────────────────────────────── */
+    .main { flex: 1; display: flex; min-height: 0; }
+
+    /* ── DIAGRAM ────────────────────────────────── */
+    .diagram-wrap {
+      flex: 1; min-width: 0;
+      position: relative;
+      padding: 32px 40px 24px 56px;
+    }
+
+    /* Tier labels on the left */
+    .tier-labels {
+      position: absolute;
+      left: 8px; top: 0; bottom: 0;
+      display: flex; flex-direction: column; justify-content: space-around;
+      padding: 40px 0 28px;
+      pointer-events: none;
+    }
+    .tier-lbl {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.58rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      white-space: nowrap;
+    }
+    .tier-lbl-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+    #diagram {
+      position: relative;
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+
+    #arrows-svg {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 0;
+      overflow: visible;
+    }
+
+    .diagram-row {
+      display: flex; justify-content: center; gap: 18px;
+      position: relative; z-index: 1;
+    }
+
+    /* ── NODES ──────────────────────────────────── */
+    .node {
+      background: #0e1e30;
+      border: 1.5px solid #1b3550;
+      border-radius: 9px;
+      padding: 11px 18px 10px;
+      cursor: pointer; user-select: none;
+      transition: border-color 0.18s, box-shadow 0.18s, transform 0.15s, background 0.18s;
+      min-width: 118px; text-align: center;
+      position: relative;
+    }
+
+    /* Coloured left bar per tier */
+    .node::before {
+      content: '';
+      position: absolute; left: 0; top: 8px; bottom: 8px;
+      width: 3px; border-radius: 0 0 0 6px;
+    }
+    .node[data-tier="client"]::before { background: #2d7dd2; border-radius: 3px 0 0 3px; }
+    .node[data-tier="bank"]::before   { background: #2dd28a; border-radius: 3px 0 0 3px; }
+    .node[data-tier="infra"]::before  { background: #8a4dd2; border-radius: 3px 0 0 3px; }
+
+    .node:hover { transform: translateY(-2px); }
+    .node[data-tier="client"]:hover { border-color: #2d6aaa; box-shadow: 0 4px 18px rgba(45,125,210,0.18); }
+    .node[data-tier="bank"]:hover   { border-color: #2aaa72; box-shadow: 0 4px 18px rgba(45,210,138,0.18); }
+    .node[data-tier="infra"]:hover  { border-color: #6a3aaa; box-shadow: 0 4px 18px rgba(138,77,210,0.18); }
+
+    .node.active[data-tier="client"] { border-color: #4fc3f7; box-shadow: 0 0 26px rgba(79,195,247,0.32); background: #0c2238; }
+    .node.active[data-tier="bank"]   { border-color: #4ff7b0; box-shadow: 0 0 26px rgba(79,247,176,0.32); background: #0c2218; }
+    .node.active[data-tier="infra"]  { border-color: #b880f7; box-shadow: 0 0 26px rgba(184,128,247,0.32); background: #180c2e; }
+
+    .node-cat {
+      font-size: 0.57rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      margin-bottom: 5px;
+    }
+    .node[data-tier="client"] .node-cat { color: #2d7dd2; }
+    .node[data-tier="bank"] .node-cat   { color: #2dd28a; }
+    .node[data-tier="infra"] .node-cat  { color: #8a4dd2; }
+
+    .node-name { font-size: 0.8rem; font-weight: 600; color: #d5ecfc; line-height: 1.3; }
+    .node-sub  { font-size: 0.6rem; color: #2e5570; margin-top: 3px; }
+
+    /* ── INFO PANEL ─────────────────────────────── */
+    .panel {
+      width: 308px; flex-shrink: 0;
+      background: #0b1926; border-left: 1px solid #162840;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+
+    .panel-hint {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px; padding: 24px; text-align: center;
+    }
+    .hint-ring {
+      width: 48px; height: 48px;
+      border: 1.5px dashed #1e3850; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #1e3850; font-size: 1.3rem;
+    }
+    .panel-hint p { font-size: 0.76rem; color: #1e4060; line-height: 1.65; }
+
+    .panel-body {
+      flex: 1; overflow-y: auto; padding: 20px 18px;
+      display: none;
+    }
+    .panel-body.open { display: block; }
+    .panel-body::-webkit-scrollbar { width: 3px; }
+    .panel-body::-webkit-scrollbar-thumb { background: #1a3050; border-radius: 2px; }
+
+    .pb-badge {
+      display: inline-block; font-size: 0.58rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 3px 10px; border-radius: 12px; margin-bottom: 10px;
+    }
+    .badge-client { background: #091d38; color: #4fc3f7; border: 1px solid #163860; }
+    .badge-bank   { background: #091e14; color: #4ff7b0; border: 1px solid #165030; }
+    .badge-infra  { background: #130820; color: #b880f7; border: 1px solid #3a1460; }
+
+    .pb-title { font-size: 1.08rem; font-weight: 700; color: #deedfc; margin-bottom: 11px; line-height: 1.3; }
+    .pb-desc  { font-size: 0.77rem; color: #7aacca; line-height: 1.72; margin-bottom: 16px; }
+
+    .pb-section {
+      font-size: 0.58rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: #1e3e58; margin-bottom: 8px;
+      padding-bottom: 5px; border-bottom: 1px solid #111e2e;
+    }
+
+    .terms { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .term {
+      background: #091828; border: 1px solid #183050;
+      color: #48a8c8; font-size: 0.67rem;
+      padding: 3px 9px; border-radius: 4px;
+      font-family: 'Consolas', 'Courier New', monospace;
+    }
+
+    .conn-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 0; border-bottom: 1px solid #0e1e2e;
+      font-size: 0.73rem; color: #3a6a8a;
+    }
+    .conn-arr { color: #1e4a70; flex-shrink: 0; }
+
+    /* ── FOOTER ─────────────────────────────────── */
+    .footer {
+      flex-shrink: 0; padding: 7px 24px;
+      border-top: 1px solid #0e1e2e;
+      display: flex; align-items: center; gap: 20px;
+      font-size: 0.62rem;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; color: #1e4060; }
+    .legend-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .footer-note { margin-left: auto; color: #142030; }
+
+    /* ── MOBILE ─────────────────────────────────── */
+    @media (max-width: 680px) {
+      body { overflow: auto; height: auto; }
+      .main { flex-direction: column; }
+      .panel { width: 100%; min-height: 220px; border-left: none; border-top: 1px solid #162840; }
+      .diagram-wrap { padding: 20px 16px 16px 42px; min-height: 360px; }
+      .tier-labels  { padding: 28px 0 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-icon">📊</div>
+  <div>
+    <div class="hdr-title">FX Market Structure Map</div>
+    <div class="hdr-sub">Global foreign exchange ecosystem · click any node to explore</div>
+  </div>
+  <div class="hdr-pill">eFX Education</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- DIAGRAM -->
+  <div class="diagram-wrap">
+
+    <!-- Tier labels -->
+    <div class="tier-labels">
+      <div class="tier-lbl" style="color:#2d7dd2">
+        <div class="tier-lbl-dot" style="background:#2d7dd2"></div>Clients
+      </div>
+      <div class="tier-lbl" style="color:#2dd28a">
+        <div class="tier-lbl-dot" style="background:#2dd28a"></div>Banks
+      </div>
+      <div class="tier-lbl" style="color:#8a4dd2">
+        <div class="tier-lbl-dot" style="background:#8a4dd2"></div>Infra
+      </div>
+    </div>
+
+    <div id="diagram">
+      <svg id="arrows-svg"></svg>
+
+      <!-- Tier 1: Clients -->
+      <div class="diagram-row" id="row-clients">
+        <div class="node" data-id="corp" data-tier="client">
+          <div class="node-cat">Buy-Side</div>
+          <div class="node-name">Corporate<br>Clients</div>
+          <div class="node-sub">importers · exporters</div>
+        </div>
+        <div class="node" data-id="hedge" data-tier="client">
+          <div class="node-cat">Buy-Side</div>
+          <div class="node-name">Hedge<br>Funds</div>
+          <div class="node-sub">macro · quant · HFT</div>
+        </div>
+        <div class="node" data-id="retail" data-tier="client">
+          <div class="node-cat">Buy-Side</div>
+          <div class="node-name">Retail<br>Clients</div>
+          <div class="node-sub">via brokers</div>
+        </div>
+      </div>
+
+      <!-- Tier 2: Banks -->
+      <div class="diagram-row" id="row-banks">
+        <div class="node" data-id="bankA" data-tier="bank">
+          <div class="node-cat">Sell-Side</div>
+          <div class="node-name">Investment<br>Bank A</div>
+          <div class="node-sub">JPM · Citi · Deutsche</div>
+        </div>
+        <div class="node" data-id="bankB" data-tier="bank">
+          <div class="node-cat">Sell-Side</div>
+          <div class="node-name">Investment<br>Bank B</div>
+          <div class="node-sub">UBS · Barclays · MS</div>
+        </div>
+      </div>
+
+      <!-- Tier 3: Infrastructure -->
+      <div class="diagram-row" id="row-infra">
+        <div class="node" data-id="lp" data-tier="infra">
+          <div class="node-cat">Non-Bank MM</div>
+          <div class="node-name">Liquidity<br>Providers</div>
+          <div class="node-sub">XTX · Citadel · Jump</div>
+        </div>
+        <div class="node" data-id="ecn" data-tier="infra">
+          <div class="node-cat">Venue</div>
+          <div class="node-name">ECN</div>
+          <div class="node-sub">EBS · Refinitiv</div>
+        </div>
+      </div>
+
+    </div><!-- #diagram -->
+  </div><!-- .diagram-wrap -->
+
+  <!-- INFO PANEL -->
+  <div class="panel">
+    <div class="panel-hint" id="panel-hint">
+      <div class="hint-ring">←</div>
+      <p>Click any node to learn about its role in the FX market ecosystem</p>
+    </div>
+    <div class="panel-body" id="panel-body">
+      <div id="pb-badge" class="pb-badge"></div>
+      <div id="pb-title" class="pb-title"></div>
+      <div id="pb-desc"  class="pb-desc"></div>
+      <div class="pb-section">Key Terms</div>
+      <div class="terms" id="pb-terms"></div>
+      <div class="pb-section">Connected To</div>
+      <div id="pb-conns"></div>
+    </div>
+  </div>
+
+</div><!-- .main -->
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="legend-item"><div class="legend-dot" style="background:#2d7dd2"></div>Buy-side</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#2dd28a"></div>Sell-side</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#8a4dd2"></div>Market infrastructure</div>
+  <div class="legend-item" style="margin-left:12px; color:#1e3858">⇄ bidirectional flow</div>
+  <div class="footer-note">$7.5T daily volume · 24h/5d</div>
+</div>
+
+<script>
+'use strict';
+
+// ── NODE CONTENT ─────────────────────────────────────────────────────────────
+
+const NODES = {
+  corp: {
+    title: 'Corporate Clients',
+    tier: 'client', label: 'Buy-Side',
+    desc: `Multinational companies, importers, and exporters that need to convert currencies for trade settlement, payroll, or treasury management. They submit Requests for Quote (RFQ) via a bank's e-portal — platforms like Barclays BARX, Deutsche Autobahn, or Citi Velocity. Corporates prioritize certainty of execution and predictable spreads over chasing the absolute best price, trading in larger and less frequent clips than fund managers. Many use FX forwards and NDFs to hedge future currency exposure rather than trading spot.`,
+    terms: ['RFQ', 'e-portal', 'FX Forward', 'NDF', 'STP', 'WMR Fix', 'hedge ratio'],
+    connects: ['bankA', 'bankB']
+  },
+  hedge: {
+    title: 'Hedge Funds',
+    tier: 'client', label: 'Buy-Side',
+    desc: `Sophisticated, price-sensitive investors running macro, quant, CTA, or stat-arb strategies. They connect to multiple banks simultaneously via FIX API to receive streaming prices and execute at high speed. Hedge funds actively shop liquidity across venues, making them sensitive to "last look" — the bank's right to reject a submitted trade after inspecting the order. Their flow is often labelled "toxic" if it consistently picks off stale prices, causing banks to widen spreads or reduce the credit extended to them.`,
+    terms: ['last look', 'FIX API', 'streaming', 'toxic flow', 'fill ratio', 'latency', 'prime brokerage'],
+    connects: ['bankA', 'bankB']
+  },
+  retail: {
+    title: 'Retail Clients',
+    tier: 'client', label: 'Buy-Side',
+    desc: `Individual traders who access FX through retail brokers such as IG, OANDA, or Saxo Bank. They typically trade CFDs or rolling spot contracts rather than deliverable spot FX. Retail brokers aggregate client orders and either internalize them (acting as counterparty — "B-booking") or hedge residual exposure with a prime bank ("A-booking"). Retail clients face the widest spreads — often 1–3 pips on EUR/USD versus sub-0.1 pip in the interbank market — and have no direct access to professional venues.`,
+    terms: ['CFD', 'rolling spot', 'A-book', 'B-book', 'spread', 'pip', 'retail broker'],
+    connects: ['bankA', 'bankB']
+  },
+  bankA: {
+    title: 'Investment Bank (Dealer)',
+    tier: 'bank', label: 'Sell-Side',
+    desc: `The central intermediary in electronic FX. Banks receive client flow, price it through an eFX pricing engine, then decide whether to internalize the risk (net it against opposite client flow) or externalize it (hedge with a liquidity provider or ECN). The goal is to maximize the "internalization rate" — matching buys against sells within the bank's own book — which captures the full bid/offer spread as profit. Residual inventory is hedged externally. Banks compete on spread tightness, fill rate, last-look rejection rates, and platform capability.`,
+    terms: ['internalization', 'risk recycling', 'eFX engine', 'SDP', 'skew', 'last look', 'algo pricing'],
+    connects: ['corp', 'hedge', 'retail', 'bankB', 'lp', 'ecn']
+  },
+  bankB: {
+    title: 'Investment Bank (Dealer)',
+    tier: 'bank', label: 'Sell-Side',
+    desc: `Same role as Bank A — a major FX dealer (think JPMorgan, UBS, Citi, Deutsche Bank, Barclays). The top five dealer banks control roughly 50% of global spot FX volume. Banks also transact directly with each other in the interbank market when they need to offload inventory, typically via bilateral credit lines or through prime brokerage relationships on ECNs. Each bank runs its own eFX pricing stack with real-time risk management deciding how to respond to each incoming trade.`,
+    terms: ['dealer bank', 'market making', 'inventory', 'bilateral credit', 'prime broker', 'credit line'],
+    connects: ['corp', 'hedge', 'retail', 'bankA', 'lp', 'ecn']
+  },
+  lp: {
+    title: 'Liquidity Providers (Non-Bank)',
+    tier: 'infra', label: 'Non-Bank MM',
+    desc: `Electronic market makers — XTX Markets, Citadel Securities, Jump Trading, Virtu Financial — that stream continuous two-way prices to banks and ECNs using statistical models and ultra-low-latency infrastructure. They earn the bid/offer spread on high volumes while carefully managing directional risk. Banks use them as an outsourced hedging venue: when a bank accumulates unwanted inventory, it hits an LP's streaming quote to offload the risk. LPs have largely displaced traditional voice brokers in major spot pairs and compete aggressively on reject rate and fill quality.`,
+    terms: ['XTX Markets', 'streaming', 'two-way price', 'reject rate', 'co-location', 'market making', 'HFT'],
+    connects: ['bankA', 'bankB', 'ecn']
+  },
+  ecn: {
+    title: 'ECN (EBS / Refinitiv)',
+    tier: 'infra', label: 'Venue',
+    desc: `Electronic Communication Networks are anonymous central limit order books (CLOB) where banks and LPs post firm bids and offers. EBS Market (CME Group) dominates EUR/USD and USD/JPY price discovery; Refinitiv Matching handles other G10 pairs. The mid-price on EBS is effectively the global FX "reference rate" that banks anchor their own pricing engines to. Access requires prime brokerage for credit intermediation. These venues operate continuously during FX market hours — from Sunday evening New York time through to Friday evening.`,
+    terms: ['CLOB', 'EBS', 'Refinitiv', 'anonymous matching', 'reference rate', 'prime broker', 'firm quote'],
+    connects: ['bankA', 'bankB', 'lp']
+  }
+};
+
+// ── EDGES ─────────────────────────────────────────────────────────────────────
+
+const EDGES = [
+  { from: 'corp',   to: 'bankA', label: 'RFQ',         bidir: true },
+  { from: 'hedge',  to: 'bankA', label: '',             bidir: true },
+  { from: 'hedge',  to: 'bankB', label: '',             bidir: true },
+  { from: 'retail', to: 'bankB', label: 'order flow',  bidir: true },
+  { from: 'bankA',  to: 'bankB', label: 'interbank',   bidir: true },
+  { from: 'bankA',  to: 'lp',    label: 'hedging',     bidir: true },
+  { from: 'bankB',  to: 'lp',    label: '',             bidir: true },
+  { from: 'bankA',  to: 'ecn',   label: '',             bidir: true },
+  { from: 'bankB',  to: 'ecn',   label: 'price disc.', bidir: true },
+  { from: 'lp',     to: 'ecn',   label: 'LP quotes',   bidir: true },
+];
+
+const CONN_NAMES = {
+  corp: 'Corporate Clients',   hedge: 'Hedge Funds',
+  retail: 'Retail Clients',    bankA: 'Investment Bank A',
+  bankB: 'Investment Bank B',  lp: 'Liquidity Providers',
+  ecn: 'ECN (EBS / Refinitiv)'
+};
+
+// ── SVG HELPERS ───────────────────────────────────────────────────────────────
+
+const ns = tag => document.createElementNS('http://www.w3.org/2000/svg', tag);
+const svgEl = document.getElementById('arrows-svg');
+
+function getCenter(el) {
+  const dr = document.getElementById('diagram').getBoundingClientRect();
+  const r  = el.getBoundingClientRect();
+  return { x: r.left - dr.left + r.width / 2, y: r.top - dr.top + r.height / 2, w: r.width, h: r.height };
+}
+
+function edgePt(cx, cy, w, h, tx, ty, pad) {
+  pad = pad || 7;
+  const dx = tx - cx, dy = ty - cy;
+  if (!dx && !dy) return { x: cx, y: cy };
+  const hw = w / 2 + pad, hh = h / 2 + pad;
+  const s = Math.min(hw / Math.abs(dx), hh / Math.abs(dy));
+  return { x: cx + dx * s, y: cy + dy * s };
+}
+
+function renderArrows(activeId) {
+  svgEl.innerHTML = '';
+
+  // Arrowhead markers
+  const defs = ns('defs');
+  [['dim', '#1e3d60'], ['hi', '#00ccf0']].forEach(function(pair) {
+    var id = pair[0], fill = pair[1];
+    var m = ns('marker');
+    m.setAttribute('id', 'arr-' + id);
+    m.setAttribute('markerWidth', '7');
+    m.setAttribute('markerHeight', '7');
+    m.setAttribute('refX', '5');
+    m.setAttribute('refY', '3.5');
+    m.setAttribute('orient', 'auto');
+    var p = ns('path');
+    p.setAttribute('d', 'M0,0.5 L0,6.5 L7,3.5 z');
+    p.setAttribute('fill', fill);
+    m.appendChild(p);
+    defs.appendChild(m);
+  });
+  svgEl.appendChild(defs);
+
+  var nodeMap = {};
+  document.querySelectorAll('.node').forEach(function(n) { nodeMap[n.dataset.id] = n; });
+
+  EDGES.forEach(function(e) {
+    var fa = nodeMap[e.from], ta = nodeMap[e.to];
+    if (!fa || !ta) return;
+    var fc = getCenter(fa), tc = getCenter(ta);
+    var fp = edgePt(fc.x, fc.y, fc.w, fc.h, tc.x, tc.y);
+    var tp = edgePt(tc.x, tc.y, tc.w, tc.h, fc.x, fc.y);
+
+    var active = activeId && (e.from === activeId || e.to === activeId);
+    var color  = active ? '#00ccf0' : '#1e3d60';
+    var width  = active ? 1.8 : 1.2;
+    var opa    = active ? 1 : 0.55;
+    var marker = active ? 'arr-hi' : 'arr-dim';
+
+    var line = ns('line');
+    line.setAttribute('x1', fp.x); line.setAttribute('y1', fp.y);
+    line.setAttribute('x2', tp.x); line.setAttribute('y2', tp.y);
+    line.setAttribute('stroke', color);
+    line.setAttribute('stroke-width', width);
+    line.setAttribute('opacity', opa);
+    line.setAttribute('marker-end', 'url(#' + marker + ')');
+    if (e.bidir) line.setAttribute('marker-start', 'url(#' + marker + ')');
+    svgEl.appendChild(line);
+
+    // Show label only on active edge
+    if (active && e.label) {
+      var mx = (fp.x + tp.x) / 2, my = (fp.y + tp.y) / 2;
+      var t = ns('text');
+      t.setAttribute('x', mx); t.setAttribute('y', my);
+      t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('dominant-baseline', 'middle');
+      t.setAttribute('fill', '#00b8d8');
+      t.setAttribute('font-size', '9.5');
+      t.setAttribute('font-weight', '600');
+      t.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
+      // Small background rectangle for readability
+      t.textContent = e.label;
+      svgEl.appendChild(t);
+    }
+  });
+}
+
+// ── PANEL ─────────────────────────────────────────────────────────────────────
+
+var activeId = null;
+var tierBadge = { client: 'badge-client', bank: 'badge-bank', infra: 'badge-infra' };
+
+function openPanel(id) {
+  var d = NODES[id];
+  document.getElementById('panel-hint').style.display = 'none';
+  var body = document.getElementById('panel-body');
+  body.classList.add('open');
+
+  var badge = document.getElementById('pb-badge');
+  badge.className = 'pb-badge ' + tierBadge[d.tier];
+  badge.textContent = d.label;
+  document.getElementById('pb-title').textContent = d.title;
+  document.getElementById('pb-desc').textContent  = d.desc;
+
+  document.getElementById('pb-terms').innerHTML = d.terms
+    .map(function(t) { return '<span class="term">' + t + '</span>'; }).join('');
+
+  document.getElementById('pb-conns').innerHTML = d.connects
+    .map(function(cid) {
+      return '<div class="conn-item"><span class="conn-arr">⇄</span><span>' + CONN_NAMES[cid] + '</span></div>';
+    }).join('');
+}
+
+function closePanel() {
+  document.getElementById('panel-hint').style.display = '';
+  document.getElementById('panel-body').classList.remove('open');
+}
+
+// ── INTERACTION ───────────────────────────────────────────────────────────────
+
+document.querySelectorAll('.node').forEach(function(node) {
+  node.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var id = node.dataset.id;
+
+    if (activeId === id) {
+      node.classList.remove('active');
+      activeId = null;
+      closePanel();
+      renderArrows(null);
+      return;
+    }
+
+    document.querySelectorAll('.node.active').forEach(function(n) { n.classList.remove('active'); });
+    node.classList.add('active');
+    activeId = id;
+    openPanel(id);
+    renderArrows(id);
+  });
+});
+
+document.addEventListener('click', function() {
+  if (!activeId) return;
+  document.querySelectorAll('.node.active').forEach(function(n) { n.classList.remove('active'); });
+  activeId = null;
+  closePanel();
+  renderArrows(null);
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+
+window.addEventListener('resize', function() { renderArrows(activeId); });
+requestAnimationFrame(function() {
+  requestAnimationFrame(function() { renderArrows(null); });
+});
+</script>
+</body>
+</html>
