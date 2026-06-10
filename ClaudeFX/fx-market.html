@@ -6,368 +6,252 @@
   <title>FX Marknadsstruktur</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-      background: #0a1628;
-      color: #c8e8f8;
+      background: #0a1628; color: #c8e8f8;
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      height: 100vh;
-      display: flex; flex-direction: column;
-      overflow: hidden;
+      height: 100vh; display: flex; flex-direction: column; overflow: hidden;
     }
 
-    /* ── HEADER ──────────────────────────────────────── */
-    .hdr {
-      flex-shrink: 0; padding: 11px 24px;
-      border-bottom: 1px solid #162840; background: #0b1c2e;
-      display: flex; align-items: center; gap: 14px;
-    }
-    .hdr-icon {
-      width: 30px; height: 30px; background: #0d2a40; border: 1px solid #1e4a6a;
-      border-radius: 7px; display: flex; align-items: center; justify-content: center;
-      font-size: 0.9rem; flex-shrink: 0;
-    }
-    .hdr-title { font-size: 0.92rem; font-weight: 700; color: #5bc8f5; letter-spacing: 0.02em; }
-    .hdr-sub   { font-size: 0.68rem; color: #3a6a8a; margin-top: 1px; }
-    .hdr-pill {
-      margin-left: auto; background: #0d2235; border: 1px solid #1e4060;
-      color: #4ab8d8; font-size: 0.57rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.1em; padding: 3px 10px; border-radius: 20px;
-    }
+    /* ── HEADER ── */
+    .hdr { flex-shrink:0; padding:11px 24px; border-bottom:1px solid #162840; background:#0b1c2e; display:flex; align-items:center; gap:14px; }
+    .hdr-icon { width:30px; height:30px; background:#0d2a40; border:1px solid #1e4a6a; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0; }
+    .hdr-title { font-size:0.92rem; font-weight:700; color:#5bc8f5; letter-spacing:0.02em; }
+    .hdr-sub   { font-size:0.68rem; color:#3a6a8a; margin-top:1px; }
+    .hdr-pill  { margin-left:auto; background:#0d2235; border:1px solid #1e4060; color:#4ab8d8; font-size:0.57rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; padding:3px 10px; border-radius:20px; }
 
-    /* ── TAB BAR ─────────────────────────────────────── */
-    .tabs {
-      flex-shrink: 0; display: flex; background: #080f1c;
-      border-bottom: 1px solid #162840; padding: 0 20px;
-    }
-    .tab-btn {
-      padding: 8px 18px; font-size: 0.74rem; font-weight: 600;
-      color: #3a6a8a; background: none; border: none;
-      border-bottom: 2px solid transparent; cursor: pointer;
-      transition: color 0.15s, border-color 0.15s; letter-spacing: 0.02em;
-    }
-    .tab-btn:hover { color: #7aacca; }
-    .tab-btn.active { color: #5bc8f5; border-bottom-color: #5bc8f5; }
+    /* ── TABS ── */
+    .tabs { flex-shrink:0; display:flex; background:#080f1c; border-bottom:1px solid #162840; padding:0 20px; }
+    .tab-btn { padding:8px 16px; font-size:0.72rem; font-weight:600; color:#3a6a8a; background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; transition:color 0.15s,border-color 0.15s; letter-spacing:0.02em; }
+    .tab-btn:hover { color:#7aacca; }
+    .tab-btn.active { color:#5bc8f5; border-bottom-color:#5bc8f5; }
 
-    /* ── MAP VIEW ────────────────────────────────────── */
-    #view-map { flex: 1; display: flex; min-height: 0; }
+    /* ── MAP VIEW ── */
+    #view-map { flex:1; display:flex; min-height:0; }
+    .diagram-wrap { flex:1; min-width:0; position:relative; padding:28px 36px 0 52px; display:flex; flex-direction:column; }
+    .tier-labels { position:absolute; left:6px; top:0; bottom:0; display:flex; flex-direction:column; justify-content:space-around; padding:38px 0 44px; pointer-events:none; }
+    .tier-lbl { display:flex; align-items:center; gap:5px; font-size:0.56rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; white-space:nowrap; }
+    .tier-lbl-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+    #diagram { position:relative; flex:1; display:flex; flex-direction:column; justify-content:space-between; }
+    #arrows-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0; overflow:visible; }
+    .diagram-row { display:flex; justify-content:center; gap:16px; position:relative; z-index:1; }
 
-    .diagram-wrap {
-      flex: 1; min-width: 0; position: relative;
-      padding: 28px 36px 0 52px; display: flex; flex-direction: column;
-    }
-    .tier-labels {
-      position: absolute; left: 6px; top: 0; bottom: 0;
-      display: flex; flex-direction: column; justify-content: space-around;
-      padding: 38px 0 44px; pointer-events: none;
-    }
-    .tier-lbl {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 0.56rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.12em; white-space: nowrap;
-    }
-    .tier-lbl-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    /* ── NODES ── */
+    .node { background:#0e1e30; border:1.5px solid #1b3550; border-radius:9px; padding:10px 16px 9px; cursor:pointer; user-select:none; transition:border-color 0.18s,box-shadow 0.18s,transform 0.15s,background 0.18s; min-width:114px; text-align:center; position:relative; }
+    .node::before { content:''; position:absolute; left:0; top:8px; bottom:8px; width:3px; border-radius:3px 0 0 3px; }
+    .node[data-tier="client"]::before { background:#2d7dd2; }
+    .node[data-tier="bank"]::before   { background:#2dd28a; }
+    .node[data-tier="infra"]::before  { background:#8a4dd2; }
+    .node:hover { transform:translateY(-2px); }
+    .node[data-tier="client"]:hover { border-color:#2d6aaa; box-shadow:0 4px 18px rgba(45,125,210,0.18); }
+    .node[data-tier="bank"]:hover   { border-color:#2aaa72; box-shadow:0 4px 18px rgba(45,210,138,0.18); }
+    .node[data-tier="infra"]:hover  { border-color:#6a3aaa; box-shadow:0 4px 18px rgba(138,77,210,0.18); }
+    .node.active[data-tier="client"] { border-color:#4fc3f7; box-shadow:0 0 24px rgba(79,195,247,0.3); background:#0c2238; }
+    .node.active[data-tier="bank"]   { border-color:#4ff7b0; box-shadow:0 0 24px rgba(79,247,176,0.3); background:#0c2218; }
+    .node.active[data-tier="infra"]  { border-color:#b880f7; box-shadow:0 0 24px rgba(184,128,247,0.3); background:#180c2e; }
+    @keyframes nodePulse { 0%{box-shadow:0 0 0 0 rgba(0,212,245,0.7);}70%{box-shadow:0 0 0 14px rgba(0,212,245,0);}100%{box-shadow:0 0 0 0 rgba(0,212,245,0);} }
+    .node.sim-pulse { animation:nodePulse 0.55s ease forwards; }
+    .node-cat  { font-size:0.55rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:4px; }
+    .node[data-tier="client"] .node-cat { color:#2d7dd2; }
+    .node[data-tier="bank"]   .node-cat { color:#2dd28a; }
+    .node[data-tier="infra"]  .node-cat { color:#8a4dd2; }
+    .node-name { font-size:0.78rem; font-weight:600; color:#d5ecfc; line-height:1.3; }
+    .node-sub  { font-size:0.58rem; color:#2e5570; margin-top:2px; }
 
-    #diagram {
-      position: relative; flex: 1;
-      display: flex; flex-direction: column; justify-content: space-between;
-    }
-    #arrows-svg {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      pointer-events: none; z-index: 0; overflow: visible;
-    }
-    .diagram-row { display: flex; justify-content: center; gap: 16px; position: relative; z-index: 1; }
+    /* ── SIM BTN & STATUS ── */
+    #sim-btn { position:absolute; top:8px; right:8px; z-index:10; background:#0d2235; border:1px solid #2d6aaa; color:#5bc8f5; font-size:0.68rem; font-weight:700; padding:5px 13px; border-radius:6px; cursor:pointer; letter-spacing:0.03em; transition:background 0.15s,border-color 0.15s; }
+    #sim-btn:hover:not(:disabled) { background:#102c40; border-color:#4fc3f7; }
+    #sim-btn:disabled { opacity:0.4; cursor:default; }
+    #sim-status { flex-shrink:0; display:none; align-items:center; gap:10px; padding:6px 14px; border-top:1px solid #162840; font-size:0.69rem; color:#4fc3f7; margin-top:4px; background:rgba(7,16,28,0.7); border-radius:0 0 6px 6px; }
+    #sim-status.visible { display:flex; }
+    .sim-pill { background:#0a2235; border:1px solid #1e4060; color:#3a88b8; font-size:0.57rem; font-weight:700; padding:2px 8px; border-radius:10px; white-space:nowrap; flex-shrink:0; }
 
-    /* ── NODES ───────────────────────────────────────── */
-    .node {
-      background: #0e1e30; border: 1.5px solid #1b3550; border-radius: 9px;
-      padding: 10px 16px 9px; cursor: pointer; user-select: none;
-      transition: border-color 0.18s, box-shadow 0.18s, transform 0.15s, background 0.18s;
-      min-width: 114px; text-align: center; position: relative;
-    }
-    .node::before {
-      content: ''; position: absolute; left: 0; top: 8px; bottom: 8px;
-      width: 3px; border-radius: 3px 0 0 3px;
-    }
-    .node[data-tier="client"]::before { background: #2d7dd2; }
-    .node[data-tier="bank"]::before   { background: #2dd28a; }
-    .node[data-tier="infra"]::before  { background: #8a4dd2; }
+    /* ── PANEL ── */
+    .panel { width:320px; flex-shrink:0; background:#0b1926; border-left:1px solid #162840; display:flex; flex-direction:column; overflow:hidden; }
+    .panel-hint { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:24px; text-align:center; }
+    .hint-ring { width:44px; height:44px; border:1.5px dashed #1e3850; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#1e3850; font-size:1.2rem; }
+    .panel-hint p { font-size:0.74rem; color:#1e4060; line-height:1.65; }
+    .panel-body { flex:1; overflow-y:auto; padding:18px 16px; display:none; }
+    .panel-body.open { display:block; }
+    .panel-body::-webkit-scrollbar { width:3px; }
+    .panel-body::-webkit-scrollbar-thumb { background:#1a3050; border-radius:2px; }
+    .pb-badge { display:inline-block; font-size:0.57rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; padding:3px 10px; border-radius:12px; margin-bottom:10px; }
+    .badge-client { background:#091d38; color:#4fc3f7; border:1px solid #163860; }
+    .badge-bank   { background:#091e14; color:#4ff7b0; border:1px solid #165030; }
+    .badge-infra  { background:#130820; color:#b880f7; border:1px solid #3a1460; }
+    .pb-title  { font-size:1.05rem; font-weight:700; color:#deedfc; margin-bottom:10px; line-height:1.3; }
+    .pb-desc   { font-size:0.75rem; color:#7aacca; line-height:1.72; margin-bottom:12px; }
+    .pb-why    { font-size:0.74rem; color:#8ac8d8; line-height:1.68; margin-bottom:12px; }
+    .pb-earns  { font-size:0.74rem; color:#8ad4a8; line-height:1.68; margin-bottom:12px; }
+    .pb-section { font-size:0.57rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:#1e3e58; margin-bottom:7px; padding-bottom:5px; border-bottom:1px solid #111e2e; }
+    .terms { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:14px; }
+    .term { background:#091828; border:1px solid #183050; color:#48a8c8; font-size:0.65rem; padding:3px 8px; border-radius:4px; font-family:'Consolas','Courier New',monospace; }
+    .conn-item { display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid #0e1e2e; font-size:0.72rem; color:#3a6a8a; }
+    .conn-arr { color:#1e4a70; flex-shrink:0; }
 
-    .node:hover { transform: translateY(-2px); }
-    .node[data-tier="client"]:hover { border-color: #2d6aaa; box-shadow: 0 4px 18px rgba(45,125,210,0.18); }
-    .node[data-tier="bank"]:hover   { border-color: #2aaa72; box-shadow: 0 4px 18px rgba(45,210,138,0.18); }
-    .node[data-tier="infra"]:hover  { border-color: #6a3aaa; box-shadow: 0 4px 18px rgba(138,77,210,0.18); }
+    /* ── OM FX VIEW ── */
+    #view-about { flex:1; display:none; overflow-y:auto; min-height:0; }
+    #view-about.active { display:block; }
+    #view-about::-webkit-scrollbar { width:4px; }
+    #view-about::-webkit-scrollbar-thumb { background:#1a3050; border-radius:2px; }
+    .about-wrap { max-width:860px; margin:0 auto; padding:28px 32px 40px; }
+    .about-hero { background:linear-gradient(135deg,#0d2035 0%,#0d1a2e 100%); border:1px solid #1e3d60; border-radius:12px; padding:28px 32px; margin-bottom:24px; }
+    .about-hero h1 { font-size:1.3rem; font-weight:700; color:#5bc8f5; margin-bottom:10px; }
+    .about-hero p  { font-size:0.84rem; color:#8ab8d4; line-height:1.75; }
+    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:24px; }
+    .stat-card { background:#0d1e30; border:1px solid #1e3550; border-radius:10px; padding:18px 16px; text-align:center; }
+    .stat-num  { font-size:1.6rem; font-weight:800; color:#5bc8f5; letter-spacing:-0.02em; line-height:1; margin-bottom:4px; }
+    .stat-label{ font-size:0.68rem; color:#3a6a8a; line-height:1.4; }
+    .about-section { margin-bottom:20px; }
+    .about-section h2 { font-size:0.88rem; font-weight:700; color:#4fc3f7; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #162840; }
+    .about-section p { font-size:0.8rem; color:#7aacca; line-height:1.75; margin-bottom:10px; }
+    .about-section p:last-child { margin-bottom:0; }
+    .driver-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+    .driver-card { background:#0d1e30; border:1px solid #1e3550; border-radius:8px; padding:14px 16px; }
+    .driver-pct  { font-size:1.2rem; font-weight:800; color:#5bc8f5; margin-bottom:2px; }
+    .driver-name { font-size:0.73rem; font-weight:700; color:#c8e8f8; margin-bottom:4px; }
+    .driver-desc { font-size:0.7rem; color:#4a7a9a; line-height:1.5; }
+    .chain-wrap { margin:12px 0; }
+    .chain-row { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:8px; margin-bottom:4px; border:1px solid transparent; }
+    .chain-row.client { background:#091828; border-color:#1e3d60; }
+    .chain-row.bank   { background:#091a14; border-color:#1e4030; }
+    .chain-row.lp     { background:#110820; border-color:#2e1060; }
+    .chain-row.ecn    { background:#0e1820; border-color:#1a3040; }
+    .chain-actor  { font-size:0.72rem; font-weight:600; color:#c8e8f8; min-width:180px; }
+    .chain-spread { font-size:0.9rem; font-weight:800; }
+    .chain-row.client .chain-spread { color:#4fc3f7; }
+    .chain-row.bank   .chain-spread { color:#4ff7b0; }
+    .chain-row.lp     .chain-spread { color:#b880f7; }
+    .chain-row.ecn    .chain-spread { color:#7ab8d4; }
+    .chain-note { font-size:0.67rem; color:#3a6a8a; }
+    .chain-arrow { font-size:0.75rem; color:#1e3050; padding-left:14px; }
+    .role-table { width:100%; border-collapse:collapse; font-size:0.74rem; }
+    .role-table th { text-align:left; padding:8px 12px; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#1e3e58; border-bottom:1px solid #162840; }
+    .role-table td { padding:9px 12px; border-bottom:1px solid #0e1e2e; vertical-align:top; }
+    .role-table tr:last-child td { border-bottom:none; }
+    .rt-name  { color:#c8e8f8; font-weight:600; }
+    .rt-why   { color:#7aacca; line-height:1.5; }
+    .rt-earns { color:#7ad4a0; line-height:1.5; }
+    .rt-dot   { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:middle; }
 
-    .node.active[data-tier="client"] { border-color: #4fc3f7; box-shadow: 0 0 24px rgba(79,195,247,0.3); background: #0c2238; }
-    .node.active[data-tier="bank"]   { border-color: #4ff7b0; box-shadow: 0 0 24px rgba(79,247,176,0.3); background: #0c2218; }
-    .node.active[data-tier="infra"]  { border-color: #b880f7; box-shadow: 0 0 24px rgba(184,128,247,0.3); background: #180c2e; }
+    /* ── VAD RÖR FX VIEW ── */
+    #view-events { flex:1; display:none; overflow-y:auto; min-height:0; }
+    #view-events.active { display:block; }
+    #view-events::-webkit-scrollbar { width:4px; }
+    #view-events::-webkit-scrollbar-thumb { background:#1a3050; border-radius:2px; }
+    .events-wrap { max-width:860px; margin:0 auto; padding:28px 32px 40px; }
+    .events-wrap h2 { font-size:0.88rem; font-weight:700; color:#4fc3f7; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid #162840; }
 
-    @keyframes nodePulse {
-      0%  { box-shadow: 0 0 0 0 rgba(0,212,245,0.7); }
-      70% { box-shadow: 0 0 0 14px rgba(0,212,245,0); }
-      100%{ box-shadow: 0 0 0 0 rgba(0,212,245,0); }
-    }
-    .node.sim-pulse { animation: nodePulse 0.55s ease forwards; }
+    /* compare table */
+    .compare-table { width:100%; border-collapse:collapse; font-size:0.73rem; margin-bottom:24px; }
+    .compare-table th { text-align:left; padding:8px 12px; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#1e3e58; border-bottom:1px solid #162840; }
+    .compare-table td { padding:9px 12px; border-bottom:1px solid #0e1e2e; vertical-align:top; line-height:1.5; }
+    .compare-table tr:last-child td { border-bottom:none; }
+    .ct-prop { color:#7aacca; font-weight:600; font-size:0.7rem; }
+    .ct-fx   { color:#5bc8f5; }
+    .ct-eq   { color:#a8b8cc; }
+    .ct-bo   { color:#8ad4a0; }
+    .ct-note { background:#091828; border:1px solid #1e3d60; border-radius:8px; padding:12px 16px; font-size:0.76rem; color:#7aacca; line-height:1.7; margin-bottom:22px; }
+    .ct-note strong { color:#c8e8f8; }
 
-    .node-cat {
-      font-size: 0.55rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;
-    }
-    .node[data-tier="client"] .node-cat { color: #2d7dd2; }
-    .node[data-tier="bank"] .node-cat   { color: #2dd28a; }
-    .node[data-tier="infra"] .node-cat  { color: #8a4dd2; }
-    .node-name { font-size: 0.78rem; font-weight: 600; color: #d5ecfc; line-height: 1.3; }
-    .node-sub  { font-size: 0.58rem; color: #2e5570; margin-top: 2px; }
+    /* drivers grid */
+    .drivers-cols { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px; }
+    .dc { background:#0d1e30; border:1px solid #1e3550; border-radius:10px; padding:16px; }
+    .dc-title { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #0e1e2e; }
+    .dc.strong .dc-title { color:#4ff7b0; }
+    .dc.weak   .dc-title { color:#f07070; }
+    .di { display:flex; gap:10px; padding:7px 0; border-bottom:1px solid #0a1625; }
+    .di:last-child { border-bottom:none; }
+    .di-ico { flex-shrink:0; font-size:0.9rem; margin-top:1px; }
+    .di-name { font-size:0.73rem; font-weight:600; color:#c8e8f8; margin-bottom:2px; }
+    .di-desc { font-size:0.66rem; color:#3a6a8a; line-height:1.4; }
 
-    /* ── SIMULATE BTN ────────────────────────────────── */
-    #sim-btn {
-      position: absolute; top: 8px; right: 8px; z-index: 10;
-      background: #0d2235; border: 1px solid #2d6aaa;
-      color: #5bc8f5; font-size: 0.68rem; font-weight: 700;
-      padding: 5px 13px; border-radius: 6px; cursor: pointer; letter-spacing: 0.03em;
-      transition: background 0.15s, border-color 0.15s;
-    }
-    #sim-btn:hover:not(:disabled) { background: #102c40; border-color: #4fc3f7; }
-    #sim-btn:disabled { opacity: 0.4; cursor: default; }
+    /* event accordion */
+    .ev-card { background:#0d1e30; border:1px solid #1e3550; border-radius:10px; margin-bottom:9px; overflow:hidden; }
+    .ev-header { display:flex; align-items:center; gap:12px; padding:14px 18px; cursor:pointer; user-select:none; transition:background 0.15s; }
+    .ev-header:hover { background:#0e2238; }
+    .ev-flag  { font-size:1.3rem; flex-shrink:0; }
+    .ev-meta  { flex:1; }
+    .ev-name  { font-size:0.86rem; font-weight:700; color:#c8e8f8; }
+    .ev-sub   { font-size:0.63rem; color:#3a6a8a; margin-top:1px; }
+    .ev-badge { font-size:0.68rem; font-weight:700; padding:3px 10px; border-radius:10px; flex-shrink:0; white-space:nowrap; }
+    .ev-badge.red  { background:#1a0808; color:#f07878; border:1px solid #4a1010; }
+    .ev-badge.blue { background:#08101a; color:#78c8f0; border:1px solid #102840; }
+    .ev-badge.yel  { background:#1a1408; color:#f0c878; border:1px solid #4a3010; }
+    .ev-chev { color:#1e3050; font-size:0.75rem; transition:transform 0.2s; flex-shrink:0; margin-left:4px; }
+    .ev-card.open .ev-chev { transform:rotate(180deg); }
+    .ev-body { display:none; padding:0 18px 18px; }
+    .ev-card.open .ev-body { display:block; }
+    .ev-intro { font-size:0.77rem; color:#7aacca; line-height:1.72; margin-bottom:14px; padding-top:12px; border-top:1px solid #0e1e2e; }
+    .ev-steps { list-style:none; padding:0; margin-bottom:14px; }
+    .ev-step  { display:flex; gap:12px; padding:8px 0; border-bottom:1px solid #0a1625; }
+    .ev-step:last-child { border-bottom:none; }
+    .ev-num   { flex-shrink:0; width:22px; height:22px; background:#0d2035; border:1px solid #1e3d60; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.62rem; font-weight:700; color:#2d7dd2; margin-top:1px; }
+    .ev-step-txt { font-size:0.75rem; color:#8ab8d4; line-height:1.62; }
+    .ev-step-txt strong { color:#c8e8f8; }
+    .ev-tags { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:11px; }
+    .ev-tag  { background:#091828; border:1px solid #183050; color:#48a8c8; font-size:0.62rem; padding:3px 8px; border-radius:4px; }
+    .ev-takeaway { background:#091a12; border:1px solid #1a4020; border-radius:7px; padding:10px 14px; font-size:0.73rem; color:#7ad4a0; line-height:1.65; }
+    .ev-takeaway strong { color:#b0f0c0; }
+    .ev-diff { background:#0d1428; border:1px solid #1e2e50; border-radius:7px; padding:10px 14px; font-size:0.73rem; color:#8ab0d4; line-height:1.65; margin-top:8px; }
+    .ev-diff strong { color:#a0c8f0; }
 
-    /* ── SIM STATUS ──────────────────────────────────── */
-    #sim-status {
-      flex-shrink: 0; display: none; align-items: center; gap: 10px;
-      padding: 6px 14px; border-top: 1px solid #162840;
-      font-size: 0.69rem; color: #4fc3f7; margin-top: 4px;
-      background: rgba(7,16,28,0.7); border-radius: 0 0 6px 6px;
-    }
-    #sim-status.visible { display: flex; }
-    .sim-pill {
-      background: #0a2235; border: 1px solid #1e4060;
-      color: #3a88b8; font-size: 0.57rem; font-weight: 700;
-      padding: 2px 8px; border-radius: 10px; white-space: nowrap; flex-shrink: 0;
-    }
+    /* ── FLASHCARD VIEW ── */
+    #view-cards { flex:1; display:none; flex-direction:column; align-items:center; justify-content:center; min-height:0; overflow:hidden; padding:16px 24px 12px; gap:14px; }
+    #view-cards.active { display:flex; }
+    .fc-cats { display:flex; gap:7px; flex-wrap:wrap; justify-content:center; flex-shrink:0; }
+    .fc-cat  { padding:5px 14px; font-size:0.7rem; font-weight:600; border-radius:20px; border:1px solid #1e3050; background:#0a1628; color:#3a6a8a; cursor:pointer; transition:all 0.15s; }
+    .fc-cat:hover { border-color:#2d5a8a; color:#7aacca; }
+    .fc-cat.active { background:#0d2235; border-color:#2d7dd2; color:#5bc8f5; }
+    .card-scene { perspective:900px; width:100%; max-width:540px; flex-shrink:0; }
+    .card-inner { position:relative; width:100%; height:196px; transform-style:preserve-3d; transition:transform 0.42s cubic-bezier(0.4,0,0.2,1); cursor:pointer; }
+    .card-inner.flipped { transform:rotateY(180deg); }
+    .card-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:12px; padding:24px 28px; display:flex; flex-direction:column; justify-content:center; }
+    .card-front { background:#0f2035; border:1.5px solid #1e3d60; }
+    .card-back  { background:#0f2228; border:1.5px solid #1e4a30; transform:rotateY(180deg); }
+    .card-hint  { font-size:0.57rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:#1e3d60; margin-bottom:10px; }
+    .card-back .card-hint { color:#1e4a30; }
+    .card-q { font-size:0.96rem; font-weight:600; color:#d5ecfc; line-height:1.4; }
+    .card-a { font-size:0.78rem; color:#7ad4a0; line-height:1.66; }
+    .card-cat-lbl { position:absolute; bottom:12px; right:16px; font-size:0.57rem; color:#1e3050; }
+    @keyframes knewFlash { 0%{border-color:#1e4a30;}40%{border-color:#4ff7b0;box-shadow:0 0 20px rgba(79,247,176,0.25);}100%{border-color:#1e4a30;} }
+    .card-back.flash { animation:knewFlash 0.5s ease; }
+    .fc-btns { display:flex; gap:9px; align-items:center; flex-shrink:0; }
+    .fc-btn  { padding:8px 20px; font-size:0.74rem; font-weight:600; border-radius:8px; cursor:pointer; border:1px solid transparent; transition:all 0.15s; letter-spacing:0.02em; }
+    .btn-flip { background:#0d2235; border-color:#1e4060; color:#5bc8f5; }
+    .btn-flip:hover { border-color:#4fc3f7; background:#102c40; }
+    .btn-knew { background:#0d2818; border-color:#1e5030; color:#4ff7b0; }
+    .btn-knew:hover { border-color:#4ff7b0; background:#103020; }
+    .btn-next { background:#0a1628; border-color:#1e3050; color:#3a6a8a; }
+    .btn-next:hover { border-color:#3a6a8a; color:#7aacca; }
+    .fc-prog { display:flex; flex-direction:column; align-items:center; gap:7px; flex-shrink:0; }
+    .fc-count { font-size:0.67rem; color:#2a5070; }
+    .fc-dots { display:flex; gap:5px; flex-wrap:wrap; justify-content:center; max-width:420px; }
+    .fc-dot { width:7px; height:7px; border-radius:50%; background:#111e2e; border:1px solid #1e3050; transition:all 0.2s; }
+    .fc-dot.cur   { background:#2d7dd2; border-color:#4fc3f7; box-shadow:0 0 5px rgba(79,195,247,0.4); }
+    .fc-dot.known { background:#2dd28a; border-color:#4ff7b0; }
 
-    /* ── INFO PANEL ──────────────────────────────────── */
-    .panel {
-      width: 320px; flex-shrink: 0; background: #0b1926;
-      border-left: 1px solid #162840; display: flex; flex-direction: column; overflow: hidden;
-    }
-    .panel-hint {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 12px; padding: 24px; text-align: center;
-    }
-    .hint-ring {
-      width: 44px; height: 44px; border: 1.5px dashed #1e3850; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; color: #1e3850; font-size: 1.2rem;
-    }
-    .panel-hint p { font-size: 0.74rem; color: #1e4060; line-height: 1.65; }
-    .panel-body { flex: 1; overflow-y: auto; padding: 18px 16px; display: none; }
-    .panel-body.open { display: block; }
-    .panel-body::-webkit-scrollbar { width: 3px; }
-    .panel-body::-webkit-scrollbar-thumb { background: #1a3050; border-radius: 2px; }
+    /* ── FOOTER ── */
+    .footer { flex-shrink:0; padding:6px 24px; border-top:1px solid #0e1e2e; display:flex; align-items:center; gap:18px; font-size:0.61rem; }
+    .legend-item { display:flex; align-items:center; gap:5px; color:#1e4060; }
+    .legend-dot  { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    .footer-note { margin-left:auto; color:#142030; }
 
-    .pb-badge {
-      display: inline-block; font-size: 0.57rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.1em;
-      padding: 3px 10px; border-radius: 12px; margin-bottom: 10px;
-    }
-    .badge-client { background: #091d38; color: #4fc3f7; border: 1px solid #163860; }
-    .badge-bank   { background: #091e14; color: #4ff7b0; border: 1px solid #165030; }
-    .badge-infra  { background: #130820; color: #b880f7; border: 1px solid #3a1460; }
-
-    .pb-title  { font-size: 1.05rem; font-weight: 700; color: #deedfc; margin-bottom: 10px; line-height: 1.3; }
-    .pb-desc   { font-size: 0.75rem; color: #7aacca; line-height: 1.72; margin-bottom: 12px; }
-    .pb-why    { font-size: 0.74rem; color: #8ac8d8; line-height: 1.68; margin-bottom: 12px; }
-    .pb-earns  { font-size: 0.74rem; color: #8ad4a8; line-height: 1.68; margin-bottom: 12px; }
-
-    .pb-section {
-      font-size: 0.57rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;
-      color: #1e3e58; margin-bottom: 7px; padding-bottom: 5px; border-bottom: 1px solid #111e2e;
-    }
-    .terms { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
-    .term {
-      background: #091828; border: 1px solid #183050; color: #48a8c8; font-size: 0.65rem;
-      padding: 3px 8px; border-radius: 4px; font-family: 'Consolas', 'Courier New', monospace;
-    }
-    .conn-item {
-      display: flex; align-items: center; gap: 8px; padding: 5px 0;
-      border-bottom: 1px solid #0e1e2e; font-size: 0.72rem; color: #3a6a8a;
-    }
-    .conn-arr { color: #1e4a70; flex-shrink: 0; }
-
-    /* ── OM FX VIEW ──────────────────────────────────── */
-    #view-about {
-      flex: 1; display: none; overflow-y: auto;
-      padding: 0; min-height: 0;
-    }
-    #view-about.active { display: block; }
-    #view-about::-webkit-scrollbar { width: 4px; }
-    #view-about::-webkit-scrollbar-thumb { background: #1a3050; border-radius: 2px; }
-
-    .about-wrap { max-width: 860px; margin: 0 auto; padding: 28px 32px 40px; }
-
-    .about-hero {
-      background: linear-gradient(135deg, #0d2035 0%, #0d1a2e 100%);
-      border: 1px solid #1e3d60; border-radius: 12px;
-      padding: 28px 32px; margin-bottom: 24px;
-    }
-    .about-hero h1 { font-size: 1.3rem; font-weight: 700; color: #5bc8f5; margin-bottom: 10px; }
-    .about-hero p  { font-size: 0.84rem; color: #8ab8d4; line-height: 1.75; }
-
-    .stats-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;
-    }
-    .stat-card {
-      background: #0d1e30; border: 1px solid #1e3550; border-radius: 10px;
-      padding: 18px 16px; text-align: center;
-    }
-    .stat-num  { font-size: 1.6rem; font-weight: 800; color: #5bc8f5; letter-spacing: -0.02em; line-height: 1; margin-bottom: 4px; }
-    .stat-label{ font-size: 0.68rem; color: #3a6a8a; line-height: 1.4; }
-
-    .about-section { margin-bottom: 20px; }
-    .about-section h2 {
-      font-size: 0.88rem; font-weight: 700; color: #4fc3f7;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #162840;
-    }
-    .about-section p  { font-size: 0.8rem; color: #7aacca; line-height: 1.75; margin-bottom: 10px; }
-    .about-section p:last-child { margin-bottom: 0; }
-
-    .driver-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-    .driver-card {
-      background: #0d1e30; border: 1px solid #1e3550; border-radius: 8px; padding: 14px 16px;
-    }
-    .driver-pct  { font-size: 1.2rem; font-weight: 800; color: #5bc8f5; margin-bottom: 2px; }
-    .driver-name { font-size: 0.73rem; font-weight: 700; color: #c8e8f8; margin-bottom: 4px; }
-    .driver-desc { font-size: 0.7rem; color: #4a7a9a; line-height: 1.5; }
-
-    /* Spread chain */
-    .chain-wrap { margin: 12px 0; }
-    .chain-row {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 14px; border-radius: 8px; margin-bottom: 4px;
-      border: 1px solid transparent;
-    }
-    .chain-row.client  { background: #091828; border-color: #1e3d60; }
-    .chain-row.bank    { background: #091a14; border-color: #1e4030; }
-    .chain-row.lp      { background: #110820; border-color: #2e1060; }
-    .chain-row.ecn     { background: #0e1820; border-color: #1a3040; }
-    .chain-actor { font-size: 0.72rem; font-weight: 600; color: #c8e8f8; min-width: 120px; }
-    .chain-spread{ font-size: 0.9rem; font-weight: 800; }
-    .chain-row.client .chain-spread { color: #4fc3f7; }
-    .chain-row.bank    .chain-spread { color: #4ff7b0; }
-    .chain-row.lp      .chain-spread { color: #b880f7; }
-    .chain-row.ecn     .chain-spread { color: #7ab8d4; }
-    .chain-note { font-size: 0.67rem; color: #3a6a8a; }
-    .chain-arrow { font-size: 0.75rem; color: #1e3050; margin: 0 4px; }
-
-    /* Participant role table */
-    .role-table { width: 100%; border-collapse: collapse; font-size: 0.74rem; }
-    .role-table th {
-      text-align: left; padding: 8px 12px;
-      font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
-      color: #1e3e58; border-bottom: 1px solid #162840;
-    }
-    .role-table td { padding: 9px 12px; border-bottom: 1px solid #0e1e2e; vertical-align: top; }
-    .role-table tr:last-child td { border-bottom: none; }
-    .rt-name  { color: #c8e8f8; font-weight: 600; }
-    .rt-why   { color: #7aacca; line-height: 1.5; }
-    .rt-earns { color: #7ad4a0; line-height: 1.5; }
-    .rt-dot   { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
-
-    /* ── FLASHCARD VIEW ──────────────────────────────── */
-    #view-cards {
-      flex: 1; display: none; flex-direction: column;
-      align-items: center; justify-content: center;
-      min-height: 0; overflow: hidden; padding: 16px 24px 12px; gap: 14px;
-    }
-    #view-cards.active { display: flex; }
-
-    .fc-cats { display: flex; gap: 7px; flex-wrap: wrap; justify-content: center; flex-shrink: 0; }
-    .fc-cat {
-      padding: 5px 14px; font-size: 0.7rem; font-weight: 600;
-      border-radius: 20px; border: 1px solid #1e3050;
-      background: #0a1628; color: #3a6a8a; cursor: pointer; transition: all 0.15s;
-    }
-    .fc-cat:hover { border-color: #2d5a8a; color: #7aacca; }
-    .fc-cat.active { background: #0d2235; border-color: #2d7dd2; color: #5bc8f5; }
-
-    .card-scene { perspective: 900px; width: 100%; max-width: 540px; flex-shrink: 0; }
-    .card-inner {
-      position: relative; width: 100%; height: 196px;
-      transform-style: preserve-3d; transition: transform 0.42s cubic-bezier(0.4,0,0.2,1); cursor: pointer;
-    }
-    .card-inner.flipped { transform: rotateY(180deg); }
-    .card-face {
-      position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
-      border-radius: 12px; padding: 24px 28px; display: flex; flex-direction: column; justify-content: center;
-    }
-    .card-front { background: #0f2035; border: 1.5px solid #1e3d60; }
-    .card-back  { background: #0f2228; border: 1.5px solid #1e4a30; transform: rotateY(180deg); }
-    .card-hint  {
-      font-size: 0.57rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;
-      color: #1e3d60; margin-bottom: 10px;
-    }
-    .card-back .card-hint { color: #1e4a30; }
-    .card-q { font-size: 0.96rem; font-weight: 600; color: #d5ecfc; line-height: 1.4; }
-    .card-a { font-size: 0.78rem; color: #7ad4a0; line-height: 1.66; }
-    .card-cat-lbl { position: absolute; bottom: 12px; right: 16px; font-size: 0.57rem; color: #1e3050; }
-
-    @keyframes knewFlash {
-      0%  { border-color: #1e4a30; }
-      40% { border-color: #4ff7b0; box-shadow: 0 0 20px rgba(79,247,176,0.25); }
-      100%{ border-color: #1e4a30; }
-    }
-    .card-back.flash { animation: knewFlash 0.5s ease; }
-
-    .fc-btns { display: flex; gap: 9px; align-items: center; flex-shrink: 0; }
-    .fc-btn {
-      padding: 8px 20px; font-size: 0.74rem; font-weight: 600;
-      border-radius: 8px; cursor: pointer; border: 1px solid transparent;
-      transition: all 0.15s; letter-spacing: 0.02em;
-    }
-    .btn-flip { background: #0d2235; border-color: #1e4060; color: #5bc8f5; }
-    .btn-flip:hover { border-color: #4fc3f7; background: #102c40; }
-    .btn-knew { background: #0d2818; border-color: #1e5030; color: #4ff7b0; }
-    .btn-knew:hover { border-color: #4ff7b0; background: #103020; }
-    .btn-next { background: #0a1628; border-color: #1e3050; color: #3a6a8a; }
-    .btn-next:hover { border-color: #3a6a8a; color: #7aacca; }
-
-    .fc-prog { display: flex; flex-direction: column; align-items: center; gap: 7px; flex-shrink: 0; }
-    .fc-count { font-size: 0.67rem; color: #2a5070; }
-    .fc-dots { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; max-width: 380px; }
-    .fc-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: #111e2e; border: 1px solid #1e3050; transition: all 0.2s;
-    }
-    .fc-dot.cur   { background: #2d7dd2; border-color: #4fc3f7; box-shadow: 0 0 5px rgba(79,195,247,0.4); }
-    .fc-dot.known { background: #2dd28a; border-color: #4ff7b0; }
-
-    /* ── FOOTER ──────────────────────────────────────── */
-    .footer {
-      flex-shrink: 0; padding: 6px 24px; border-top: 1px solid #0e1e2e;
-      display: flex; align-items: center; gap: 18px; font-size: 0.61rem;
-    }
-    .legend-item { display: flex; align-items: center; gap: 5px; color: #1e4060; }
-    .legend-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .footer-note { margin-left: auto; color: #142030; }
-
-    /* ── MOBILE ──────────────────────────────────────── */
-    @media (max-width: 720px) {
-      body { overflow: auto; height: auto; }
-      #view-map { flex-direction: column; }
-      .panel { width: 100%; min-height: 200px; border-left: none; border-top: 1px solid #162840; }
-      .diagram-wrap { padding: 18px 14px 0 38px; min-height: 300px; }
-      .tier-labels { padding: 26px 0 44px; }
-      .stats-grid { grid-template-columns: 1fr 1fr; }
-      .driver-grid { grid-template-columns: 1fr; }
-      .about-wrap { padding: 20px 16px 32px; }
-      .role-table { font-size: 0.68rem; }
-      .fc-btns { flex-wrap: wrap; justify-content: center; }
+    @media (max-width:720px) {
+      body { overflow:auto; height:auto; }
+      #view-map { flex-direction:column; }
+      .panel { width:100%; min-height:200px; border-left:none; border-top:1px solid #162840; }
+      .diagram-wrap { padding:18px 14px 0 38px; min-height:300px; }
+      .tier-labels { padding:26px 0 44px; }
+      .stats-grid,.drivers-cols { grid-template-columns:1fr 1fr; }
+      .driver-grid { grid-template-columns:1fr; }
+      .about-wrap,.events-wrap { padding:20px 16px 32px; }
+      .fc-btns { flex-wrap:wrap; justify-content:center; }
+      .compare-table { font-size:0.65rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="hdr">
   <div class="hdr-icon">📊</div>
   <div>
@@ -377,78 +261,40 @@
   <div class="hdr-pill">eFX Utbildning</div>
 </div>
 
-<!-- TABS -->
 <div class="tabs">
   <button class="tab-btn active" data-tab="map">Marknadskarta</button>
   <button class="tab-btn" data-tab="about">Om FX-marknaden</button>
+  <button class="tab-btn" data-tab="events">Vad rör FX?</button>
   <button class="tab-btn" data-tab="cards">Flashkort</button>
 </div>
 
-<!-- ══════════════════════════════════════════════════ -->
-<!-- MAP VIEW                                          -->
-<!-- ══════════════════════════════════════════════════ -->
+<!-- ══ MAP VIEW ══ -->
 <div id="view-map">
   <div class="diagram-wrap">
     <button id="sim-btn">▶ Simulera handel</button>
-
     <div class="tier-labels">
       <div class="tier-lbl" style="color:#2d7dd2"><div class="tier-lbl-dot" style="background:#2d7dd2"></div>Kunder</div>
       <div class="tier-lbl" style="color:#2dd28a"><div class="tier-lbl-dot" style="background:#2dd28a"></div>Banker</div>
       <div class="tier-lbl" style="color:#8a4dd2"><div class="tier-lbl-dot" style="background:#8a4dd2"></div>Infra</div>
     </div>
-
     <div id="diagram">
       <svg id="arrows-svg"></svg>
       <div class="diagram-row">
-        <div class="node" data-id="corp" data-tier="client">
-          <div class="node-cat">Köpsida</div>
-          <div class="node-name">Företags-<br>kunder</div>
-          <div class="node-sub">importörer · exportörer</div>
-        </div>
-        <div class="node" data-id="hedge" data-tier="client">
-          <div class="node-cat">Köpsida</div>
-          <div class="node-name">Hedge-<br>fonder</div>
-          <div class="node-sub">makro · kvant · HFT</div>
-        </div>
-        <div class="node" data-id="retail" data-tier="client">
-          <div class="node-cat">Köpsida</div>
-          <div class="node-name">Privat-<br>kunder</div>
-          <div class="node-sub">via mäklare</div>
-        </div>
+        <div class="node" data-id="corp"  data-tier="client"><div class="node-cat">Köpsida</div><div class="node-name">Företags-<br>kunder</div><div class="node-sub">importörer · exportörer</div></div>
+        <div class="node" data-id="hedge" data-tier="client"><div class="node-cat">Köpsida</div><div class="node-name">Hedge-<br>fonder</div><div class="node-sub">makro · kvant · HFT</div></div>
+        <div class="node" data-id="retail" data-tier="client"><div class="node-cat">Köpsida</div><div class="node-name">Privat-<br>kunder</div><div class="node-sub">via mäklare</div></div>
       </div>
       <div class="diagram-row">
-        <div class="node" data-id="bankA" data-tier="bank">
-          <div class="node-cat">Säljsida</div>
-          <div class="node-name">Investment-<br>bank A</div>
-          <div class="node-sub">JPM · Citi · Deutsche</div>
-        </div>
-        <div class="node" data-id="bankB" data-tier="bank">
-          <div class="node-cat">Säljsida</div>
-          <div class="node-name">Investment-<br>bank B</div>
-          <div class="node-sub">UBS · Barclays · MS</div>
-        </div>
+        <div class="node" data-id="bankA" data-tier="bank"><div class="node-cat">Säljsida</div><div class="node-name">Investment-<br>bank A</div><div class="node-sub">JPM · Citi · Deutsche</div></div>
+        <div class="node" data-id="bankB" data-tier="bank"><div class="node-cat">Säljsida</div><div class="node-name">Investment-<br>bank B</div><div class="node-sub">UBS · Barclays · MS</div></div>
       </div>
       <div class="diagram-row">
-        <div class="node" data-id="lp" data-tier="infra">
-          <div class="node-cat">Icke-bank MM</div>
-          <div class="node-name">Likviditets-<br>leverantörer</div>
-          <div class="node-sub">XTX · Citadel · Jump</div>
-        </div>
-        <div class="node" data-id="ecn" data-tier="infra">
-          <div class="node-cat">Handelsplats</div>
-          <div class="node-name">ECN</div>
-          <div class="node-sub">EBS · Refinitiv</div>
-        </div>
+        <div class="node" data-id="lp"  data-tier="infra"><div class="node-cat">Icke-bank MM</div><div class="node-name">Likviditets-<br>leverantörer</div><div class="node-sub">XTX · Citadel · Jump</div></div>
+        <div class="node" data-id="ecn" data-tier="infra"><div class="node-cat">Handelsplats</div><div class="node-name">ECN</div><div class="node-sub">EBS · Refinitiv</div></div>
       </div>
     </div>
-
-    <div id="sim-status">
-      <span class="sim-pill" id="sim-step-pill"></span>
-      <span id="sim-msg"></span>
-    </div>
+    <div id="sim-status"><span class="sim-pill" id="sim-step-pill"></span><span id="sim-msg"></span></div>
   </div>
-
-  <!-- INFO PANEL -->
   <div class="panel">
     <div class="panel-hint" id="panel-hint">
       <div class="hint-ring">←</div>
@@ -458,9 +304,9 @@
       <div id="pb-badge" class="pb-badge"></div>
       <div id="pb-title" class="pb-title"></div>
       <div class="pb-section">Vad de gör</div>
-      <div id="pb-desc" class="pb-desc"></div>
+      <div id="pb-desc"  class="pb-desc"></div>
       <div class="pb-section">Varför de deltar</div>
-      <div id="pb-why" class="pb-why"></div>
+      <div id="pb-why"   class="pb-why"></div>
       <div class="pb-section">Vad de tjänar på</div>
       <div id="pb-earns" class="pb-earns"></div>
       <div class="pb-section">Nyckeltermer</div>
@@ -471,173 +317,269 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════ -->
-<!-- OM FX VIEW                                        -->
-<!-- ══════════════════════════════════════════════════ -->
+<!-- ══ OM FX VIEW ══ -->
 <div id="view-about">
   <div class="about-wrap">
-
     <div class="about-hero">
       <h1>Varför finns valutamarknaden?</h1>
       <p>Varje land har sin egen valuta. När ett svenskt företag köper komponenter från Japan måste det betala i yen — inte kronor. En pensionsfond med global portfölj är exponerad mot dussintals valutor varje dag. Valutamarknaden (FX) löser detta grundläggande problem: den gör det möjligt att växla från en valuta till en annan, dygnet runt, fem dagar i veckan, för belopp från hundralappar till miljarder. Utan den stannar världshandeln.</p>
     </div>
-
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-num">$7,5T</div>
-        <div class="stat-label">daglig handelsvolym — mer än alla världens börser kombinerat</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">300×</div>
-        <div class="stat-label">större daglig volym än NYSE:s aktiehandel</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">24/5</div>
-        <div class="stat-label">öppen dygnet runt, måndag–fredag, följer solen runt jorden</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">40%</div>
-        <div class="stat-label">av global volym sker i London — världens FX-centrum</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">&gt;75%</div>
-        <div class="stat-label">av handeln är elektronisk (eFX) — algoritmer, inte telefoner</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">~5</div>
-        <div class="stat-label">toppbanker kontrollerar 50% av global spotvolym</div>
-      </div>
+      <div class="stat-card"><div class="stat-num">$7,5T</div><div class="stat-label">daglig handelsvolym — mer än alla världens börser kombinerat</div></div>
+      <div class="stat-card"><div class="stat-num">300×</div><div class="stat-label">större daglig volym än NYSE:s aktiehandel</div></div>
+      <div class="stat-card"><div class="stat-num">24/5</div><div class="stat-label">öppen dygnet runt, måndag–fredag, följer solen runt jorden</div></div>
+      <div class="stat-card"><div class="stat-num">40%</div><div class="stat-label">av global volym sker i London — världens FX-centrum</div></div>
+      <div class="stat-card"><div class="stat-num">&gt;75%</div><div class="stat-label">av handeln är elektronisk (eFX) — algoritmer, inte telefoner</div></div>
+      <div class="stat-card"><div class="stat-num">~5</div><div class="stat-label">toppbanker kontrollerar 50% av global spotvolym</div></div>
     </div>
-
     <div class="about-section">
       <h2>Varför handlas det för så enorma belopp?</h2>
-      <p>Det är lätt att tro att den höga volymen beror på världshandel — företag som växlar valutor för import och export. Men det är bara en liten del av bilden. Så här fördelas volymen ungefär:</p>
+      <p>Det är lätt att tro att den höga volymen beror på världshandel — företag som växlar valutor för import och export. Men det är bara en liten del av bilden:</p>
       <div class="driver-grid">
-        <div class="driver-card">
-          <div class="driver-pct">~5%</div>
-          <div class="driver-name">Internationell handel</div>
-          <div class="driver-desc">Företag som importerar och exporterar varor och tjänster. Nödvändigt men relativt litet.</div>
-        </div>
-        <div class="driver-card">
-          <div class="driver-pct">~10%</div>
-          <div class="driver-name">Hedging</div>
-          <div class="driver-desc">Företag och fonder som säkrar framtida valutaexponering via terminer och optioner.</div>
-        </div>
-        <div class="driver-card">
-          <div class="driver-pct">~15%</div>
-          <div class="driver-name">Kapitalflöden &amp; investeringar</div>
-          <div class="driver-desc">Institutioner som omplacerar kapital globalt — köper aktier, obligationer eller fastigheter i andra länder.</div>
-        </div>
-        <div class="driver-card">
-          <div class="driver-pct">~70%</div>
-          <div class="driver-name">Spekulation &amp; market making</div>
-          <div class="driver-desc">Hedgefonder, banker och elektroniska market makers som handlar för att tjäna på prisskillnader. Denna volym driver likviditeten för alla andra.</div>
-        </div>
+        <div class="driver-card"><div class="driver-pct">~5%</div><div class="driver-name">Internationell handel</div><div class="driver-desc">Företag som importerar och exporterar. Nödvändigt men relativt litet.</div></div>
+        <div class="driver-card"><div class="driver-pct">~10%</div><div class="driver-name">Hedging</div><div class="driver-desc">Företag och fonder som säkrar framtida valutaexponering via terminer och optioner.</div></div>
+        <div class="driver-card"><div class="driver-pct">~15%</div><div class="driver-name">Kapitalflöden</div><div class="driver-desc">Institutioner som omplacerar kapital globalt — aktier, obligationer och fastigheter i andra länder.</div></div>
+        <div class="driver-card"><div class="driver-pct">~70%</div><div class="driver-name">Spekulation &amp; market making</div><div class="driver-desc">Hedgefonder, banker och elektroniska market makers som handlar på prisskillnader. Denna volym driver likviditeten för alla andra.</div></div>
       </div>
-      <p>Spekulationen är alltså inte ett problem — den är det som gör marknaden så likvid att ett företag kan växla miljoner kronor på sekunder till ett pris nära det teoretiska "riktiga" priset.</p>
+      <p>Spekulationen är alltså inte ett problem — den är det som gör marknaden så likvid att ett företag kan växla miljoner kronor på sekunder.</p>
     </div>
-
     <div class="about-section">
       <h2>Hur FX-marknaden öppnar och stänger</h2>
-      <p>Det finns ingen central börs. FX handlas over-the-counter (OTC) — direkt mellan parter globalt. Marknaden följer handelsdagen runt jordklotet: <strong style="color:#c8e8f8">Sydney → Tokyo → London → New York</strong>. Den största aktiviteten sker när London och New York överlappar (13:00–17:00 svensk tid). London-sessionen är dominant med ~40% av global volym, tack vare geografins överlapp med både Asien och Amerika.</p>
+      <p>Det finns ingen central börs. FX handlas over-the-counter (OTC) — direkt mellan parter globalt. Marknaden följer handelsdagen runt jordklotet: <strong style="color:#c8e8f8">Sydney → Tokyo → London → New York</strong>. Den största aktiviteten sker när London och New York överlappar (13:00–17:00 svensk tid). London-sessionen är dominant med ~40% av global volym.</p>
     </div>
-
     <div class="about-section">
       <h2>Aktörernas roll och motivation</h2>
       <table class="role-table">
-        <thead>
-          <tr>
-            <th>Aktör</th>
-            <th>Varför de deltar</th>
-            <th>Vad de tjänar på</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Aktör</th><th>Varför de deltar</th><th>Vad de tjänar på</th></tr></thead>
         <tbody>
-          <tr>
-            <td class="rt-name"><span class="rt-dot" style="background:#2d7dd2"></span>Företagskunder</td>
-            <td class="rt-why">Måste växla valuta för handel och lön — inget val</td>
-            <td class="rt-earns">Tjänar inte på FX. Målet är att minimera kostnader</td>
-          </tr>
-          <tr>
-            <td class="rt-name"><span class="rt-dot" style="background:#2d7dd2"></span>Hedgefonder</td>
-            <td class="rt-why">FX är det mest likvida instrumentet för global makroexponering</td>
-            <td class="rt-earns">Kursrörelser, carry trade (ränteskillnader), statistiska mönster</td>
-          </tr>
-          <tr>
-            <td class="rt-name"><span class="rt-dot" style="background:#2d7dd2"></span>Privatkunder</td>
-            <td class="rt-why">Spekulation med hävstång via CFD-mäklare</td>
-            <td class="rt-earns">Rätt prisprediktion — ~75% förlorar pengar långsiktigt</td>
-          </tr>
-          <tr>
-            <td class="rt-name"><span class="rt-dot" style="background:#2dd28a"></span>Investmentbanker</td>
-            <td class="rt-why">FX är en av bankens mest lönsamma divisioner</td>
-            <td class="rt-earns">Bid/offer-spread på kundaffärer + internalisering</td>
-          </tr>
-          <tr>
-            <td class="rt-name"><span class="rt-dot" style="background:#8a4dd2"></span>Likviditets­leverantörer</td>
-            <td class="rt-why">Tjäna spread på extremt hög volym utan att ta riktningsrisk</td>
-            <td class="rt-earns">Mikroskopisk spread × miljarder i daglig volym</td>
-          </tr>
-          <tr>
-            <td class="rt-name"><span class="rt-dot" style="background:#8a4dd2"></span>ECN (EBS/Refinitiv)</td>
-            <td class="rt-why">Tillhandahålla neutral mötesplats för interbankymarknaden</td>
-            <td class="rt-earns">Transaktionsavgifter per matchad affär</td>
-          </tr>
+          <tr><td class="rt-name"><span class="rt-dot" style="background:#2d7dd2"></span>Företagskunder</td><td class="rt-why">Måste växla valuta för handel och lön — inget val</td><td class="rt-earns">Tjänar inte på FX. Målet är att minimera kostnader</td></tr>
+          <tr><td class="rt-name"><span class="rt-dot" style="background:#2d7dd2"></span>Hedgefonder</td><td class="rt-why">FX är det mest likvida instrumentet för global makroexponering</td><td class="rt-earns">Kursrörelser, carry trade (ränteskillnader), statistiska mönster</td></tr>
+          <tr><td class="rt-name"><span class="rt-dot" style="background:#2d7dd2"></span>Privatkunder</td><td class="rt-why">Spekulation med hävstång via CFD-mäklare</td><td class="rt-earns">Rätt prisprediktion — ~75% förlorar pengar långsiktigt</td></tr>
+          <tr><td class="rt-name"><span class="rt-dot" style="background:#2dd28a"></span>Investmentbanker</td><td class="rt-why">FX är en av bankens mest lönsamma divisioner</td><td class="rt-earns">Bid/offer-spread på kundaffärer + internalisering</td></tr>
+          <tr><td class="rt-name"><span class="rt-dot" style="background:#8a4dd2"></span>Likviditetsleverantörer</td><td class="rt-why">Tjäna spread på extremt hög volym utan riktningsrisk</td><td class="rt-earns">Mikroskopisk spread × miljarder i daglig volym</td></tr>
+          <tr><td class="rt-name"><span class="rt-dot" style="background:#8a4dd2"></span>ECN (EBS/Refinitiv)</td><td class="rt-why">Tillhandahålla neutral mötesplats för interbankmarknaden</td><td class="rt-earns">Transaktionsavgifter per matchad affär</td></tr>
         </tbody>
       </table>
     </div>
-
     <div class="about-section">
       <h2>Hur spreaden fördelas längs kedjan</h2>
-      <p>Varje lager i marknadsstrukturen tar en bit av spreaden. En privatkund betalar mest — en institutionell hedgefond betalar nästan ingenting. Så här ser en typisk EUR/USD-affär ut:</p>
+      <p>Varje lager i marknadsstrukturen tar en bit av spreaden. En privatkund betalar mest — en institutionell hedgefond betalar nästan ingenting:</p>
       <div class="chain-wrap">
-        <div class="chain-row client">
-          <span class="chain-actor">Privatkund (via mäklare)</span>
-          <span class="chain-spread">~2,0 pips</span>
-          <span class="chain-note">— betalar till mäklaren</span>
-        </div>
-        <div class="chain-arrow" style="padding-left:16px">↓</div>
-        <div class="chain-row bank">
-          <span class="chain-actor">Retail-mäklare → Bank</span>
-          <span class="chain-spread">~0,5 pips</span>
-          <span class="chain-note">— mäklarens kostnad, tar 1,5 pips i vinst</span>
-        </div>
-        <div class="chain-arrow" style="padding-left:16px">↓</div>
-        <div class="chain-row bank">
-          <span class="chain-actor">Hedgefond → Bank</span>
-          <span class="chain-spread">~0,3 pips</span>
-          <span class="chain-note">— banken quotar till fonden</span>
-        </div>
-        <div class="chain-arrow" style="padding-left:16px">↓</div>
-        <div class="chain-row lp">
-          <span class="chain-actor">Bank → Likviditetsleverantör</span>
-          <span class="chain-spread">~0,1 pips</span>
-          <span class="chain-note">— banken säkrar risk, LP tar position</span>
-        </div>
-        <div class="chain-arrow" style="padding-left:16px">↓</div>
-        <div class="chain-row ecn">
-          <span class="chain-actor">LP → ECN (interbank)</span>
-          <span class="chain-spread">~0,02 pips</span>
-          <span class="chain-note">— det "riktiga" priset, nära noll spread</span>
-        </div>
+        <div class="chain-row client"><span class="chain-actor">Privatkund (via mäklare)</span><span class="chain-spread">~2,0 pips</span><span class="chain-note">— betalar till mäklaren</span></div>
+        <div class="chain-arrow">↓</div>
+        <div class="chain-row bank"><span class="chain-actor">Retail-mäklare → Bank</span><span class="chain-spread">~0,5 pips</span><span class="chain-note">— mäklarens kostnad, tar 1,5 pips i vinst</span></div>
+        <div class="chain-arrow">↓</div>
+        <div class="chain-row bank"><span class="chain-actor">Hedgefond → Bank</span><span class="chain-spread">~0,3 pips</span><span class="chain-note">— banken quotar till fonden</span></div>
+        <div class="chain-arrow">↓</div>
+        <div class="chain-row lp"><span class="chain-actor">Bank → Likviditetsleverantör</span><span class="chain-spread">~0,1 pips</span><span class="chain-note">— banken säkrar risk</span></div>
+        <div class="chain-arrow">↓</div>
+        <div class="chain-row ecn"><span class="chain-actor">LP → ECN (interbank)</span><span class="chain-spread">~0,02 pips</span><span class="chain-note">— det "riktiga" referenspriset</span></div>
       </div>
-      <p>Banker tjänar på att internalisera — det vill säga matcha köp och sälj internt utan att gå till LP eller ECN. Ju mer som internaliseras, desto mer av spreaden stannar i banken.</p>
     </div>
-
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════ -->
-<!-- FLASHCARD VIEW                                    -->
-<!-- ══════════════════════════════════════════════════ -->
+<!-- ══ VAD RÖR FX VIEW ══ -->
+<div id="view-events">
+  <div class="events-wrap">
+
+    <!-- FX vs andra marknader -->
+    <div style="margin-bottom:24px">
+      <h2>FX vs Aktier &amp; Obligationer — viktiga skillnader</h2>
+      <table class="compare-table">
+        <thead>
+          <tr><th>Egenskap</th><th class="ct-fx">FX (Valuta)</th><th class="ct-eq">Aktier</th><th class="ct-bo">Obligationer</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="ct-prop">Vad prissätts</td><td class="ct-fx">Relativ valutastyrka (alltid ett par)</td><td class="ct-eq">Absolut bolagsvärde</td><td class="ct-bo">Kreditrisk + förväntad ränta</td></tr>
+          <tr><td class="ct-prop">Öppettider</td><td class="ct-fx">24h/5d — reagerar direkt på nyheter</td><td class="ct-eq">8h/dag, lokal börstid</td><td class="ct-bo">24h/5d (OTC)</td></tr>
+          <tr><td class="ct-prop">Primär drivkraft</td><td class="ct-fx">Räntor, centralbanker, makrodata</td><td class="ct-eq">Bolagsvinster, tillväxt</td><td class="ct-bo">Inflation, kreditrisk</td></tr>
+          <tr><td class="ct-prop">Reaktion vid kris</td><td class="ct-fx">Safe-haven flöden → USD, CHF, JPY</td><td class="ct-eq">Bred nedgång</td><td class="ct-bo">Flight to quality → US Treasuries</td></tr>
+          <tr><td class="ct-prop">Hävstång (retail)</td><td class="ct-fx">20–500×</td><td class="ct-eq">1–5×</td><td class="ct-bo">10–30× (pro)</td></tr>
+          <tr><td class="ct-prop">Daglig volym</td><td class="ct-fx">$7,5 biljoner</td><td class="ct-eq">~$0,5 biljoner</td><td class="ct-bo">~$3 biljoner</td></tr>
+        </tbody>
+      </table>
+      <div class="ct-note">
+        <strong>Den viktigaste skillnaden:</strong> FX prissätter alltid ett par. EUR/USD är inte "eurons värde" — det är euron <em>relativt</em> dollarn. Om ECB sänker räntan men Fed sänker ännu mer, kan EUR/USD faktiskt stiga. Det är alltid den relativa förändringen som räknas.<br><br>
+        <strong>FX reagerar på förväntningar, inte på fakta:</strong> Om marknaden förväntar sig att Fed höjer 25 bp och de höjer 25 bp — USD rör sig knappt. Om de höjer 50 bp (surprise) — USD stärks kraftigt. Avvikelsen från konsensus, inte beslutet i sig, driver rörelsen.
+      </div>
+    </div>
+
+    <!-- Vad stärker / försvagar en valuta -->
+    <div style="margin-bottom:24px">
+      <h2>Vad gör en valuta stark eller svag?</h2>
+      <div class="drivers-cols">
+        <div class="dc strong">
+          <div class="dc-title">↑ Stärker valutan</div>
+          <div class="di"><div class="di-ico">📈</div><div><div class="di-name">Höga räntor</div><div class="di-desc">Attraherar utländskt kapital som vill ha avkastning — kapital flödar in och köper valutan</div></div></div>
+          <div class="di"><div class="di-ico">💪</div><div><div class="di-name">Stark ekonomisk tillväxt</div><div class="di-desc">Attraherar investeringar och kapitalflöden till landet</div></div></div>
+          <div class="di"><div class="di-ico">📉</div><div><div class="di-name">Låg inflation</div><div class="di-desc">Bevarar köpkraften relativt andra länder — valutor i länder med låg inflation tenderar att stärkas</div></div></div>
+          <div class="di"><div class="di-ico">⚖️</div><div><div class="di-name">Handelsöverskott</div><div class="di-desc">Exportinkomster ger konstant köptryck på valutan — utlandet måste köpa din valuta för att betala dig</div></div></div>
+          <div class="di"><div class="di-ico">🏛️</div><div><div class="di-name">Safe-haven status</div><div class="di-desc">USD, CHF och JPY stärks vid global kris när investerare söker trygghet</div></div></div>
+          <div class="di"><div class="di-ico">🔐</div><div><div class="di-name">Politisk stabilitet</div><div class="di-desc">Minskar riskpremien — stabila länder attraherar långsiktigt kapital</div></div></div>
+        </div>
+        <div class="dc weak">
+          <div class="dc-title">↓ Försvagar valutan</div>
+          <div class="di"><div class="di-ico">🔻</div><div><div class="di-name">Låga / negativa räntor</div><div class="di-desc">Kapital söker bättre avkastning på annat håll — konstant säljtryck på valutan (se Japan 2022–2024)</div></div></div>
+          <div class="di"><div class="di-ico">🔥</div><div><div class="di-name">Hög inflation</div><div class="di-desc">Valutan förlorar köpkraft. Om centralbanken inte agerar accelererar försvagningen (se Turkiet)</div></div></div>
+          <div class="di"><div class="di-ico">🛒</div><div><div class="di-name">Handelsunderskott</div><div class="di-desc">Landet måste sälja sin valuta för att betala import — konstant säljtryck</div></div></div>
+          <div class="di"><div class="di-ico">🗳️</div><div><div class="di-name">Politisk osäkerhet</div><div class="di-desc">Investerare kräver riskpremie. Elektioner, folkomröstningar och konflikter skapar volatilitet (se Brexit)</div></div></div>
+          <div class="di"><div class="di-ico">🏚️</div><div><div class="di-name">Centralbanken förlorar trovärdighet</div><div class="di-desc">Om marknaden tror att centralbanken inte kan eller vill försvara sin valuta accelererar försvagningen</div></div></div>
+          <div class="di"><div class="di-ico">💸</div><div><div class="di-name">Skulder i utländsk valuta</div><div class="di-desc">Tillväxtmarknader med USD-skulder drabbas hårt när USD stärks — skuldtjänsten ökar i lokal valuta</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event accordion -->
+    <div>
+      <h2>Verkliga händelser — steg för steg</h2>
+
+      <!-- Japan -->
+      <div class="ev-card">
+        <div class="ev-header">
+          <div class="ev-flag">🇯🇵</div>
+          <div class="ev-meta">
+            <div class="ev-name">Japan — Den svaga yenen</div>
+            <div class="ev-sub">2022–2024 · Carry trade &amp; räntedifferens</div>
+          </div>
+          <div class="ev-badge red">USD/JPY +40%</div>
+          <div class="ev-chev">▼</div>
+        </div>
+        <div class="ev-body">
+          <div class="ev-intro">Yenen tappade 40% mot dollarn på drygt två år — den kraftigaste försvagningen sedan 1970-talet. Orsaken var inte ekonomisk katastrof i Japan, utan en extrem räntedifferens skapad av att Fed och BOJ gick i helt olika riktningar.</div>
+          <ol class="ev-steps">
+            <li class="ev-step"><div class="ev-num">1</div><div class="ev-step-txt"><strong>Januari 2022:</strong> USA:s inflation når 7,5% — högsta på 40 år. Fed signalerar aggressiva räntehöjningar.</div></li>
+            <li class="ev-step"><div class="ev-num">2</div><div class="ev-step-txt"><strong>Mars 2022 – Juli 2023:</strong> Fed höjer styrräntan från 0% till 5,25% på 16 månader — historiens snabbaste höjningscykel.</div></li>
+            <li class="ev-step"><div class="ev-num">3</div><div class="ev-step-txt"><strong>BOJ håller emot:</strong> Japan har haft deflation och svag tillväxt i decennier. BOJ behåller styrräntan på −0,1% och tillämpar "yield curve control" (YCC) — taket på 10-åriga japanska statsobligationer hålls nära 0%.</div></li>
+            <li class="ev-step"><div class="ev-num">4</div><div class="ev-step-txt"><strong>Räntedifferensen exploderar:</strong> USA ger ~5,25% avkastning, Japan −0,1%. Skillnaden: ~5,35 procentenheter — rekord.</div></li>
+            <li class="ev-step"><div class="ev-num">5</div><div class="ev-step-txt"><strong>Carry trade flödar in:</strong> Globala investerare lånar yen (nästan gratis), växlar till dollar och placerar i US Treasuries med 5%+ avkastning. Detta kräver att de säljer yen och köper dollar — konstant säljtryck på JPY.</div></li>
+            <li class="ev-step"><div class="ev-num">6</div><div class="ev-step-txt"><strong>USD/JPY stiger från 115 (jan 2022) till 160 (april 2024)</strong> — yenen halverades i köpkraft mot dollarn. Importpriser exploderar i Japan.</div></li>
+            <li class="ev-step"><div class="ev-num">7</div><div class="ev-step-txt"><strong>Japan intervenerar:</strong> Japanska finansministeriet köper yen (säljer dollar-reserver) för uppskattningsvis 60–100 miljarder USD 2022–2024. Rörelserna bromsas tillfälligt men vänder när fundamenta kvarstår.</div></li>
+            <li class="ev-step"><div class="ev-num">8</div><div class="ev-step-txt"><strong>Vändning 2024:</strong> BOJ börjar höja räntan (till 0,5%), Fed signalerar sänkningar. Räntedifferensen minskar — yen stärks och carry trades reverseras snabbt i en "unwind".</div></li>
+          </ol>
+          <div class="ev-tags"><span class="ev-tag">carry trade</span><span class="ev-tag">räntedifferens</span><span class="ev-tag">yield curve control</span><span class="ev-tag">centralbanksintervention</span><span class="ev-tag">safe haven</span></div>
+          <div class="ev-takeaway"><strong>Nyckelinsikt:</strong> Yenens svaghet handlade inte om att Japan var ett svagt land — det handlade om relativ räntenivå. En valuta kan vara svag trots stark ekonomi om dess räntor är lägre än konkurrenternas.</div>
+          <div class="ev-diff"><strong>Skillnad mot aktier:</strong> Om ett japanskt bolag rapporterar bra vinster stiger aktien. Men yenen föll trots att Japan exporterade mer än någonsin — för kapitalflödena dominerade handelskurserna. FX styrs av kapitalmarknadslogik, inte bara handelslogik.</div>
+        </div>
+      </div>
+
+      <!-- Brexit -->
+      <div class="ev-card">
+        <div class="ev-header">
+          <div class="ev-flag">🇬🇧</div>
+          <div class="ev-meta">
+            <div class="ev-name">Brexit — GBP-kollapsen</div>
+            <div class="ev-sub">Juni 2016 · Politisk chockreaktion</div>
+          </div>
+          <div class="ev-badge red">GBP/USD −10% på 4 h</div>
+          <div class="ev-chev">▼</div>
+        </div>
+        <div class="ev-body">
+          <div class="ev-intro">Natten 23–24 juni 2016 föll pundet med ~10% mot dollarn på fyra timmar. Det var historiens snabbaste stora valutarörelse i fredstid. FX prissatte hela resultatet av Storbritanniens EU-omröstning medan Londonbörsen fortfarande var stängd.</div>
+          <ol class="ev-steps">
+            <li class="ev-step"><div class="ev-num">1</div><div class="ev-step-txt"><strong>23 juni, kl 22:00:</strong> Röstningslokalerna stänger. Opinionsmätningar och marknadskonsensum pekar på "Remain" — GBP/USD handlas på ~1,4876.</div></li>
+            <li class="ev-step"><div class="ev-num">2</div><div class="ev-step-txt"><strong>Kl 00:30:</strong> Sunderland (ett bellwether-distrikt) röstar 61% Leave — starkare än förväntat. Algoritmiska system som följer valresultat börjar automatiskt sälja GBP.</div></li>
+            <li class="ev-step"><div class="ev-num">3</div><div class="ev-step-txt"><strong>Kl 01:30–03:00:</strong> Fler Leave-regioner bekräftar trenden. Hedgefonder och banker ökar säljpositionerna. GBP/USD faller till 1,38. Spreaden i GBP-par vidgas kraftigt — LP:er drar sig tillbaka.</div></li>
+            <li class="ev-step"><div class="ev-num">4</div><div class="ev-step-txt"><strong>Kl 04:30:</strong> Formellt Leave-resultat. Premiärminister Cameron meddelar avgång. GBP/USD kraschar till lägst ~1,3224 — ett fall på ~10,5% från kvällens nivå.</div></li>
+            <li class="ev-step"><div class="ev-num">5</div><div class="ev-step-txt"><strong>Varför föll GBP?</strong> Brexit signalerade: (a) extrem politisk osäkerhet, (b) risk för att Storbrittanien förlorar tillgång till EU:s inre marknad, (c) möjlig splittring av unionen (Skottland, Nordirland), (d) förväntad BOE-sänkning.</div></li>
+            <li class="ev-step"><div class="ev-num">6</div><div class="ev-step-txt"><strong>Börsen öppnar kl 09:00:</strong> FX hade redan prissatt resultatet fullt ut — FTSE 100 föll 8% vid öppning men återhämtade sig delvis. GBP förblev svagt i månader.</div></li>
+          </ol>
+          <div class="ev-tags"><span class="ev-tag">politisk risk</span><span class="ev-tag">likviditetsvakuum</span><span class="ev-tag">algoritmisk handel</span><span class="ev-tag">24h-handel</span><span class="ev-tag">osäkerhetspremie</span></div>
+          <div class="ev-diff"><strong>Skillnad mot aktier:</strong> Börsen var stängd — den kunde inte prissätta nyheterna förrän nio timmar efter att resultatet var klart. FX hade redan gjort jobbet. Det visar FX-marknadens unika roll som det snabbaste och mest likvida prisinstrumentet.</div>
+        </div>
+      </div>
+
+      <!-- SNB -->
+      <div class="ev-card">
+        <div class="ev-header">
+          <div class="ev-flag">🇨🇭</div>
+          <div class="ev-meta">
+            <div class="ev-name">SNB-chocken — CHF-peg avskaffas</div>
+            <div class="ev-sub">Januari 2015 · Centralbank reverserar fastkurs</div>
+          </div>
+          <div class="ev-badge red">EUR/CHF −25% på sekunder</div>
+          <div class="ev-chev">▼</div>
+        </div>
+        <div class="ev-body">
+          <div class="ev-intro">Den 15 januari 2015 avskaffade Schweiziska nationalbanken (SNB) plötsligt den fastkurs de försvarat sedan 2011. EUR/CHF föll 25% på sekunder — den mest extrema FX-rörelsen på modern tid. Mäklare gick bankrutt, marknaden frös, och hela FX-industrin fick ett wake-up call om centralbankscyklar.</div>
+          <ol class="ev-steps">
+            <li class="ev-step"><div class="ev-num">1</div><div class="ev-step-txt"><strong>2011:</strong> Schweizisk franc stärks kraftigt under eurokrisen (safe haven). SNB inför ett golv: 1 EUR = minimum 1,20 CHF. SNB lovar att försvara det "med obegränsade resurser".</div></li>
+            <li class="ev-step"><div class="ev-num">2</div><div class="ev-step-txt"><strong>2011–2014:</strong> SNB köper massivt med EUR (säljer CHF) för att hålla golvet. SNB:s valutareserver sväller till motsvarande 80% av Schweiz BNP. Marknaden tror att golvet är orubbligt.</div></li>
+            <li class="ev-step"><div class="ev-num">3</div><div class="ev-step-txt"><strong>December 2014:</strong> ECB signalerar massivt QE-program för januari 2015. EUR förväntas försvagas kraftigt. SNB inser att det skulle kräva obegränsade EUR-köp för att hålla golvet — orealistiskt.</div></li>
+            <li class="ev-step"><div class="ev-num">4</div><div class="ev-step-txt"><strong>15 januari 2015, kl 10:30:</strong> SNB meddelar utan förvarning att de avskaffar golvkursen. EUR/CHF kraschar från 1,2000 till 0,8500 på sekunder — ett fall på 28%.</div></li>
+            <li class="ev-step"><div class="ev-num">5</div><div class="ev-step-txt"><strong>Marknaden frysser:</strong> LP:er och banker slutar prissätta CHF-par — ingen vet var "rätt" kurs är. Spreaden öppnar till 500+ pips. Ordrar kan inte exekveras.</div></li>
+            <li class="ev-step"><div class="ev-num">6</div><div class="ev-step-txt"><strong>Konsekvenser:</strong> Retail-mäklare OANDA, Alpari UK och flera andra förklarar sig insolventa — kunder hade short CHF-positioner med förluster som översteg deras insättningar. Hävstång förstärkte katastrofen.</div></li>
+          </ol>
+          <div class="ev-tags"><span class="ev-tag">peg</span><span class="ev-tag">fastkurs</span><span class="ev-tag">centralbanksintervention</span><span class="ev-tag">black swan</span><span class="ev-tag">likviditetsvakuum</span><span class="ev-tag">hävstång</span></div>
+          <div class="ev-takeaway"><strong>Nyckelinsikt:</strong> En fastkurs ackumulerar rörelserna den hindrar — när den släpper frigörs all undertryckt rörelse på en gång. "Orubbliga" centralbanksgarantier är aldrig orubbliga. Ju längre en peg håller, desto mer explosiv är avkopplingen.</div>
+        </div>
+      </div>
+
+      <!-- Fed 2022 / USD-styrka -->
+      <div class="ev-card">
+        <div class="ev-header">
+          <div class="ev-flag">🇺🇸</div>
+          <div class="ev-meta">
+            <div class="ev-name">Fed höjer aggressivt — Dollar-supercykeln</div>
+            <div class="ev-sub">2022 · Inflation + räntehöjningar + euroenergi­kris</div>
+          </div>
+          <div class="ev-badge blue">DXY +18% · EUR/USD till paritet</div>
+          <div class="ev-chev">▼</div>
+        </div>
+        <div class="ev-body">
+          <div class="ev-intro">Under 2022 stärktes dollarn med 18% mot en korg av valutor — den kraftigaste USD-rörelsen på 20 år. EUR/USD föll under 1,0 för första gången sedan 2002. Orsaken var en kombination av Feds aggressivaste höjningscykel på 40 år och ett Europa som drabbades av energikris till följd av Rysslands invasion av Ukraina.</div>
+          <ol class="ev-steps">
+            <li class="ev-step"><div class="ev-num">1</div><div class="ev-step-txt"><strong>Januari 2022:</strong> USA:s KPI når 7,5% (högsta sedan 1982). Fed-ordförande Powell signalerar att inflationen inte längre är "transitorisk".</div></li>
+            <li class="ev-step"><div class="ev-num">2</div><div class="ev-step-txt"><strong>Mars–November 2022:</strong> Fed höjer vid varje möte — fyra höjningar på 75 bp i rad. Marknaden prisar in en "terminal rate" på 5%+. Kapital globalt roterar till dollar-tillgångar.</div></li>
+            <li class="ev-step"><div class="ev-num">3</div><div class="ev-step-txt"><strong>24 februari 2022:</strong> Ryssland invaderar Ukraina. Europa är beroende av rysk naturgas — energipriser exploderar. Europeisk industri drabbas hårt. ECB tvekar att höja räntan i samma takt som Fed.</div></li>
+            <li class="ev-step"><div class="ev-num">4</div><div class="ev-step-txt"><strong>"Dollar smile"-effekten:</strong> USD stärks i två scenarion — (a) global kris (safe haven) och (b) USA:s tillväxt och räntor är starka. 2022 träffade båda: krig i Europa + Feds höjningar. EUR/USD faller.</div></li>
+            <li class="ev-step"><div class="ev-num">5</div><div class="ev-step-txt"><strong>Juli–September 2022:</strong> EUR/USD faller under 1,0000 — paritet — för första gången sedan 2002. DXY (dollar-index) toppar på ~114. Tillväxtmarknadsvalutor som TRY, BRL och ZAR tvingas ned kraftigt.</div></li>
+            <li class="ev-step"><div class="ev-num">6</div><div class="ev-step-txt"><strong>2023–2024:</strong> Inflationen kyls ner. Fed pausar, sedan sänker. Dollarn återvänder mot mer normala nivåer men behåller styrka relativt låg-räntevalutor (JPY, CHF).</div></li>
+          </ol>
+          <div class="ev-tags"><span class="ev-tag">räntedifferens</span><span class="ev-tag">capital flows</span><span class="ev-tag">DXY</span><span class="ev-tag">dollar smile</span><span class="ev-tag">terms of trade</span><span class="ev-tag">EM-valutarisk</span></div>
+          <div class="ev-diff"><strong>Skillnad mot aktier:</strong> S&amp;P 500 föll 20% under 2022 — och USD stärktes 18%. Aktier och USD gick alltså i motsatt riktning. Det visar att FX inte följer aktier: stark USD kan samexistera med svaga börser när kapital söker trygga räntebärande dollar-tillgångar istället för aktierisk.</div>
+        </div>
+      </div>
+
+      <!-- Turkiet -->
+      <div class="ev-card">
+        <div class="ev-header">
+          <div class="ev-flag">🇹🇷</div>
+          <div class="ev-meta">
+            <div class="ev-name">Turkiska liran — Politisk intervention</div>
+            <div class="ev-sub">2018–2024 · Centralbanken förlorar sin independens</div>
+          </div>
+          <div class="ev-badge red">TRY/USD −90%</div>
+          <div class="ev-chev">▼</div>
+        </div>
+        <div class="ev-body">
+          <div class="ev-intro">Den turkiska liran förlorade 90% av sitt värde mot dollarn på sex år — inte på grund av krig eller naturkatastrof, utan på grund av ett ovanligt ekonomiskt experiment: en regering som tvingade centralbanken att sänka räntan mitt i hög inflation.</div>
+          <ol class="ev-steps">
+            <li class="ev-step"><div class="ev-num">1</div><div class="ev-step-txt"><strong>Normalekonomin:</strong> Hög inflation → centralbanken höjer räntan → dyrare att låna → lägre efterfrågan → inflation kyls ned → valutan stärks.</div></li>
+            <li class="ev-step"><div class="ev-num">2</div><div class="ev-step-txt"><strong>2018–2021 under Erdogan:</strong> Erdogan pressar och avsätter centralbankchefer som vill höja räntan. Hans teori: "höga räntor orsakar inflation" (tvärt mot standardekonomi).</div></li>
+            <li class="ev-step"><div class="ev-num">3</div><div class="ev-step-txt"><strong>Konsekvens:</strong> Utländska investerare flyr turkiska tillgångar — de vill inte hålla en valuta vars centralbank inte kan agera fritt. TRY säljs, reserver töms.</div></li>
+            <li class="ev-step"><div class="ev-num">4</div><div class="ev-step-txt"><strong>Inflationsspiral startar:</strong> Svagare lira → dyrare import → högre konsumentpriser → ännu mer inflationsförväntningar → ännu svagare lira. Inflationen når 85% (2022).</div></li>
+            <li class="ev-step"><div class="ev-num">5</div><div class="ev-step-txt"><strong>USD/TRY-rörelsen:</strong> Från 3,5 (2018) → 8 (2021) → 18 (2022) → 33 (2024). Varje gång Erdogan signalerade ytterligare räntesänkningar kollapsade liran ytterligare.</div></li>
+            <li class="ev-step"><div class="ev-num">6</div><div class="ev-step-txt"><strong>2023–2024 (U-sväng):</strong> Efter valet 2023 tillsätter Erdogan ortodox finansminister. Centralbanken höjer räntan till 50% (2024). Stabilisering sker, men förlorade 90% av köpkraften återkommer aldrig.</div></li>
+          </ol>
+          <div class="ev-tags"><span class="ev-tag">centralbanksindependens</span><span class="ev-tag">inflationsspiral</span><span class="ev-tag">kapitalflykt</span><span class="ev-tag">valutareserver</span><span class="ev-tag">politisk risk</span></div>
+          <div class="ev-takeaway"><strong>Nyckelinsikt:</strong> Centralbanksindependens är inte en formsak — det är det som gör att marknaden litar på en valuta. Så snart marknaden tror att politiken styr räntebesluten prissätts en riskpremie in i valutan. Turkiet är läroboksexemplet på vad som händer utan det.</div>
+        </div>
+      </div>
+
+    </div><!-- /events -->
+  </div>
+</div>
+
+<!-- ══ FLASHCARD VIEW ══ -->
 <div id="view-cards">
   <div class="fc-cats">
     <button class="fc-cat active" data-cat="all">Alla kort</button>
     <button class="fc-cat" data-cat="fx-basics">FX Grunderna</button>
     <button class="fc-cat" data-cat="efx">eFX Begrepp</button>
     <button class="fc-cat" data-cat="market-structure">Marknadsstruktur</button>
+    <button class="fc-cat" data-cat="events">Marknadshändelser</button>
   </div>
-
   <div class="card-scene">
     <div id="card-inner" class="card-inner">
       <div class="card-face card-front">
@@ -651,20 +593,17 @@
       </div>
     </div>
   </div>
-
   <div class="fc-btns">
     <button class="fc-btn btn-flip" id="btn-flip">↻ Vänd</button>
     <button class="fc-btn btn-knew" id="btn-knew">✓ Kunde det</button>
     <button class="fc-btn btn-next" id="btn-next">Nästa →</button>
   </div>
-
   <div class="fc-prog">
     <div class="fc-count" id="fc-count"></div>
     <div class="fc-dots" id="fc-dots"></div>
   </div>
 </div>
 
-<!-- FOOTER -->
 <div class="footer">
   <div class="legend-item"><div class="legend-dot" style="background:#2d7dd2"></div>Köpsida</div>
   <div class="legend-item"><div class="legend-dot" style="background:#2dd28a"></div>Säljsida</div>
@@ -679,374 +618,254 @@
 // ── NODDATA ───────────────────────────────────────────────────────────────────
 var NODES = {
   corp: {
-    title: 'Företagskunder', tier: 'client', label: 'Köpsida',
-    desc: 'Multinationella företag, importörer och exportörer som behöver växla valutor för handelspapper, löneutbetalningar eller finansförvaltning. De skickar prisförfrågningar (RFQ) via bankens e-portal och prioriterar säkerhet i exekvering framför bästa möjliga pris. De handlar i stora men sällan återkommande volymer.',
-    why: 'De har inget val — internationell handel kräver valutaväxling. En svensk exportör som fakturerar i USD måste sälja dollar för att täcka kronkostnader. En importör som köper från Japan behöver yen. Utan FX-marknaden stannar världshandeln.',
-    earns: 'Företag tjänar inte pengar på FX — för dem är det en transaktionskostnad. Målet är att minimera spreadar och eliminera valutarisk via terminskontrakt (hedging), inte att spekulera.',
-    terms: ['RFQ', 'e-portal', 'FX-termin', 'NDF', 'STP', 'WMR Fix', 'säkringskvot'],
-    connects: ['bankA', 'bankB']
+    title:'Företagskunder', tier:'client', label:'Köpsida',
+    desc:'Multinationella företag, importörer och exportörer som behöver växla valutor för handelspapper, löneutbetalningar eller finansförvaltning. De skickar prisförfrågningar (RFQ) via bankens e-portal och prioriterar säkerhet i exekvering framför bästa möjliga pris.',
+    why:'De har inget val — internationell handel kräver valutaväxling. En svensk exportör som fakturerar i USD måste sälja dollar för att täcka kronkostnader. Utan FX-marknaden stannar världshandeln.',
+    earns:'Företag tjänar inte pengar på FX — för dem är det en transaktionskostnad. Målet är att minimera spreadar och eliminera valutarisk via terminskontrakt, inte att spekulera.',
+    terms:['RFQ','e-portal','FX-termin','NDF','STP','WMR Fix','säkringskvot'],
+    connects:['bankA','bankB']
   },
   hedge: {
-    title: 'Hedgefonder', tier: 'client', label: 'Köpsida',
-    desc: 'Sofistikerade, priskänsliga investerare som kör makro-, kvant-, CTA- eller stat-arb-strategier. De ansluter till banker via FIX API för att ta emot strömmande priser och exekvera med hög hastighet. De shoppar likviditet på flera ställen och är känsliga för "last look" — bankens rätt att neka en handel efter att ha sett ordern.',
-    why: 'FX är det mest likvida finansiella instrumentet som finns. En hedgefond som tror att EUR ska stärkas mot USD kan ta en position på miljarder inom sekunder och avsluta den lika snabbt — det går inte att göra i aktier eller råvaror på samma sätt.',
-    earns: 'Tjänar på kursrörelser (taktisk handel), carry trade (låna i låg-räntevaluta, placera i hög-räntevaluta) och statistiska samband. De betalar spread och latens — varje millisekund av försening kostar pengar i konkurrensen om bästa pris.',
-    terms: ['last look', 'FIX API', 'streaming', 'toxiskt flöde', 'fyllnadsgrad', 'latens', 'prime brokerage'],
-    connects: ['bankA', 'bankB']
+    title:'Hedgefonder', tier:'client', label:'Köpsida',
+    desc:'Sofistikerade, priskänsliga investerare som kör makro-, kvant-, CTA- eller stat-arb-strategier. De ansluter till banker via FIX API för att ta emot strömmande priser och exekvera med hög hastighet. De är känsliga för "last look" — bankens rätt att neka en handel efter att ha sett ordern.',
+    why:'FX är det mest likvida finansiella instrumentet som finns. En hedgefond som tror att EUR ska stärkas mot USD kan ta en position på miljarder inom sekunder och avsluta den lika snabbt.',
+    earns:'Tjänar på kursrörelser (taktisk handel), carry trade (låna i låg-räntevaluta, placera i hög-räntevaluta) och statistiska samband. Varje millisekund av försening kostar pengar i konkurrensen om bästa pris.',
+    terms:['last look','FIX API','streaming','toxiskt flöde','fyllnadsgrad','latens','prime brokerage'],
+    connects:['bankA','bankB']
   },
   retail: {
-    title: 'Privatkunder', tier: 'client', label: 'Köpsida',
-    desc: 'Privatpersoner som handlar valuta via mäklare som IG, OANDA eller Saxo Bank, vanligtvis via CFD:er eller rullande spotkontrakt. Retail-mäklare internaliserar kundorder ("B-bokning") eller säkrar nettoexponeringen hos en primärbank ("A-bokning"). Privatkunder betalar de bredaste spreadarna i hela kedjan.',
-    why: 'Lockas av hävstång (möjlighet att kontrollera stora positioner med litet kapital), 24/5-handel och låga insatskrav. FX marknadsförs ofta som ett sätt att tjäna pengar på kortsiktiga kursrörelser.',
-    earns: 'Tjänar om prisförutsägelsen är rätt. Verkligheten är tuff: ~75% av alla retail-traders förlorar pengar på lång sikt, dels pga spreaden, dels pga finansieringskostnader på övernattpositioner, dels pga psykologiska fällor.',
-    terms: ['CFD', 'rullande spot', 'A-bokning', 'B-bokning', 'spread', 'pip', 'hävstång'],
-    connects: ['bankA', 'bankB']
+    title:'Privatkunder', tier:'client', label:'Köpsida',
+    desc:'Privatpersoner som handlar valuta via mäklare som IG, OANDA eller Saxo Bank, vanligtvis via CFD:er eller rullande spotkontrakt. Retail-mäklare internaliserar kundorder ("B-bokning") eller säkrar nettoexponeringen hos en primärbank ("A-bokning"). Privatkunder betalar de bredaste spreadarna i hela kedjan.',
+    why:'Lockas av hävstång, 24/5-handel och låga insatskrav. FX marknadsförs som ett sätt att tjäna på kortsiktiga kursrörelser.',
+    earns:'Tjänar om prisförutsägelsen är rätt. ~75% av alla retail-traders förlorar pengar på lång sikt, dels pga spreaden, dels pga finansieringskostnader, dels pga psykologiska fällor.',
+    terms:['CFD','rullande spot','A-bokning','B-bokning','spread','pip','hävstång'],
+    connects:['bankA','bankB']
   },
   bankA: {
-    title: 'Investmentbank (Dealer)', tier: 'bank', label: 'Säljsida',
-    desc: 'Den centrala intermediären i elektronisk FX. Banken tar emot kundflöde, prissätter det via en eFX-motor och beslutar om den ska internalisera risken (matcha mot motsatt kundflöde i egen bok) eller säkra den externt hos en LP eller ECN. Banker konkurrerar på spreadstyrka, fyllnadsgrad och plattformskvalitet.',
-    why: 'FX är en av bankens mest lönsamma verksamheter relativt kapitalbehovet. Till skillnad från aktiehandel behöver en FX-dealerdesk minimalt med eget kapital för att prissätta kunder — och med hög internalisering kan vinsten bli enorm på stor volym.',
-    earns: 'Primärt: bid/offer-spreaden på kundaffärer. Sekundärt: internalisering — banken tjänar hela spreaden när den matchar en kunds köp mot en annan kunds sälj internt. Tertiärt: avgifter för e-portalstjänster och custody.',
-    terms: ['internalisering', 'riskåtervinning', 'eFX-motor', 'SDP', 'last look', 'algoprissättning'],
-    connects: ['corp', 'hedge', 'retail', 'bankB', 'lp', 'ecn']
+    title:'Investmentbank (Dealer)', tier:'bank', label:'Säljsida',
+    desc:'Den centrala intermediären i elektronisk FX. Banken tar emot kundflöde, prissätter det via en eFX-motor och beslutar om den ska internalisera risken (matcha mot motsatt kundflöde) eller säkra den externt hos en LP eller ECN.',
+    why:'FX är en av bankens mest lönsamma verksamheter relativt kapitalbehovet. Med hög internalisering kan vinsten bli enorm på stor volym.',
+    earns:'Primärt: bid/offer-spreaden på kundaffärer. Sekundärt: internalisering — banken tjänar hela spreaden när den matchar en kunds köp mot en annan kunds sälj internt.',
+    terms:['internalisering','riskåtervinning','eFX-motor','SDP','last look','algoprissättning'],
+    connects:['corp','hedge','retail','bankB','lp','ecn']
   },
   bankB: {
-    title: 'Investmentbank (Dealer)', tier: 'bank', label: 'Säljsida',
-    desc: 'Identisk roll som Bank A — en av de stora FX-dealerbankerna som JPMorgan, UBS, Citi, Deutsche Bank eller Barclays. De fem största kontrollerar ~50% av global spotvolym. Banker handlar också med varandra på interbankmarknaden via bilaterala kreditlinjer eller prime brokerage på ECN:er.',
-    why: 'Banker med stort kundnätverk kan internalisera mer flöde — ett stort kundflöde skapar en naturlig kvittningsbas (nettorisken är liten men marginalerna är stora). FX-desken är ofta den mest lönsamma handelsenheten i banken.',
-    earns: 'Samma som Bank A. Vinnaren är den bank som lyckas kombinera störst kundflöde, högst internaliseringsgrad och snabbast prissättningsmotor.',
-    terms: ['dealerbank', 'market making', 'lager', 'bilateral kreditlinje', 'prime broker', 'internalisering'],
-    connects: ['corp', 'hedge', 'retail', 'bankA', 'lp', 'ecn']
+    title:'Investmentbank (Dealer)', tier:'bank', label:'Säljsida',
+    desc:'Identisk roll som Bank A. De fem största FX-dealerbankerna (JPMorgan, UBS, Citi, Deutsche Bank, Barclays) kontrollerar ~50% av global spotvolym. Banker handlar också med varandra på interbankmarknaden via bilaterala kreditlinjer eller prime brokerage på ECN:er.',
+    why:'Banker med stort kundnätverk kan internalisera mer flöde — ett stort kundflöde skapar en naturlig kvittningsbas. FX-desken är ofta den mest lönsamma handelsenheten i banken.',
+    earns:'Samma som Bank A. Vinnaren är den bank som kombinerar störst kundflöde, högst internaliseringsgrad och snabbast prissättningsmotor.',
+    terms:['dealerbank','market making','lager','bilateral kreditlinje','prime broker','internalisering'],
+    connects:['corp','hedge','retail','bankA','lp','ecn']
   },
   lp: {
-    title: 'Likviditetsleverantörer (LP)', tier: 'infra', label: 'Icke-bank MM',
-    desc: 'Tänk på en LP som en grossist i ett lager. Banken är affären, kunden är konsumenten — och LP:n är grossisten som ständigt erbjuder priser till banken. LP:er som XTX Markets, Citadel Securities och Jump Trading strömmar kontinuerliga tvåvägspriser (bid och ask) till banker och ECN:er, dygnet runt, med en hastighet som mänskliga traders aldrig kan matcha.\n\nDe ersatte traditionella röstmäklare på 2000-talet. Nu sköts allt av algoritmer som reagerar på marknadsinformation på mikrosekunder.',
-    why: 'En bank som tar emot ett kundköp på EUR 50 miljoner vill inte sitta med den positionen — den riskerar att förlora om euron faller. LP:n erbjuder banken ett pris för att ta över den positionen direkt. LP:n hanterar sedan sin egen risk via snabb hedging på ECN:er eller andra LP:er.',
-    earns: 'Tjänar på bid/offer-spreaden multiplicerat med enorma volymer. Marginalen per affär är mikroskopisk — ofta 0,1–0,5 pip — men kompenseras av volym. XTX hanterar uppskattningsvis $100+ miljarder per dag. Risken är att deras prismodell är felaktig — om de quotar ett dåligt pris och marknaden rör sig emot dem kan de förlora pengar snabbt.',
-    terms: ['XTX Markets', 'streaming', 'tvåvägspris', 'avvisningsfrekvens', 'co-location', 'algohandel', 'HFT'],
-    connects: ['bankA', 'bankB', 'ecn']
+    title:'Likviditetsleverantörer (LP)', tier:'infra', label:'Icke-bank MM',
+    desc:'Tänk på en LP som en grossist. Banken är affären, kunden är konsumenten — och LP:n är grossisten som ständigt erbjuder priser till banken. LP:er som XTX Markets, Citadel Securities och Jump Trading strömmar kontinuerliga tvåvägspriser dygnet runt, med en hastighet som mänskliga traders aldrig kan matcha. De ersatte traditionella röstmäklare på 2000-talet.',
+    why:'En bank som tar emot ett kundköp på EUR 50 miljoner vill inte sitta med den positionen — den riskerar att förlora om euron faller. LP:n erbjuder banken ett pris för att ta över positionen direkt och hanterar sin egen risk via snabb hedging på ECN:er.',
+    earns:'Tjänar på bid/offer-spreaden × enorma volymer. Marginalen per affär är 0,1–0,5 pip — men XTX hanterar ~$100+ miljarder per dag. Risken är att prismodellen är felaktig och marknaden rör sig emot dem.',
+    terms:['XTX Markets','streaming','tvåvägspris','avvisningsfrekvens','co-location','algohandel','HFT'],
+    connects:['bankA','bankB','ecn']
   },
   ecn: {
-    title: 'ECN (EBS / Refinitiv)', tier: 'infra', label: 'Handelsplats',
-    desc: 'Tänk på en ECN som Nasdaq — men för valuta och bara för institutioner. Det är en elektronisk marknadsplats (en "orderbok") där banker och LP:er lägger ut sina bästa bud och erbjudanden anonymt. Ingen vet vem motparten är. Den bästa köparen matchas mot den bästa säljaren automatiskt.\n\nEBS Market (ägt av CME Group) dominerar EUR/USD och USD/JPY. Refinitiv Matching täcker övriga G10-par. Kreditåtkomst sker via prime brokerage — fonden eller banken handlar under prime brokerns namn.',
-    why: 'Banker och LP:er behöver en neutral plats att handla med varandra utan att behöva ha kreditförhållanden med alla motparter i världen. ECN löser detta: prime brokern borgar för krediten, ECN:en matchar priserna anonymt.',
-    earns: 'ECN tjänar transaktionsavgifter per matchad affär (brokerage fees). CME Group är börsnoterat och genererar stabila intäkter från volymen på EBS. Refinitiv (numera LSEG) gör detsamma. De konkurrerar om volym genom att erbjuda snabbare matchning och lägre avgifter.',
-    terms: ['CLOB', 'EBS', 'Refinitiv', 'anonym matchning', 'referenspris', 'prime broker', 'fast kurs'],
-    connects: ['bankA', 'bankB', 'lp']
+    title:'ECN (EBS / Refinitiv)', tier:'infra', label:'Handelsplats',
+    desc:'Tänk på en ECN som Nasdaq — men för valuta och bara för institutioner. Det är en elektronisk marknadsplats (orderbok) där banker och LP:er lägger ut sina bästa bud och erbjudanden anonymt. Ingen vet vem motparten är. Den bästa köparen matchas mot den bästa säljaren automatiskt. EBS dominerar EUR/USD och USD/JPY. Refinitiv täcker övriga G10-par.',
+    why:'Banker och LP:er behöver en neutral plats att handla med varandra utan att behöva ha kreditförhållanden med alla motparter. ECN löser detta: prime brokern borgar för krediten, ECN:en matchar priserna anonymt.',
+    earns:'ECN tjänar transaktionsavgifter per matchad affär. CME Group (äger EBS) och LSEG (äger Refinitiv) är börsnoterade och genererar stabila intäkter från volymen.',
+    terms:['CLOB','EBS','Refinitiv','anonym matchning','referenspris','prime broker','fast kurs'],
+    connects:['bankA','bankB','lp']
   }
 };
 
 var EDGES = [
-  { from: 'corp',   to: 'bankA', label: 'RFQ',         bidir: true },
-  { from: 'hedge',  to: 'bankA', label: '',             bidir: true },
-  { from: 'hedge',  to: 'bankB', label: '',             bidir: true },
-  { from: 'retail', to: 'bankB', label: 'orderflöde',  bidir: true },
-  { from: 'bankA',  to: 'bankB', label: 'interbank',   bidir: true },
-  { from: 'bankA',  to: 'lp',   label: 'säkring',      bidir: true },
-  { from: 'bankB',  to: 'lp',   label: '',             bidir: true },
-  { from: 'bankA',  to: 'ecn',  label: '',             bidir: true },
-  { from: 'bankB',  to: 'ecn',  label: 'prissättning', bidir: true },
-  { from: 'lp',     to: 'ecn',  label: 'LP-priser',    bidir: true }
+  {from:'corp',  to:'bankA',label:'RFQ',        bidir:true},
+  {from:'hedge', to:'bankA',label:'',           bidir:true},
+  {from:'hedge', to:'bankB',label:'',           bidir:true},
+  {from:'retail',to:'bankB',label:'orderflöde', bidir:true},
+  {from:'bankA', to:'bankB',label:'interbank',  bidir:true},
+  {from:'bankA', to:'lp',   label:'säkring',    bidir:true},
+  {from:'bankB', to:'lp',   label:'',           bidir:true},
+  {from:'bankA', to:'ecn',  label:'',           bidir:true},
+  {from:'bankB', to:'ecn',  label:'prissättning',bidir:true},
+  {from:'lp',    to:'ecn',  label:'LP-priser',  bidir:true}
 ];
 
-var CONN_NAMES = {
-  corp: 'Företagskunder', hedge: 'Hedgefonder', retail: 'Privatkunder',
-  bankA: 'Investmentbank A', bankB: 'Investmentbank B',
-  lp: 'Likviditetsleverantörer', ecn: 'ECN (EBS / Refinitiv)'
-};
+var CONN_NAMES = {corp:'Företagskunder',hedge:'Hedgefonder',retail:'Privatkunder',bankA:'Investmentbank A',bankB:'Investmentbank B',lp:'Likviditetsleverantörer',ecn:'ECN (EBS / Refinitiv)'};
 
-// ── SVG-HJÄLPARE ──────────────────────────────────────────────────────────────
+// ── SVG ───────────────────────────────────────────────────────────────────────
 var svgEl = document.getElementById('arrows-svg');
-function ns(tag) { return document.createElementNS('http://www.w3.org/2000/svg', tag); }
+function ns(tag){return document.createElementNS('http://www.w3.org/2000/svg',tag);}
+function getCenter(el){var dr=document.getElementById('diagram').getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-dr.left+r.width/2,y:r.top-dr.top+r.height/2,w:r.width,h:r.height};}
+function edgePt(cx,cy,w,h,tx,ty){var pad=7,dx=tx-cx,dy=ty-cy;if(!dx&&!dy)return{x:cx,y:cy};var s=Math.min((w/2+pad)/Math.abs(dx),(h/2+pad)/Math.abs(dy));return{x:cx+dx*s,y:cy+dy*s};}
 
-function getCenter(el) {
-  var dr = document.getElementById('diagram').getBoundingClientRect();
-  var r  = el.getBoundingClientRect();
-  return { x: r.left - dr.left + r.width/2, y: r.top - dr.top + r.height/2, w: r.width, h: r.height };
-}
-function edgePt(cx, cy, w, h, tx, ty) {
-  var pad = 7, dx = tx-cx, dy = ty-cy;
-  if (!dx && !dy) return { x: cx, y: cy };
-  var s = Math.min((w/2+pad)/Math.abs(dx), (h/2+pad)/Math.abs(dy));
-  return { x: cx+dx*s, y: cy+dy*s };
-}
-
-function renderArrows(activeId) {
-  svgEl.innerHTML = '';
-  var defs = ns('defs');
-  [['dim','#1e3d60'],['hi','#00ccf0']].forEach(function(p) {
-    var m = ns('marker');
-    m.setAttribute('id','arr-'+p[0]); m.setAttribute('markerWidth','7');
-    m.setAttribute('markerHeight','7'); m.setAttribute('refX','5');
-    m.setAttribute('refY','3.5'); m.setAttribute('orient','auto');
-    var path = ns('path'); path.setAttribute('d','M0,0.5 L0,6.5 L7,3.5 z');
-    path.setAttribute('fill', p[1]); m.appendChild(path); defs.appendChild(m);
+function renderArrows(activeId){
+  svgEl.innerHTML='';
+  var defs=ns('defs');
+  [['dim','#1e3d60'],['hi','#00ccf0']].forEach(function(p){
+    var m=ns('marker');m.setAttribute('id','arr-'+p[0]);m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('refX','5');m.setAttribute('refY','3.5');m.setAttribute('orient','auto');
+    var path=ns('path');path.setAttribute('d','M0,0.5 L0,6.5 L7,3.5 z');path.setAttribute('fill',p[1]);m.appendChild(path);defs.appendChild(m);
   });
   svgEl.appendChild(defs);
-  var nm = {};
-  document.querySelectorAll('.node').forEach(function(n) { nm[n.dataset.id] = n; });
-  EDGES.forEach(function(e) {
-    var fa = nm[e.from], ta = nm[e.to]; if (!fa || !ta) return;
-    var fc = getCenter(fa), tc = getCenter(ta);
-    var fp = edgePt(fc.x,fc.y,fc.w,fc.h,tc.x,tc.y);
-    var tp = edgePt(tc.x,tc.y,tc.w,tc.h,fc.x,fc.y);
-    var act = activeId && (e.from===activeId || e.to===activeId);
-    var mk = act ? 'arr-hi' : 'arr-dim';
-    var line = ns('line');
-    line.setAttribute('x1',fp.x); line.setAttribute('y1',fp.y);
-    line.setAttribute('x2',tp.x); line.setAttribute('y2',tp.y);
-    line.setAttribute('stroke', act?'#00ccf0':'#1e3d60');
-    line.setAttribute('stroke-width', act?'1.8':'1.2');
-    line.setAttribute('opacity', act?'1':'0.55');
+  var nm={};document.querySelectorAll('.node').forEach(function(n){nm[n.dataset.id]=n;});
+  EDGES.forEach(function(e){
+    var fa=nm[e.from],ta=nm[e.to];if(!fa||!ta)return;
+    var fc=getCenter(fa),tc=getCenter(ta),fp=edgePt(fc.x,fc.y,fc.w,fc.h,tc.x,tc.y),tp=edgePt(tc.x,tc.y,tc.w,tc.h,fc.x,fc.y);
+    var act=activeId&&(e.from===activeId||e.to===activeId);
+    var mk=act?'arr-hi':'arr-dim';
+    var line=ns('line');
+    line.setAttribute('x1',fp.x);line.setAttribute('y1',fp.y);line.setAttribute('x2',tp.x);line.setAttribute('y2',tp.y);
+    line.setAttribute('stroke',act?'#00ccf0':'#1e3d60');line.setAttribute('stroke-width',act?'1.8':'1.2');line.setAttribute('opacity',act?'1':'0.55');
     line.setAttribute('marker-end','url(#'+mk+')');
-    if (e.bidir) line.setAttribute('marker-start','url(#'+mk+')');
+    if(e.bidir)line.setAttribute('marker-start','url(#'+mk+')');
     svgEl.appendChild(line);
-    if (act && e.label) {
-      var t = ns('text');
-      t.setAttribute('x',(fp.x+tp.x)/2); t.setAttribute('y',(fp.y+tp.y)/2);
-      t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','middle');
-      t.setAttribute('fill','#00b8d8'); t.setAttribute('font-size','9.5');
-      t.setAttribute('font-weight','600');
-      t.setAttribute('font-family','Segoe UI, system-ui, sans-serif');
-      t.textContent = e.label; svgEl.appendChild(t);
-    }
+    if(act&&e.label){var t=ns('text');t.setAttribute('x',(fp.x+tp.x)/2);t.setAttribute('y',(fp.y+tp.y)/2);t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','middle');t.setAttribute('fill','#00b8d8');t.setAttribute('font-size','9.5');t.setAttribute('font-weight','600');t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');t.textContent=e.label;svgEl.appendChild(t);}
   });
 }
 
 // ── PANEL ─────────────────────────────────────────────────────────────────────
-var activeId = null;
-var tierBadge = { client: 'badge-client', bank: 'badge-bank', infra: 'badge-infra' };
-
-function openPanel(id) {
-  var d = NODES[id];
-  document.getElementById('panel-hint').style.display = 'none';
+var activeId=null;
+var tierBadge={client:'badge-client',bank:'badge-bank',infra:'badge-infra'};
+function openPanel(id){
+  var d=NODES[id];
+  document.getElementById('panel-hint').style.display='none';
   document.getElementById('panel-body').classList.add('open');
-  var badge = document.getElementById('pb-badge');
-  badge.className = 'pb-badge ' + tierBadge[d.tier];
-  badge.textContent = d.label;
-  document.getElementById('pb-title').textContent = d.title;
-  document.getElementById('pb-desc').textContent  = d.desc;
-  document.getElementById('pb-why').textContent   = d.why;
-  document.getElementById('pb-earns').textContent = d.earns;
-  document.getElementById('pb-terms').innerHTML = d.terms
-    .map(function(t) { return '<span class="term">'+t+'</span>'; }).join('');
-  document.getElementById('pb-conns').innerHTML = d.connects
-    .map(function(cid) {
-      return '<div class="conn-item"><span class="conn-arr">⇄</span><span>'+CONN_NAMES[cid]+'</span></div>';
-    }).join('');
+  var badge=document.getElementById('pb-badge');badge.className='pb-badge '+tierBadge[d.tier];badge.textContent=d.label;
+  document.getElementById('pb-title').textContent=d.title;
+  document.getElementById('pb-desc').textContent=d.desc;
+  document.getElementById('pb-why').textContent=d.why;
+  document.getElementById('pb-earns').textContent=d.earns;
+  document.getElementById('pb-terms').innerHTML=d.terms.map(function(t){return'<span class="term">'+t+'</span>';}).join('');
+  document.getElementById('pb-conns').innerHTML=d.connects.map(function(cid){return'<div class="conn-item"><span class="conn-arr">⇄</span><span>'+CONN_NAMES[cid]+'</span></div>';}).join('');
 }
-function closePanel() {
-  document.getElementById('panel-hint').style.display = '';
-  document.getElementById('panel-body').classList.remove('open');
-}
+function closePanel(){document.getElementById('panel-hint').style.display='';document.getElementById('panel-body').classList.remove('open');}
 
-document.querySelectorAll('.node').forEach(function(node) {
-  node.addEventListener('click', function(e) {
+document.querySelectorAll('.node').forEach(function(node){
+  node.addEventListener('click',function(e){
     e.stopPropagation();
-    var id = node.dataset.id;
-    if (activeId === id) {
-      node.classList.remove('active'); activeId = null; closePanel(); renderArrows(null); return;
-    }
-    document.querySelectorAll('.node.active').forEach(function(n) { n.classList.remove('active'); });
-    node.classList.add('active'); activeId = id; openPanel(id); renderArrows(id);
+    var id=node.dataset.id;
+    if(activeId===id){node.classList.remove('active');activeId=null;closePanel();renderArrows(null);return;}
+    document.querySelectorAll('.node.active').forEach(function(n){n.classList.remove('active');});
+    node.classList.add('active');activeId=id;openPanel(id);renderArrows(id);
   });
 });
-document.addEventListener('click', function() {
-  if (!activeId) return;
-  document.querySelectorAll('.node.active').forEach(function(n) { n.classList.remove('active'); });
-  activeId = null; closePanel(); renderArrows(null);
+document.addEventListener('click',function(){
+  if(!activeId)return;
+  document.querySelectorAll('.node.active').forEach(function(n){n.classList.remove('active');});
+  activeId=null;closePanel();renderArrows(null);
 });
 
-// ── FLIKAR ────────────────────────────────────────────────────────────────────
-document.querySelectorAll('.tab-btn').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    var tab = btn.dataset.tab;
-    document.querySelectorAll('.tab-btn').forEach(function(b) {
-      b.classList.toggle('active', b.dataset.tab === tab);
-    });
-    document.getElementById('view-map').style.display   = tab === 'map'   ? 'flex' : 'none';
-    var aboutEl = document.getElementById('view-about');
-    if (tab === 'about') { aboutEl.classList.add('active'); }
-    else                 { aboutEl.classList.remove('active'); }
-    var cardsEl = document.getElementById('view-cards');
-    if (tab === 'cards') { cardsEl.classList.add('active'); }
-    else                 { cardsEl.classList.remove('active'); }
-    if (tab === 'map') { renderArrows(activeId); }
+// ── TABS ─────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var tab=btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab===tab);});
+    document.getElementById('view-map').style.display=tab==='map'?'flex':'none';
+    document.getElementById('view-about').classList.toggle('active',tab==='about');
+    document.getElementById('view-events').classList.toggle('active',tab==='events');
+    document.getElementById('view-cards').classList.toggle('active',tab==='cards');
+    if(tab==='map')renderArrows(activeId);
   });
 });
 
-// ── SIMULERING ────────────────────────────────────────────────────────────────
-var SIM_PATH  = ['hedge', 'bankA', 'lp', 'bankA', 'hedge'];
-var SIM_STEPS = [
-  null,
-  { pill: 'Steg 1 / 4', msg: 'Hedgefond skickar RFQ — banken quotar en spread på ~0,5 pip',       color: '#4ff7b0' },
-  { pill: 'Steg 2 / 4', msg: 'Exekveringspunkt — LP fyller banken till ett snävare internt pris',  color: '#b880f7' },
-  { pill: 'Steg 3 / 4', msg: 'Spread fångad — banken tjänade bid/offer-skillnaden ✓',              color: '#4ff7b0' },
-  { pill: 'Steg 4 / 4', msg: 'Kund fylld — handel slutförd ✓',                                     color: '#4fc3f7' }
+// ── SIMULATE ──────────────────────────────────────────────────────────────────
+var SIM_PATH=['hedge','bankA','lp','bankA','hedge'];
+var SIM_STEPS=[null,
+  {pill:'Steg 1 / 4',msg:'Hedgefond skickar RFQ — banken quotar en spread på ~0,5 pip',color:'#4ff7b0'},
+  {pill:'Steg 2 / 4',msg:'Exekveringspunkt — LP fyller banken till ett snävare internt pris',color:'#b880f7'},
+  {pill:'Steg 3 / 4',msg:'Spread fångad — banken tjänade bid/offer-skillnaden ✓',color:'#4ff7b0'},
+  {pill:'Steg 4 / 4',msg:'Kund fylld — handel slutförd ✓',color:'#4fc3f7'}
 ];
-var simRunning = false;
-
-document.getElementById('sim-btn').addEventListener('click', function(e) {
-  e.stopPropagation();
-  if (simRunning) return;
-  document.querySelectorAll('.node.active').forEach(function(n) { n.classList.remove('active'); });
-  activeId = null; closePanel(); renderArrows(null);
-  var nodeMap = {};
-  document.querySelectorAll('.node').forEach(function(n) { nodeMap[n.dataset.id] = n; });
-  var pts = SIM_PATH.map(function(id) { return getCenter(nodeMap[id]); });
-  var dot = ns('circle');
-  dot.setAttribute('r','7'); dot.setAttribute('fill','#00d4f5');
-  dot.style.filter = 'drop-shadow(0 0 6px #00d4f5)';
-  svgEl.appendChild(dot);
-  var segLine = ns('line');
-  segLine.setAttribute('stroke','#00d4f5'); segLine.setAttribute('stroke-width','2.5');
-  segLine.setAttribute('opacity','0.55'); segLine.setAttribute('stroke-dasharray','5 4');
-  svgEl.appendChild(segLine);
-  var statusEl = document.getElementById('sim-status');
-  var pillEl   = document.getElementById('sim-step-pill');
-  var msgEl    = document.getElementById('sim-msg');
-  var btn      = document.getElementById('sim-btn');
-  btn.disabled = true; btn.textContent = '● Simulerar…';
-  statusEl.classList.add('visible');
-  pillEl.textContent = 'Startar…';
-  msgEl.textContent  = 'Spårar: Hedgefond → Bank → LP → Bank → Kund';
-  msgEl.style.color  = '#4fc3f7';
-  var SEG_DUR = 950, totalSegs = SIM_PATH.length - 1;
-  var totalDur = totalSegs * SEG_DUR, fired = {}, startTs = null;
-  simRunning = true;
-  function frame(ts) {
-    if (!startTs) startTs = ts;
-    var prog = Math.min((ts - startTs) / totalDur, 1);
-    var segPrg = prog * totalSegs;
-    var si = Math.min(Math.floor(segPrg), totalSegs - 1);
-    var t = segPrg - si;
-    var p0 = pts[si], p1 = pts[si+1];
-    var cx = p0.x + (p1.x-p0.x)*t, cy = p0.y + (p1.y-p0.y)*t;
-    dot.setAttribute('cx',cx); dot.setAttribute('cy',cy);
-    segLine.setAttribute('x1',p0.x); segLine.setAttribute('y1',p0.y);
-    segLine.setAttribute('x2',cx);   segLine.setAttribute('y2',cy);
-    for (var i = 1; i <= totalSegs; i++) {
-      if (!fired[i] && prog >= i/totalSegs) {
-        fired[i] = true;
-        var step = SIM_STEPS[i];
-        if (step) {
-          pillEl.textContent = step.pill; msgEl.textContent = step.msg; msgEl.style.color = step.color;
-          var nd = nodeMap[SIM_PATH[i]];
-          nd.classList.remove('sim-pulse'); void nd.offsetWidth; nd.classList.add('sim-pulse');
-        }
-      }
-    }
-    if (prog < 1) { requestAnimationFrame(frame); }
-    else {
-      simRunning = false; btn.disabled = false; btn.textContent = '▶ Simulera handel';
-      setTimeout(function() { dot.remove(); segLine.remove(); }, 900);
-    }
+var simRunning=false;
+document.getElementById('sim-btn').addEventListener('click',function(e){
+  e.stopPropagation();if(simRunning)return;
+  document.querySelectorAll('.node.active').forEach(function(n){n.classList.remove('active');});
+  activeId=null;closePanel();renderArrows(null);
+  var nodeMap={};document.querySelectorAll('.node').forEach(function(n){nodeMap[n.dataset.id]=n;});
+  var pts=SIM_PATH.map(function(id){return getCenter(nodeMap[id]);});
+  var dot=ns('circle');dot.setAttribute('r','7');dot.setAttribute('fill','#00d4f5');dot.style.filter='drop-shadow(0 0 6px #00d4f5)';svgEl.appendChild(dot);
+  var segLine=ns('line');segLine.setAttribute('stroke','#00d4f5');segLine.setAttribute('stroke-width','2.5');segLine.setAttribute('opacity','0.55');segLine.setAttribute('stroke-dasharray','5 4');svgEl.appendChild(segLine);
+  var statusEl=document.getElementById('sim-status'),pillEl=document.getElementById('sim-step-pill'),msgEl=document.getElementById('sim-msg'),btn=document.getElementById('sim-btn');
+  btn.disabled=true;btn.textContent='● Simulerar…';statusEl.classList.add('visible');pillEl.textContent='Startar…';msgEl.textContent='Spårar: Hedgefond → Bank → LP → Bank → Kund';msgEl.style.color='#4fc3f7';
+  var SEG_DUR=950,totalSegs=SIM_PATH.length-1,totalDur=totalSegs*SEG_DUR,fired={},startTs=null;simRunning=true;
+  function frame(ts){
+    if(!startTs)startTs=ts;
+    var prog=Math.min((ts-startTs)/totalDur,1),segPrg=prog*totalSegs,si=Math.min(Math.floor(segPrg),totalSegs-1),t=segPrg-si;
+    var p0=pts[si],p1=pts[si+1],cx=p0.x+(p1.x-p0.x)*t,cy=p0.y+(p1.y-p0.y)*t;
+    dot.setAttribute('cx',cx);dot.setAttribute('cy',cy);segLine.setAttribute('x1',p0.x);segLine.setAttribute('y1',p0.y);segLine.setAttribute('x2',cx);segLine.setAttribute('y2',cy);
+    for(var i=1;i<=totalSegs;i++){if(!fired[i]&&prog>=i/totalSegs){fired[i]=true;var step=SIM_STEPS[i];if(step){pillEl.textContent=step.pill;msgEl.textContent=step.msg;msgEl.style.color=step.color;var nd=nodeMap[SIM_PATH[i]];nd.classList.remove('sim-pulse');void nd.offsetWidth;nd.classList.add('sim-pulse');}}}
+    if(prog<1){requestAnimationFrame(frame);}else{simRunning=false;btn.disabled=false;btn.textContent='▶ Simulera handel';setTimeout(function(){dot.remove();segLine.remove();},900);}
   }
   requestAnimationFrame(frame);
 });
 
-// ── FLASHKORTDATA ─────────────────────────────────────────────────────────────
-var CARDS = [
-  { cat: 'fx-basics', q: 'Vad är en bid/ask-spread?',
-    a: 'Skillnaden mellan det pris en market maker köper (bid) och säljer (ask) till. Det är makarens vinstmarginal. T.ex. EUR/USD 1,0850 / 1,0851 = 1 pip spread. Snävare spread signalerar en mer konkurrensutsatt och likvid marknad.' },
-  { cat: 'fx-basics', q: 'Vad är en pip?',
-    a: 'Percentage in Point — den minsta standardiserade prisrörelsen. För EUR/USD är 1 pip = 0,0001. För USD/JPY är 1 pip = 0,01. Spreadar, P&L och rörelsestorlekar uttrycks i pips.' },
-  { cat: 'fx-basics', q: 'Varför vidgas spreadar vid låg likviditet?',
-    a: 'Färre market makers som lägger ut priser och högre lagerrisk per handel. Market makers vidgar spreaden för att täcka risken för ogynnsamma prisrörelser och att bli exploaterade av informerat flöde. Vanligt vid Asiens öppning och runt stora datapublikationer.' },
-  { cat: 'fx-basics', q: 'Vad är spot-FX?',
-    a: 'Byte av två valutor till dagens kurs för avveckling inom T+2 bankdagar (T+1 för USD/CAD). Det största FX-segmentet volymmässigt. Skiljer sig från terminer (framtida datum) och swappar (två avvecklingsben).' },
-  { cat: 'fx-basics', q: 'Vad är en FX-termin (Forward)?',
-    a: 'Avtal om att byta valutor till ett fast pris på ett framtida datum. Används av företag för att låsa in växelkurser och eliminera valutaosäkerhet. Prissätts som spotkurs ± terminspunkter, som härleds från räntedifferensen mellan de två valutorna.' },
-  { cat: 'fx-basics', q: 'Vad är WMR-fixingen (16:00-fixing)?',
-    a: 'WM/Refinitivs referenskurs beräknad utifrån faktiska affärer i ett 5-minutersfönster kring 16:00 London-tid. Fondförvaltare använder den för att värdera valutapositioner och exekvera till ett transparent referenspris. Har historiskt utsatts för manipulationsskandaler.' },
-  { cat: 'efx', q: 'Vad är eFX?',
-    a: 'Elektronisk valutahandel — exekvering via plattformar och API:er snarare än via telefon. Täcker bankportaler (SDP:er), multi-dealer-plattformar och ECN:er. Nu ~75%+ av spotvalutavolymen. Möjliggör snävare spreadar, snabbare exekvering och fullständig STP.' },
-  { cat: 'efx', q: 'Vad är "last look"?',
-    a: 'En banks avtalsenliga rätt att avvisa en inkommande handel efter att ha granskat den — typiskt inom 5–100 ms. Skyddar mot latensarbitrage på inaktuella priser. Kontroversiellt: hedgefonder föredrar ställen utan last look. Avvisningsfrekvensen är ett viktigt kvalitetsmått för LP:er.' },
-  { cat: 'efx', q: 'Vad är internalisering?',
-    a: 'När en bank matchar en kunds köp mot en annan kunds sälj i sin egen bok och tjänar hela spreaden på båda sidor utan extern säkring. Toppbanker siktar på >80% internaliseringsgrad. Ju högre grad, desto lönsammare är eFX-verksamheten.' },
-  { cat: 'efx', q: 'Vad är STP?',
-    a: 'Straight-Through Processing — automatisk routing från handelsexekvering till avveckling utan manuella steg. Avbrott i STP kräver manuell hantering och ökar kostnader och operativ risk. Ett centralt effektivitetsmått för eFX-deskar.' },
-  { cat: 'efx', q: 'Vad är ett strömmande pris (streaming)?',
-    a: 'En levande, kontinuerligt uppdaterad tvåvägskurs som skickas elektroniskt till en kund eller handelsplats. Hedgefonder tar emot strömmar via FIX API och kan handla direkt med ett klick. Skiljer sig från RFQ, där kunden begär varje pris separat.' },
-  { cat: 'efx', q: 'Vad är toxiskt flöde?',
-    a: 'Kundorder som systematiskt plockar av inaktuella priser och genererar förluster för market makern. HFT-latensarb-strategier producerar toxiskt flöde. Banker identifierar det via P&L-attribution och svarar med vidgade spreadar, last look eller minskad kredit.' },
-  { cat: 'market-structure', q: 'Vad är en ECN?',
-    a: 'Electronic Communication Network — en anonym central limitorderbok (CLOB). Tänk Nasdaq men för interbankyvaluta. EBS dominerar EUR/USD och USD/JPY; Refinitiv täcker andra G10-par. Sätter det globala FX-referenspriset. Kräver prime brokerage för kreditförmedling.' },
-  { cat: 'market-structure', q: 'Vilka är de ledande FX-dealerbankerna?',
-    a: 'JPMorgan, UBS, Citi, Deutsche Bank och Barclays — de fem största kontrollerar ~50% av global spotvalutavolym. De agerar som market makers för alla kundsegment och konkurrerar på spread, fyllnadsgrad, internalisering och plattformskvalitet.' },
-  { cat: 'market-structure', q: 'Vad är en icke-bank LP?',
-    a: 'En elektronisk market maker (XTX Markets, Citadel Securities, Jump Trading, Virtu) som tillhandahåller tvåvägspriser till banker och ECN:er. Tänk på dem som grossister som säljer priser i bulk. XTX är nu världens största FX-market maker volymmässigt.' },
-  { cat: 'market-structure', q: 'Vad är prime brokerage inom FX?',
-    a: 'En tjänst där en stor bank utökar kredit, vilket gör det möjligt för en hedgefond att handla med flera motparter under ett enda förhållande. Nödvändigt för ECN-åtkomst — fonden handlar anonymt under prime brokerns namn. Viktig intäktskälla för toppbanker.' },
-  { cat: 'market-structure', q: 'Vad är en single-dealer-plattform (SDP)?',
-    a: 'En banks egna e-handelsportal — t.ex. Barclays BARX, Citi Velocity, JPMorgan Markets. Kunder får strömmande priser, exekvering, analyser och orderhantering på ett ställe. Banker investerar kraftigt i SDP:ernas UX för att behålla kundflödet.' },
-  { cat: 'market-structure', q: 'Vad är interbankmarknaden?',
-    a: 'Marknaden där stora banker handlar valuta direkt med varandra — bilateralt via kreditlinjer eller anonymt på ECN:er. Sätter de referensmitt-priser som används för att prissätta alla kundaffärer. Domineras av de tio största dealerbankerna.' }
+// ── EVENT ACCORDION ───────────────────────────────────────────────────────────
+document.querySelectorAll('.ev-header').forEach(function(hdr){
+  hdr.addEventListener('click',function(){hdr.closest('.ev-card').classList.toggle('open');});
+});
+
+// ── FLASHKORT DATA ────────────────────────────────────────────────────────────
+var CARDS=[
+  {cat:'fx-basics',q:'Vad är en bid/ask-spread?',a:'Skillnaden mellan det pris en market maker köper (bid) och säljer (ask) till. Det är makarens vinstmarginal. T.ex. EUR/USD 1,0850/1,0851 = 1 pip spread. Snävare spread signalerar en mer konkurrensutsatt och likvid marknad.'},
+  {cat:'fx-basics',q:'Vad är en pip?',a:'Percentage in Point — den minsta standardiserade prisrörelsen. För EUR/USD är 1 pip = 0,0001. För USD/JPY är 1 pip = 0,01. Spreadar, P&L och rörelsestorlekar uttrycks i pips.'},
+  {cat:'fx-basics',q:'Varför vidgas spreadar vid låg likviditet?',a:'Färre market makers och högre lagerrisk per handel. Market makers vidgar spreaden för att täcka risken för ogynnsamma prisrörelser. Vanligt vid Asiens öppning och runt stora datapublikationer.'},
+  {cat:'fx-basics',q:'Vad är spot-FX?',a:'Byte av två valutor till dagens kurs för avveckling inom T+2 bankdagar (T+1 för USD/CAD). Det största FX-segmentet volymmässigt. Skiljer sig från terminer (framtida datum) och swappar (två avvecklingsben).'},
+  {cat:'fx-basics',q:'Vad är en FX-termin (Forward)?',a:'Avtal om att byta valutor till ett fast pris på ett framtida datum. Används av företag för att låsa in växelkurser och eliminera valutaosäkerhet. Prissätts som spotkurs ± terminspunkter, som härleds från räntedifferensen.'},
+  {cat:'fx-basics',q:'Vad är WMR-fixingen (16:00-fixing)?',a:'WM/Refinitivs referenskurs beräknad utifrån faktiska affärer kring 16:00 London-tid. Fondförvaltare använder den för att värdera positioner och exekvera till ett transparent referenspris. Har historiskt utsatts för manipulationsskandaler.'},
+  {cat:'efx',q:'Vad är eFX?',a:'Elektronisk valutahandel — exekvering via plattformar och API:er snarare än via telefon. Nu ~75%+ av spotvalutavolymen. Möjliggör snävare spreadar, snabbare exekvering och fullständig STP.'},
+  {cat:'efx',q:'Vad är "last look"?',a:'En banks avtalsenliga rätt att avvisa en inkommande handel efter granskning — typiskt inom 5–100 ms. Skyddar mot latensarbitrage. Kontroversiellt: hedgefonder föredrar ställen utan last look. Avvisningsfrekvensen är ett viktigt kvalitetsmått.'},
+  {cat:'efx',q:'Vad är internalisering?',a:'När en bank matchar en kunds köp mot en annan kunds sälj i sin egen bok och tjänar hela spreaden på båda sidor utan extern säkring. Toppbanker siktar på >80% internaliseringsgrad.'},
+  {cat:'efx',q:'Vad är STP?',a:'Straight-Through Processing — automatisk routing från handelsexekvering till avveckling utan manuella steg. Avbrott i STP kräver manuell hantering och ökar kostnader och operativ risk.'},
+  {cat:'efx',q:'Vad är ett strömmande pris (streaming)?',a:'En levande, kontinuerligt uppdaterad tvåvägskurs skickad elektroniskt. Hedgefonder tar emot strömmar via FIX API och kan handla direkt. Skiljer sig från RFQ, där kunden begär varje pris separat.'},
+  {cat:'efx',q:'Vad är toxiskt flöde?',a:'Kundorder som systematiskt plockar av inaktuella priser och genererar förluster för market makern. HFT-latensarb-strategier producerar toxiskt flöde. Banker identifierar det via P&L-attribution.'},
+  {cat:'market-structure',q:'Vad är en ECN?',a:'Electronic Communication Network — en anonym central limitorderbok (CLOB). Tänk Nasdaq men för interbankyvaluta. EBS dominerar EUR/USD och USD/JPY. Sätter det globala FX-referenspriset. Kräver prime brokerage för kreditförmedling.'},
+  {cat:'market-structure',q:'Vilka är de ledande FX-dealerbankerna?',a:'JPMorgan, UBS, Citi, Deutsche Bank och Barclays — de fem största kontrollerar ~50% av global spotvalutavolym. De agerar som market makers för alla kundsegment.'},
+  {cat:'market-structure',q:'Vad är en icke-bank LP?',a:'En elektronisk market maker (XTX Markets, Citadel Securities, Jump Trading, Virtu) som tillhandahåller tvåvägspriser till banker och ECN:er. XTX är nu världens största FX-market maker volymmässigt.'},
+  {cat:'market-structure',q:'Vad är prime brokerage inom FX?',a:'En tjänst där en stor bank utökar kredit, vilket gör det möjligt för en hedgefond att handla med flera motparter under ett enda förhållande. Nödvändigt för ECN-åtkomst.'},
+  {cat:'market-structure',q:'Vad är en SDP (single-dealer-platform)?',a:'En banks egna e-handelsportal — t.ex. Barclays BARX, Citi Velocity, JPMorgan Markets. Kunder får strömmande priser, exekvering, analyser och orderhantering på ett ställe.'},
+  {cat:'market-structure',q:'Vad är interbankmarknaden?',a:'Marknaden där stora banker handlar valuta direkt med varandra — bilateralt via kreditlinjer eller anonymt på ECN:er. Sätter de referensmittpriser som används för alla kundaffärer.'},
+  {cat:'events',q:'Vad är carry trade?',a:'En strategi där du lånar i en lågräntevaluta (t.ex. yen vid −0,1%) och investerar i en högräntevaluta (t.ex. dollar vid 5,25%). Vinsten = räntedifferensen. Risk: om ränteläget förändras snabbt reverseras positionerna snabbt och valutan rör sig kraftigt i omvänd riktning.'},
+  {cat:'events',q:'Varför föll japanska yenen ~40% mot dollarn 2022–2024?',a:'Fed höjde räntan till 5,25%, BOJ höll −0,1% ("yield curve control"). Räntedifferensen på ~5,35% triggade massiv carry trade: investerare sålde yen, köpte dollar. USD/JPY steg från 115 till 160. BOJ:s interventioner (~$100mdr) bromsade men stoppade inte rörelsen.'},
+  {cat:'events',q:'Vad hände med pundet (GBP) natten för Brexit 2016?',a:'GBP/USD föll från ~1,49 till ~1,32 på fyra timmar (−10%) — historiens snabbaste stora valutarörelse i fredstid. Algoritmer sålde GBP automatiskt i takt med att Leave-resultaten kom in. FX prissatte hela resultatet medan Londonbörsen var stängd.'},
+  {cat:'events',q:'Vad är en valutaintervention och varför fungerar den sällan?',a:'När en centralbank köper eller säljer sin valuta för att påverka kursen. Fungerar tillfälligt men inte om fundamenta kvarstår — Fed vs BOJ räntedifferens fortbestod, yen vände tillbaka. Effektiv intervention kräver att den fundamentala drivkraften försvinner.'},
+  {cat:'events',q:'Vad är "Dollar Smile Theory"?',a:'USD stärks i två scenarion: (1) global kris — dollar är safe haven, (2) stark US-tillväxt och höga räntor — kapital flödar in. I mitten (lugnt globalt läge) är USD svagare. 2022 träffade båda: Rysslands invasion + Feds höjningscykel.'},
+  {cat:'events',q:'Varför är centralbanksindependens avgörande för en valuta?',a:'Om marknaden tror att politiker styr räntepolitiken prissätts en riskpremie in. Turkiet under Erdogan: räntan sänktes mitt i 80% inflation. Kapital flydde, TRY tappade 90% mot USD 2018–2024. Centralbanksindependens är valutans trovärdighetsankare.'}
 ];
 
-var CAT_NAMES = { 'fx-basics': 'FX Grunderna', 'efx': 'eFX Begrepp', 'market-structure': 'Marknadsstruktur' };
+var CAT_NAMES={'fx-basics':'FX Grunderna','efx':'eFX Begrepp','market-structure':'Marknadsstruktur','events':'Marknadshändelser'};
 
-// ── FLASHKORT-STATE ───────────────────────────────────────────────────────────
-var FC = { cat: 'all', idx: 0, flipped: false, known: {} };
-
-function fcFiltered() {
-  if (FC.cat === 'all') return CARDS;
-  return CARDS.filter(function(c) { return c.cat === FC.cat; });
+// ── FLASHKORT LOGIK ───────────────────────────────────────────────────────────
+var FC={cat:'all',idx:0,flipped:false,known:{}};
+function fcFiltered(){if(FC.cat==='all')return CARDS;return CARDS.filter(function(c){return c.cat===FC.cat;});}
+function fcOrigIdx(card){return CARDS.indexOf(card);}
+function fcRender(){
+  var deck=fcFiltered(),total=deck.length;
+  if(FC.idx>=total)FC.idx=0;
+  var card=deck[FC.idx];
+  document.getElementById('fc-q').textContent=card.q;
+  document.getElementById('fc-a').textContent=card.a;
+  document.getElementById('fc-cat-lbl').textContent=CAT_NAMES[card.cat]||'';
+  var kc=Object.keys(FC.known).length;
+  document.getElementById('fc-count').textContent='Kort '+(FC.idx+1)+' av '+total+(kc?' · '+kc+' kända ✓':'');
+  var dots=document.getElementById('fc-dots');dots.innerHTML='';
+  for(var i=0;i<Math.min(total,24);i++){var d=document.createElement('div');d.className='fc-dot'+(i===FC.idx?' cur':'')+(FC.known[fcOrigIdx(deck[i])]?' known':'');dots.appendChild(d);}
 }
-function fcOrigIdx(card) { return CARDS.indexOf(card); }
-
-function fcRender() {
-  var deck = fcFiltered(), total = deck.length;
-  if (FC.idx >= total) FC.idx = 0;
-  var card = deck[FC.idx];
-  document.getElementById('fc-q').textContent       = card.q;
-  document.getElementById('fc-a').textContent       = card.a;
-  document.getElementById('fc-cat-lbl').textContent = CAT_NAMES[card.cat] || '';
-  var kc = Object.keys(FC.known).length;
-  document.getElementById('fc-count').textContent =
-    'Kort ' + (FC.idx+1) + ' av ' + total + (kc ? ' · ' + kc + ' kända ✓' : '');
-  var dots = document.getElementById('fc-dots');
-  dots.innerHTML = '';
-  for (var i = 0; i < Math.min(total, 20); i++) {
-    var d = document.createElement('div');
-    d.className = 'fc-dot' + (i===FC.idx?' cur':'') + (FC.known[fcOrigIdx(deck[i])]?' known':'');
-    dots.appendChild(d);
-  }
+function fcFlip(){FC.flipped=!FC.flipped;document.getElementById('card-inner').classList.toggle('flipped',FC.flipped);}
+function fcNext(knew){
+  if(knew){FC.known[fcOrigIdx(fcFiltered()[FC.idx])]=true;var back=document.getElementById('card-back-face');back.classList.remove('flash');void back.offsetWidth;back.classList.add('flash');}
+  var deck=fcFiltered();FC.idx=(FC.idx+1)%deck.length;FC.flipped=false;document.getElementById('card-inner').classList.remove('flipped');fcRender();
 }
-function fcFlip() {
-  FC.flipped = !FC.flipped;
-  document.getElementById('card-inner').classList.toggle('flipped', FC.flipped);
-}
-function fcNext(knew) {
-  if (knew) {
-    FC.known[fcOrigIdx(fcFiltered()[FC.idx])] = true;
-    var back = document.getElementById('card-back-face');
-    back.classList.remove('flash'); void back.offsetWidth; back.classList.add('flash');
-  }
-  var deck = fcFiltered();
-  FC.idx = (FC.idx+1) % deck.length; FC.flipped = false;
-  document.getElementById('card-inner').classList.remove('flipped');
-  fcRender();
-}
-
-document.getElementById('card-inner').addEventListener('click', fcFlip);
-document.getElementById('btn-flip').addEventListener('click', fcFlip);
-document.getElementById('btn-knew').addEventListener('click', function() { fcNext(true); });
-document.getElementById('btn-next').addEventListener('click', function() { fcNext(false); });
-
-document.querySelectorAll('.fc-cat').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.fc-cat').forEach(function(b) { b.classList.toggle('active', b===btn); });
-    FC.cat = btn.dataset.cat; FC.idx = 0; FC.flipped = false;
-    document.getElementById('card-inner').classList.remove('flipped');
-    fcRender();
+document.getElementById('card-inner').addEventListener('click',fcFlip);
+document.getElementById('btn-flip').addEventListener('click',fcFlip);
+document.getElementById('btn-knew').addEventListener('click',function(){fcNext(true);});
+document.getElementById('btn-next').addEventListener('click',function(){fcNext(false);});
+document.querySelectorAll('.fc-cat').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.fc-cat').forEach(function(b){b.classList.toggle('active',b===btn);});
+    FC.cat=btn.dataset.cat;FC.idx=0;FC.flipped=false;document.getElementById('card-inner').classList.remove('flipped');fcRender();
   });
 });
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-window.addEventListener('resize', function() { renderArrows(activeId); });
-requestAnimationFrame(function() { requestAnimationFrame(function() { renderArrows(null); fcRender(); }); });
+window.addEventListener('resize',function(){renderArrows(activeId);});
+requestAnimationFrame(function(){requestAnimationFrame(function(){renderArrows(null);fcRender();});});
 </script>
 </body>
 </html>
