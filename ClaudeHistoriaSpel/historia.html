@@ -520,7 +520,8 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
       The fewer guesses you use, the more points you earn:<br>
       <strong>200 pts</strong> — correct on 1st try<br>
       <strong>100 pts</strong> — correct on 2nd try<br>
-      <strong>50 pts</strong> — correct on 3rd try<br><br>
+      <strong>50 pts</strong> — correct on 3rd try<br>
+      <strong>1–25 pts</strong> — wrong all 3 tries but within 25 years (proximity bonus)<br><br>
       The game lasts <strong>5 rounds</strong>. Aim for the highest score and top the leaderboard!</p>
     </div>
 
@@ -1522,7 +1523,16 @@ function win() {
 function lose() {
   roundOver = true;
   playLoseSound(); flash('#ef4444');
-  showResult(false, 0);
+  let consolationPts = 0;
+  if (gameMode === 'classic' && guessHistory.length > 0) {
+    const bestOff = Math.min(...guessHistory.map(g => g.yearsOff));
+    consolationPts = Math.max(0, 26 - bestOff);
+    if (consolationPts > 0) {
+      sessionScore += consolationPts;
+      document.getElementById('header-score').textContent = `${sessionScore} pts`;
+    }
+  }
+  showResult(false, consolationPts);
   endRound();
 }
 
@@ -1643,11 +1653,12 @@ function showResult(isWin, pts) {
           <div class="answer">The year was <strong>${currentYearData.year}</strong> — solved in ${guessCount} guess${guessCount !== 1 ? 'es' : ''}</div>
         </div>`;
     } else {
+      const proximityNote = pts > 0 ? ` — +${pts} proximity pts` : '';
       area.innerHTML = `
         <div class="result-banner lose">
           <h2>No more guesses</h2>
-          <div class="delta">+0 pts</div>
-          <div class="answer">The answer was <strong>${currentYearData.year}</strong></div>
+          <div class="delta">${pts > 0 ? '+' + pts + ' pts' : '+0 pts'}</div>
+          <div class="answer">The answer was <strong>${currentYearData.year}</strong>${proximityNote}</div>
         </div>`;
     }
   }
