@@ -409,6 +409,8 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
 #start-help-close:hover { color: #1a1a2e; }
 .start-help-page { display: none; }
 .start-help-page.active { display: block; }
+.help-page { display: none; }
+.help-page.active { display: block; }
 .help-page-badge {
   display: inline-block; font-size: 0.7rem; font-weight: 700;
   background: #eff6ff; color: #3b82f6; border-radius: 20px;
@@ -497,11 +499,9 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
     <button id="start-help-close" onclick="closeStartHelp()">×</button>
 
     <div class="start-help-page active" id="start-help-p1">
-      <span class="help-page-badge">Classic Mode</span>
       <h2>How to Play</h2>
-      <p>You'll be shown a historical event. Use the slider — or the − and + buttons — to pick the year you think it happened, then press <strong>Guess</strong>.<br><br>
-      You have <strong>3 guesses</strong> per round. After each wrong guess, a new event from the same year appears as an extra clue. The fewer guesses you use, the more points you earn: <strong>200</strong> for the first try, <strong>100</strong> for the second, <strong>50</strong> for the third.<br><br>
-      The game lasts <strong>5 rounds</strong>. Aim for the highest score!</p>
+      <p>You'll be shown a historical event. Use the slider — or the − and + buttons — to set the year you think it happened, then press <strong>Guess</strong>.<br><br>
+      The colour of each result tells you how close you were — use it to guide your next guess!</p>
       <div class="start-color-scale-wrap">
         <p>How close is your guess?</p>
         <div class="start-color-gradient-bar"></div>
@@ -514,10 +514,21 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
     </div>
 
     <div class="start-help-page" id="start-help-p2">
+      <span class="help-page-badge">Classic Mode</span>
+      <h2>How to Play</h2>
+      <p>You have <strong>3 guesses</strong> per round. After each wrong guess, a new event from the same year appears as an extra clue.<br><br>
+      The fewer guesses you use, the more points you earn:<br>
+      <strong>200 pts</strong> — correct on 1st try<br>
+      <strong>100 pts</strong> — correct on 2nd try<br>
+      <strong>50 pts</strong> — correct on 3rd try<br><br>
+      The game lasts <strong>5 rounds</strong>. Aim for the highest score and top the leaderboard!</p>
+    </div>
+
+    <div class="start-help-page" id="start-help-p3">
       <span class="help-page-badge">Endless Mode</span>
       <h2>How to Play</h2>
-      <p>You'll be shown a historical event. Use the slider — or the − and + buttons — to pick the year you think it happened, then press <strong>Guess</strong>.<br><br>
-      In Endless mode you have only <strong>one attempt</strong> per question. If your guess is within the tolerance for your chosen difficulty, you score a point and move on to the next event. Get it wrong and the game is over!<br><br>
+      <p>You have only <strong>one attempt</strong> per question. Guess correctly and you score a point and move to the next event. Guess wrong and the game is over!<br><br>
+      Choose your difficulty before you start:<br>
       <strong>Easy</strong> — guess within ±10 years<br>
       <strong>Medium</strong> — guess within ±5 years<br>
       <strong>Hard</strong> — exact year only<br><br>
@@ -528,6 +539,7 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
       <button class="help-nav-btn" id="start-help-prev" onclick="goStartHelp(-1)" disabled>&#8592;</button>
       <div class="help-dots">
         <div class="help-dot active"></div>
+        <div class="help-dot"></div>
         <div class="help-dot"></div>
       </div>
       <button class="help-nav-btn" id="start-help-next" onclick="goStartHelp(1)">&#8594;</button>
@@ -564,10 +576,10 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
   <div id="help-card">
     <button id="help-close" onclick="toggleHelp()">×</button>
     <h2>How to Play</h2>
-    <div id="help-classic">
-      <p>You'll be shown a historical event. Use the slider — or the − and + buttons — to pick the year you think it happened, then press <strong>Guess</strong>.<br><br>
-      You have <strong>3 guesses</strong> per round. After each wrong guess, a new event from the same year will appear as an extra clue. The fewer guesses you use, the more points you earn: <strong>200</strong> for the first try, <strong>100</strong> for the second, <strong>50</strong> for the third.<br><br>
-      The game lasts <strong>5 rounds</strong>. Try to get the highest score!</p>
+
+    <div class="help-page active" id="help-p1">
+      <p>Use the slider — or the − and + buttons — to set the year you think the event happened, then press <strong>Guess</strong>.<br><br>
+      The colour of each result tells you how close you were — use it to guide your next guess!</p>
       <div id="color-scale-wrap">
         <p>How close is your guess?</p>
         <div id="color-gradient-bar"></div>
@@ -578,12 +590,31 @@ main { max-width: 620px; margin: 0 auto; padding: 20px 16px 60px; }
         </div>
       </div>
     </div>
-    <div id="help-endless" style="display:none">
-      <p>You'll be shown a historical event. Use the slider — or the − and + buttons — to pick the year you think it happened, then press <strong>Guess</strong>.<br><br>
-      In Endless mode you have only <strong>one attempt</strong> per question. If your guess is within the tolerance for your chosen difficulty, you score a point and move on to the next event. A wrong guess ends the game!<br><br>
-      <strong>Easy</strong> — guess within ±10 years<br>
-      <strong>Medium</strong> — guess within ±5 years<br>
-      <strong>Hard</strong> — exact year only</p>
+
+    <div class="help-page" id="help-p2">
+      <div id="help-classic-detail">
+        <p>You have <strong>3 guesses</strong> per round. After each wrong guess, a new event from the same year appears as an extra clue.<br><br>
+        Points earned per round:<br>
+        <strong>200 pts</strong> — correct on 1st try<br>
+        <strong>100 pts</strong> — correct on 2nd try<br>
+        <strong>50 pts</strong> — correct on 3rd try<br><br>
+        The game lasts <strong>5 rounds</strong>. Try to get the highest score!</p>
+      </div>
+      <div id="help-endless-detail" style="display:none">
+        <p>You have only <strong>one attempt</strong> per question. Guess correctly and you score a point and move on. Get it wrong and the game is over!<br><br>
+        <strong>Easy</strong> — guess within ±10 years<br>
+        <strong>Medium</strong> — guess within ±5 years<br>
+        <strong>Hard</strong> — exact year only</p>
+      </div>
+    </div>
+
+    <div class="help-nav">
+      <button class="help-nav-btn" id="help-prev" onclick="goHelp(-1)" disabled>&#8592;</button>
+      <div class="help-dots">
+        <div class="help-dot active"></div>
+        <div class="help-dot"></div>
+      </div>
+      <button class="help-nav-btn" id="help-next" onclick="goHelp(1)">&#8594;</button>
     </div>
   </div>
 </div>
@@ -1650,15 +1681,34 @@ function eraBg(year) {
   return '#d8e0de';
 }
 
-// ── HELP ──
+// ── HELP (in-game) ──
+let helpPage = 1;
 function toggleHelp() {
   const modal = document.getElementById('help-modal');
   const opening = !modal.classList.contains('open');
   modal.classList.toggle('open');
   if (opening) {
+    helpPage = 1;
+    updateHelpPage();
+  }
+}
+function goHelp(dir) {
+  helpPage = Math.max(1, Math.min(2, helpPage + dir));
+  updateHelpPage();
+}
+function updateHelpPage() {
+  document.querySelectorAll('.help-page').forEach((p, i) => {
+    p.classList.toggle('active', i + 1 === helpPage);
+  });
+  document.querySelectorAll('#help-card .help-dot').forEach((d, i) => {
+    d.classList.toggle('active', i + 1 === helpPage);
+  });
+  document.getElementById('help-prev').disabled = helpPage === 1;
+  document.getElementById('help-next').disabled = helpPage === 2;
+  if (helpPage === 2) {
     const endless = gameMode === 'endless';
-    document.getElementById('help-classic').style.display = endless ? 'none' : 'block';
-    document.getElementById('help-endless').style.display = endless ? 'block' : 'none';
+    document.getElementById('help-classic-detail').style.display = endless ? 'none' : 'block';
+    document.getElementById('help-endless-detail').style.display = endless ? 'block' : 'none';
   }
 }
 document.getElementById('help-modal').addEventListener('click', e => {
@@ -1676,18 +1726,18 @@ function closeStartHelp() {
   document.getElementById('start-help-modal').classList.remove('open');
 }
 function goStartHelp(dir) {
-  startHelpPage = Math.max(1, Math.min(2, startHelpPage + dir));
+  startHelpPage = Math.max(1, Math.min(3, startHelpPage + dir));
   updateStartHelpPage();
 }
 function updateStartHelpPage() {
   document.querySelectorAll('.start-help-page').forEach((p, i) => {
     p.classList.toggle('active', i + 1 === startHelpPage);
   });
-  document.querySelectorAll('.help-dot').forEach((d, i) => {
+  document.querySelectorAll('#start-help-card .help-dot').forEach((d, i) => {
     d.classList.toggle('active', i + 1 === startHelpPage);
   });
   document.getElementById('start-help-prev').disabled = startHelpPage === 1;
-  document.getElementById('start-help-next').disabled = startHelpPage === 2;
+  document.getElementById('start-help-next').disabled = startHelpPage === 3;
 }
 document.getElementById('start-help-modal').addEventListener('click', e => {
   if (e.target === document.getElementById('start-help-modal')) closeStartHelp();
