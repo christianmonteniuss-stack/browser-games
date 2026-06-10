@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FX Market Structure Map</title>
+  <title>FX Market Structure</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -12,157 +12,201 @@
       color: #c8e8f8;
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       height: 100vh;
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       overflow: hidden;
     }
 
-    /* ── HEADER ─────────────────────────────────── */
+    /* ── HEADER ──────────────────────────────────────── */
     .hdr {
       flex-shrink: 0;
-      padding: 13px 24px;
+      padding: 11px 24px;
       border-bottom: 1px solid #162840;
       background: #0b1c2e;
-      display: flex;
-      align-items: center;
-      gap: 14px;
+      display: flex; align-items: center; gap: 14px;
     }
     .hdr-icon {
-      width: 34px; height: 34px;
-      background: #0d2a40;
-      border: 1px solid #1e4a6a;
-      border-radius: 8px;
+      width: 30px; height: 30px;
+      background: #0d2a40; border: 1px solid #1e4a6a;
+      border-radius: 7px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
-      flex-shrink: 0;
+      font-size: 0.9rem; flex-shrink: 0;
     }
-    .hdr-title { font-size: 1rem; font-weight: 700; color: #5bc8f5; letter-spacing: 0.02em; }
-    .hdr-sub { font-size: 0.72rem; color: #3a6a8a; margin-top: 1px; }
+    .hdr-title { font-size: 0.92rem; font-weight: 700; color: #5bc8f5; letter-spacing: 0.02em; }
+    .hdr-sub   { font-size: 0.68rem; color: #3a6a8a; margin-top: 1px; }
     .hdr-pill {
       margin-left: auto;
       background: #0d2235; border: 1px solid #1e4060;
-      color: #4ab8d8; font-size: 0.6rem; font-weight: 700;
+      color: #4ab8d8; font-size: 0.57rem; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.1em;
-      padding: 4px 12px; border-radius: 20px;
+      padding: 3px 10px; border-radius: 20px;
     }
 
-    /* ── MAIN SPLIT ─────────────────────────────── */
-    .main { flex: 1; display: flex; min-height: 0; }
+    /* ── TAB BAR ─────────────────────────────────────── */
+    .tabs {
+      flex-shrink: 0;
+      display: flex;
+      background: #080f1c;
+      border-bottom: 1px solid #162840;
+      padding: 0 20px;
+    }
+    .tab-btn {
+      padding: 8px 18px;
+      font-size: 0.74rem; font-weight: 600;
+      color: #3a6a8a; background: none; border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      letter-spacing: 0.02em;
+    }
+    .tab-btn:hover { color: #7aacca; }
+    .tab-btn.active { color: #5bc8f5; border-bottom-color: #5bc8f5; }
 
-    /* ── DIAGRAM ────────────────────────────────── */
+    /* ── MAP VIEW ────────────────────────────────────── */
+    #view-map { flex: 1; display: flex; min-height: 0; }
+
     .diagram-wrap {
       flex: 1; min-width: 0;
       position: relative;
-      padding: 32px 40px 24px 56px;
+      padding: 28px 36px 0 52px;
+      display: flex; flex-direction: column;
     }
 
-    /* Tier labels on the left */
     .tier-labels {
       position: absolute;
-      left: 8px; top: 0; bottom: 0;
+      left: 6px; top: 0; bottom: 0;
       display: flex; flex-direction: column; justify-content: space-around;
-      padding: 40px 0 28px;
+      padding: 38px 0 44px;
       pointer-events: none;
     }
     .tier-lbl {
       display: flex; align-items: center; gap: 5px;
-      font-size: 0.58rem; font-weight: 700;
+      font-size: 0.56rem; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.12em;
       white-space: nowrap;
     }
-    .tier-lbl-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .tier-lbl-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
 
     #diagram {
       position: relative;
-      width: 100%; height: 100%;
+      flex: 1;
       display: flex; flex-direction: column; justify-content: space-between;
     }
 
     #arrows-svg {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
-      pointer-events: none; z-index: 0;
-      overflow: visible;
+      pointer-events: none; z-index: 0; overflow: visible;
     }
 
     .diagram-row {
-      display: flex; justify-content: center; gap: 18px;
+      display: flex; justify-content: center; gap: 16px;
       position: relative; z-index: 1;
     }
 
-    /* ── NODES ──────────────────────────────────── */
+    /* ── NODES ───────────────────────────────────────── */
     .node {
       background: #0e1e30;
       border: 1.5px solid #1b3550;
       border-radius: 9px;
-      padding: 11px 18px 10px;
+      padding: 10px 16px 9px;
       cursor: pointer; user-select: none;
       transition: border-color 0.18s, box-shadow 0.18s, transform 0.15s, background 0.18s;
-      min-width: 118px; text-align: center;
+      min-width: 114px; text-align: center;
       position: relative;
     }
-
-    /* Coloured left bar per tier */
     .node::before {
       content: '';
       position: absolute; left: 0; top: 8px; bottom: 8px;
-      width: 3px; border-radius: 0 0 0 6px;
+      width: 3px; border-radius: 3px 0 0 3px;
     }
-    .node[data-tier="client"]::before { background: #2d7dd2; border-radius: 3px 0 0 3px; }
-    .node[data-tier="bank"]::before   { background: #2dd28a; border-radius: 3px 0 0 3px; }
-    .node[data-tier="infra"]::before  { background: #8a4dd2; border-radius: 3px 0 0 3px; }
+    .node[data-tier="client"]::before { background: #2d7dd2; }
+    .node[data-tier="bank"]::before   { background: #2dd28a; }
+    .node[data-tier="infra"]::before  { background: #8a4dd2; }
 
     .node:hover { transform: translateY(-2px); }
     .node[data-tier="client"]:hover { border-color: #2d6aaa; box-shadow: 0 4px 18px rgba(45,125,210,0.18); }
     .node[data-tier="bank"]:hover   { border-color: #2aaa72; box-shadow: 0 4px 18px rgba(45,210,138,0.18); }
     .node[data-tier="infra"]:hover  { border-color: #6a3aaa; box-shadow: 0 4px 18px rgba(138,77,210,0.18); }
 
-    .node.active[data-tier="client"] { border-color: #4fc3f7; box-shadow: 0 0 26px rgba(79,195,247,0.32); background: #0c2238; }
-    .node.active[data-tier="bank"]   { border-color: #4ff7b0; box-shadow: 0 0 26px rgba(79,247,176,0.32); background: #0c2218; }
-    .node.active[data-tier="infra"]  { border-color: #b880f7; box-shadow: 0 0 26px rgba(184,128,247,0.32); background: #180c2e; }
+    .node.active[data-tier="client"] { border-color: #4fc3f7; box-shadow: 0 0 24px rgba(79,195,247,0.3); background: #0c2238; }
+    .node.active[data-tier="bank"]   { border-color: #4ff7b0; box-shadow: 0 0 24px rgba(79,247,176,0.3); background: #0c2218; }
+    .node.active[data-tier="infra"]  { border-color: #b880f7; box-shadow: 0 0 24px rgba(184,128,247,0.3); background: #180c2e; }
+
+    @keyframes nodePulse {
+      0%  { box-shadow: 0 0 0 0 rgba(0,212,245,0.7); }
+      70% { box-shadow: 0 0 0 14px rgba(0,212,245,0); }
+      100%{ box-shadow: 0 0 0 0 rgba(0,212,245,0); }
+    }
+    .node.sim-pulse { animation: nodePulse 0.55s ease forwards; }
 
     .node-cat {
-      font-size: 0.57rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.12em;
-      margin-bottom: 5px;
+      font-size: 0.55rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px;
     }
     .node[data-tier="client"] .node-cat { color: #2d7dd2; }
     .node[data-tier="bank"] .node-cat   { color: #2dd28a; }
     .node[data-tier="infra"] .node-cat  { color: #8a4dd2; }
 
-    .node-name { font-size: 0.8rem; font-weight: 600; color: #d5ecfc; line-height: 1.3; }
-    .node-sub  { font-size: 0.6rem; color: #2e5570; margin-top: 3px; }
+    .node-name { font-size: 0.78rem; font-weight: 600; color: #d5ecfc; line-height: 1.3; }
+    .node-sub  { font-size: 0.58rem; color: #2e5570; margin-top: 2px; }
 
-    /* ── INFO PANEL ─────────────────────────────── */
+    /* ── SIMULATE BUTTON ─────────────────────────────── */
+    #sim-btn {
+      position: absolute; top: 8px; right: 8px; z-index: 10;
+      background: #0d2235; border: 1px solid #2d6aaa;
+      color: #5bc8f5; font-size: 0.68rem; font-weight: 700;
+      padding: 5px 13px; border-radius: 6px;
+      cursor: pointer; letter-spacing: 0.03em;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    #sim-btn:hover:not(:disabled) { background: #102c40; border-color: #4fc3f7; }
+    #sim-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── SIM STATUS BAR ──────────────────────────────── */
+    #sim-status {
+      flex-shrink: 0;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 14px;
+      border-top: 1px solid #162840;
+      font-size: 0.69rem; color: #4fc3f7;
+      margin-top: 4px;
+      background: rgba(7,16,28,0.7);
+      border-radius: 0 0 6px 6px;
+    }
+    #sim-status.visible { display: flex; }
+    .sim-pill {
+      background: #0a2235; border: 1px solid #1e4060;
+      color: #3a88b8; font-size: 0.57rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px; white-space: nowrap; flex-shrink: 0;
+    }
+
+    /* ── INFO PANEL ──────────────────────────────────── */
     .panel {
-      width: 308px; flex-shrink: 0;
+      width: 304px; flex-shrink: 0;
       background: #0b1926; border-left: 1px solid #162840;
       display: flex; flex-direction: column; overflow: hidden;
     }
-
     .panel-hint {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       gap: 12px; padding: 24px; text-align: center;
     }
     .hint-ring {
-      width: 48px; height: 48px;
+      width: 44px; height: 44px;
       border: 1.5px dashed #1e3850; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      color: #1e3850; font-size: 1.3rem;
+      color: #1e3850; font-size: 1.2rem;
     }
-    .panel-hint p { font-size: 0.76rem; color: #1e4060; line-height: 1.65; }
-
-    .panel-body {
-      flex: 1; overflow-y: auto; padding: 20px 18px;
-      display: none;
-    }
+    .panel-hint p { font-size: 0.74rem; color: #1e4060; line-height: 1.65; }
+    .panel-body { flex: 1; overflow-y: auto; padding: 18px 16px; display: none; }
     .panel-body.open { display: block; }
     .panel-body::-webkit-scrollbar { width: 3px; }
     .panel-body::-webkit-scrollbar-thumb { background: #1a3050; border-radius: 2px; }
 
     .pb-badge {
-      display: inline-block; font-size: 0.58rem; font-weight: 700;
+      display: inline-block; font-size: 0.57rem; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.1em;
       padding: 3px 10px; border-radius: 12px; margin-bottom: 10px;
     }
@@ -170,49 +214,134 @@
     .badge-bank   { background: #091e14; color: #4ff7b0; border: 1px solid #165030; }
     .badge-infra  { background: #130820; color: #b880f7; border: 1px solid #3a1460; }
 
-    .pb-title { font-size: 1.08rem; font-weight: 700; color: #deedfc; margin-bottom: 11px; line-height: 1.3; }
-    .pb-desc  { font-size: 0.77rem; color: #7aacca; line-height: 1.72; margin-bottom: 16px; }
-
+    .pb-title { font-size: 1.05rem; font-weight: 700; color: #deedfc; margin-bottom: 10px; line-height: 1.3; }
+    .pb-desc  { font-size: 0.75rem; color: #7aacca; line-height: 1.72; margin-bottom: 14px; }
     .pb-section {
-      font-size: 0.58rem; font-weight: 700;
+      font-size: 0.57rem; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.12em;
-      color: #1e3e58; margin-bottom: 8px;
+      color: #1e3e58; margin-bottom: 7px;
       padding-bottom: 5px; border-bottom: 1px solid #111e2e;
     }
-
-    .terms { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .terms { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
     .term {
       background: #091828; border: 1px solid #183050;
-      color: #48a8c8; font-size: 0.67rem;
-      padding: 3px 9px; border-radius: 4px;
+      color: #48a8c8; font-size: 0.65rem;
+      padding: 3px 8px; border-radius: 4px;
       font-family: 'Consolas', 'Courier New', monospace;
     }
-
     .conn-item {
       display: flex; align-items: center; gap: 8px;
       padding: 5px 0; border-bottom: 1px solid #0e1e2e;
-      font-size: 0.73rem; color: #3a6a8a;
+      font-size: 0.72rem; color: #3a6a8a;
     }
     .conn-arr { color: #1e4a70; flex-shrink: 0; }
 
-    /* ── FOOTER ─────────────────────────────────── */
+    /* ── FLASHCARD VIEW ──────────────────────────────── */
+    #view-cards {
+      flex: 1; display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 0; overflow: hidden;
+      padding: 16px 24px 12px;
+      gap: 14px;
+    }
+    #view-cards.active { display: flex; }
+
+    .fc-cats {
+      display: flex; gap: 7px; flex-wrap: wrap; justify-content: center;
+      flex-shrink: 0;
+    }
+    .fc-cat {
+      padding: 5px 14px; font-size: 0.7rem; font-weight: 600;
+      border-radius: 20px; border: 1px solid #1e3050;
+      background: #0a1628; color: #3a6a8a;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .fc-cat:hover { border-color: #2d5a8a; color: #7aacca; }
+    .fc-cat.active { background: #0d2235; border-color: #2d7dd2; color: #5bc8f5; }
+
+    .card-scene { perspective: 900px; width: 100%; max-width: 540px; flex-shrink: 0; }
+    .card-inner {
+      position: relative; width: 100%; height: 196px;
+      transform-style: preserve-3d;
+      transition: transform 0.42s cubic-bezier(0.4,0,0.2,1);
+      cursor: pointer;
+    }
+    .card-inner.flipped { transform: rotateY(180deg); }
+    .card-face {
+      position: absolute; inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 12px; padding: 24px 28px;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .card-front { background: #0f2035; border: 1.5px solid #1e3d60; }
+    .card-back  { background: #0f2228; border: 1.5px solid #1e4a30; transform: rotateY(180deg); }
+
+    .card-hint {
+      font-size: 0.57rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: #1e3d60; margin-bottom: 10px;
+    }
+    .card-back .card-hint { color: #1e4a30; }
+    .card-q { font-size: 0.96rem; font-weight: 600; color: #d5ecfc; line-height: 1.4; }
+    .card-a { font-size: 0.78rem; color: #7ad4a0; line-height: 1.66; }
+    .card-cat-lbl {
+      position: absolute; bottom: 12px; right: 16px;
+      font-size: 0.57rem; color: #1e3050; letter-spacing: 0.06em;
+    }
+
+    @keyframes knewFlash {
+      0%  { border-color: #1e4a30; }
+      40% { border-color: #4ff7b0; box-shadow: 0 0 20px rgba(79,247,176,0.25); }
+      100%{ border-color: #1e4a30; }
+    }
+    .card-back.flash { animation: knewFlash 0.5s ease; }
+
+    .fc-btns { display: flex; gap: 9px; align-items: center; flex-shrink: 0; }
+    .fc-btn {
+      padding: 8px 20px; font-size: 0.74rem; font-weight: 600;
+      border-radius: 8px; cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s; letter-spacing: 0.02em;
+    }
+    .btn-flip { background: #0d2235; border-color: #1e4060; color: #5bc8f5; }
+    .btn-flip:hover { border-color: #4fc3f7; background: #102c40; }
+    .btn-knew { background: #0d2818; border-color: #1e5030; color: #4ff7b0; }
+    .btn-knew:hover { border-color: #4ff7b0; background: #103020; }
+    .btn-next { background: #0a1628; border-color: #1e3050; color: #3a6a8a; }
+    .btn-next:hover { border-color: #3a6a8a; color: #7aacca; }
+
+    .fc-prog { display: flex; flex-direction: column; align-items: center; gap: 7px; flex-shrink: 0; }
+    .fc-count { font-size: 0.67rem; color: #2a5070; }
+    .fc-dots { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; max-width: 380px; }
+    .fc-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #111e2e; border: 1px solid #1e3050;
+      transition: all 0.2s;
+    }
+    .fc-dot.cur   { background: #2d7dd2; border-color: #4fc3f7; box-shadow: 0 0 5px rgba(79,195,247,0.4); }
+    .fc-dot.known { background: #2dd28a; border-color: #4ff7b0; }
+
+    /* ── FOOTER ──────────────────────────────────────── */
     .footer {
-      flex-shrink: 0; padding: 7px 24px;
+      flex-shrink: 0; padding: 6px 24px;
       border-top: 1px solid #0e1e2e;
-      display: flex; align-items: center; gap: 20px;
-      font-size: 0.62rem;
+      display: flex; align-items: center; gap: 18px;
+      font-size: 0.61rem;
     }
     .legend-item { display: flex; align-items: center; gap: 5px; color: #1e4060; }
     .legend-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .footer-note { margin-left: auto; color: #142030; }
 
-    /* ── MOBILE ─────────────────────────────────── */
+    /* ── MOBILE ──────────────────────────────────────── */
     @media (max-width: 680px) {
       body { overflow: auto; height: auto; }
-      .main { flex-direction: column; }
-      .panel { width: 100%; min-height: 220px; border-left: none; border-top: 1px solid #162840; }
-      .diagram-wrap { padding: 20px 16px 16px 42px; min-height: 360px; }
-      .tier-labels  { padding: 28px 0 18px; }
+      #view-map { flex-direction: column; }
+      .panel { width: 100%; min-height: 200px; border-left: none; border-top: 1px solid #162840; }
+      .diagram-wrap { padding: 18px 14px 0 38px; min-height: 300px; }
+      .tier-labels { padding: 26px 0 44px; }
+      .card-scene { max-width: 100%; }
+      .fc-btns { flex-wrap: wrap; justify-content: center; }
     }
   </style>
 </head>
@@ -222,19 +351,23 @@
 <div class="hdr">
   <div class="hdr-icon">📊</div>
   <div>
-    <div class="hdr-title">FX Market Structure Map</div>
-    <div class="hdr-sub">Global foreign exchange ecosystem · click any node to explore</div>
+    <div class="hdr-title">FX Market Structure</div>
+    <div class="hdr-sub">Global foreign exchange ecosystem</div>
   </div>
   <div class="hdr-pill">eFX Education</div>
 </div>
 
-<!-- MAIN -->
-<div class="main">
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" data-tab="map">Market Map</button>
+  <button class="tab-btn" data-tab="cards">Flashcards</button>
+</div>
 
-  <!-- DIAGRAM -->
+<!-- MAP VIEW -->
+<div id="view-map">
   <div class="diagram-wrap">
+    <button id="sim-btn">▶ Simulate Trade</button>
 
-    <!-- Tier labels -->
     <div class="tier-labels">
       <div class="tier-lbl" style="color:#2d7dd2">
         <div class="tier-lbl-dot" style="background:#2d7dd2"></div>Clients
@@ -250,8 +383,7 @@
     <div id="diagram">
       <svg id="arrows-svg"></svg>
 
-      <!-- Tier 1: Clients -->
-      <div class="diagram-row" id="row-clients">
+      <div class="diagram-row">
         <div class="node" data-id="corp" data-tier="client">
           <div class="node-cat">Buy-Side</div>
           <div class="node-name">Corporate<br>Clients</div>
@@ -269,8 +401,7 @@
         </div>
       </div>
 
-      <!-- Tier 2: Banks -->
-      <div class="diagram-row" id="row-banks">
+      <div class="diagram-row">
         <div class="node" data-id="bankA" data-tier="bank">
           <div class="node-cat">Sell-Side</div>
           <div class="node-name">Investment<br>Bank A</div>
@@ -283,8 +414,7 @@
         </div>
       </div>
 
-      <!-- Tier 3: Infrastructure -->
-      <div class="diagram-row" id="row-infra">
+      <div class="diagram-row">
         <div class="node" data-id="lp" data-tier="infra">
           <div class="node-cat">Non-Bank MM</div>
           <div class="node-name">Liquidity<br>Providers</div>
@@ -296,15 +426,19 @@
           <div class="node-sub">EBS · Refinitiv</div>
         </div>
       </div>
-
     </div><!-- #diagram -->
+
+    <div id="sim-status">
+      <span class="sim-pill" id="sim-step-pill"></span>
+      <span id="sim-msg"></span>
+    </div>
   </div><!-- .diagram-wrap -->
 
   <!-- INFO PANEL -->
   <div class="panel">
     <div class="panel-hint" id="panel-hint">
       <div class="hint-ring">←</div>
-      <p>Click any node to learn about its role in the FX market ecosystem</p>
+      <p>Click any node to learn about its role in the FX ecosystem</p>
     </div>
     <div class="panel-body" id="panel-body">
       <div id="pb-badge" class="pb-badge"></div>
@@ -316,177 +450,181 @@
       <div id="pb-conns"></div>
     </div>
   </div>
+</div><!-- #view-map -->
 
-</div><!-- .main -->
+<!-- FLASHCARD VIEW -->
+<div id="view-cards">
+  <div class="fc-cats">
+    <button class="fc-cat active" data-cat="all">All Cards</button>
+    <button class="fc-cat" data-cat="fx-basics">FX Basics</button>
+    <button class="fc-cat" data-cat="efx">eFX Concepts</button>
+    <button class="fc-cat" data-cat="market-structure">Market Structure</button>
+  </div>
+
+  <div class="card-scene">
+    <div id="card-inner" class="card-inner">
+      <div class="card-face card-front">
+        <div class="card-hint">Question — click card or press Flip</div>
+        <div class="card-q" id="fc-q"></div>
+        <div class="card-cat-lbl" id="fc-cat-lbl"></div>
+      </div>
+      <div class="card-face card-back" id="card-back-face">
+        <div class="card-hint">Answer</div>
+        <div class="card-a" id="fc-a"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fc-btns">
+    <button class="fc-btn btn-flip" id="btn-flip">↻ Flip</button>
+    <button class="fc-btn btn-knew" id="btn-knew">✓ I Knew It</button>
+    <button class="fc-btn btn-next" id="btn-next">Next →</button>
+  </div>
+
+  <div class="fc-prog">
+    <div class="fc-count" id="fc-count"></div>
+    <div class="fc-dots" id="fc-dots"></div>
+  </div>
+</div><!-- #view-cards -->
 
 <!-- FOOTER -->
 <div class="footer">
   <div class="legend-item"><div class="legend-dot" style="background:#2d7dd2"></div>Buy-side</div>
   <div class="legend-item"><div class="legend-dot" style="background:#2dd28a"></div>Sell-side</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#8a4dd2"></div>Market infrastructure</div>
-  <div class="legend-item" style="margin-left:12px; color:#1e3858">⇄ bidirectional flow</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#8a4dd2"></div>Infrastructure</div>
+  <div class="legend-item" style="margin-left:10px;color:#1e3858">⇄ bidirectional flow</div>
   <div class="footer-note">$7.5T daily volume · 24h/5d</div>
 </div>
 
 <script>
 'use strict';
 
-// ── NODE CONTENT ─────────────────────────────────────────────────────────────
-
-const NODES = {
+// ── NODE DATA ─────────────────────────────────────────────────────────────────
+var NODES = {
   corp: {
-    title: 'Corporate Clients',
-    tier: 'client', label: 'Buy-Side',
-    desc: `Multinational companies, importers, and exporters that need to convert currencies for trade settlement, payroll, or treasury management. They submit Requests for Quote (RFQ) via a bank's e-portal — platforms like Barclays BARX, Deutsche Autobahn, or Citi Velocity. Corporates prioritize certainty of execution and predictable spreads over chasing the absolute best price, trading in larger and less frequent clips than fund managers. Many use FX forwards and NDFs to hedge future currency exposure rather than trading spot.`,
+    title: 'Corporate Clients', tier: 'client', label: 'Buy-Side',
+    desc: 'Multinational companies, importers, and exporters converting currencies for trade settlement, payroll, or treasury management. They submit Requests for Quote (RFQ) via a bank\'s e-portal — platforms like Barclays BARX, Deutsche Autobahn, or Citi Velocity. Corporates prioritize certainty of execution and predictable spreads over the best possible price, and often use FX forwards and NDFs to hedge future currency exposure.',
     terms: ['RFQ', 'e-portal', 'FX Forward', 'NDF', 'STP', 'WMR Fix', 'hedge ratio'],
     connects: ['bankA', 'bankB']
   },
   hedge: {
-    title: 'Hedge Funds',
-    tier: 'client', label: 'Buy-Side',
-    desc: `Sophisticated, price-sensitive investors running macro, quant, CTA, or stat-arb strategies. They connect to multiple banks simultaneously via FIX API to receive streaming prices and execute at high speed. Hedge funds actively shop liquidity across venues, making them sensitive to "last look" — the bank's right to reject a submitted trade after inspecting the order. Their flow is often labelled "toxic" if it consistently picks off stale prices, causing banks to widen spreads or reduce the credit extended to them.`,
+    title: 'Hedge Funds', tier: 'client', label: 'Buy-Side',
+    desc: 'Sophisticated, price-sensitive investors running macro, quant, CTA, or stat-arb strategies. They connect to banks via FIX API to receive streaming prices and execute at high speed. Hedge funds shop multiple venues simultaneously, making them sensitive to "last look" — the bank\'s right to reject a trade after seeing the order. Their flow is labelled "toxic" if it consistently picks off stale quotes, causing banks to widen spreads.',
     terms: ['last look', 'FIX API', 'streaming', 'toxic flow', 'fill ratio', 'latency', 'prime brokerage'],
     connects: ['bankA', 'bankB']
   },
   retail: {
-    title: 'Retail Clients',
-    tier: 'client', label: 'Buy-Side',
-    desc: `Individual traders who access FX through retail brokers such as IG, OANDA, or Saxo Bank. They typically trade CFDs or rolling spot contracts rather than deliverable spot FX. Retail brokers aggregate client orders and either internalize them (acting as counterparty — "B-booking") or hedge residual exposure with a prime bank ("A-booking"). Retail clients face the widest spreads — often 1–3 pips on EUR/USD versus sub-0.1 pip in the interbank market — and have no direct access to professional venues.`,
+    title: 'Retail Clients', tier: 'client', label: 'Buy-Side',
+    desc: 'Individual traders accessing FX through retail brokers such as IG, OANDA, or Saxo Bank. They typically trade CFDs or rolling spot contracts rather than deliverable spot FX. Retail brokers either internalize client orders ("B-booking") or hedge residual exposure with a prime bank ("A-booking"). Retail clients face the widest spreads — often 1–3 pips on EUR/USD versus sub-0.1 pip in the interbank market.',
     terms: ['CFD', 'rolling spot', 'A-book', 'B-book', 'spread', 'pip', 'retail broker'],
     connects: ['bankA', 'bankB']
   },
   bankA: {
-    title: 'Investment Bank (Dealer)',
-    tier: 'bank', label: 'Sell-Side',
-    desc: `The central intermediary in electronic FX. Banks receive client flow, price it through an eFX pricing engine, then decide whether to internalize the risk (net it against opposite client flow) or externalize it (hedge with a liquidity provider or ECN). The goal is to maximize the "internalization rate" — matching buys against sells within the bank's own book — which captures the full bid/offer spread as profit. Residual inventory is hedged externally. Banks compete on spread tightness, fill rate, last-look rejection rates, and platform capability.`,
+    title: 'Investment Bank (Dealer)', tier: 'bank', label: 'Sell-Side',
+    desc: 'The central intermediary in electronic FX. Banks receive client flow, price it through an eFX engine, then decide whether to internalize the risk (match against opposite client flow) or hedge externally with an LP or ECN. The goal is to maximize internalization rate — capturing the full bid/offer spread as profit. Residual inventory is hedged externally. Banks compete on spread tightness, fill rate, and last-look rejection rates.',
     terms: ['internalization', 'risk recycling', 'eFX engine', 'SDP', 'skew', 'last look', 'algo pricing'],
     connects: ['corp', 'hedge', 'retail', 'bankB', 'lp', 'ecn']
   },
   bankB: {
-    title: 'Investment Bank (Dealer)',
-    tier: 'bank', label: 'Sell-Side',
-    desc: `Same role as Bank A — a major FX dealer (think JPMorgan, UBS, Citi, Deutsche Bank, Barclays). The top five dealer banks control roughly 50% of global spot FX volume. Banks also transact directly with each other in the interbank market when they need to offload inventory, typically via bilateral credit lines or through prime brokerage relationships on ECNs. Each bank runs its own eFX pricing stack with real-time risk management deciding how to respond to each incoming trade.`,
+    title: 'Investment Bank (Dealer)', tier: 'bank', label: 'Sell-Side',
+    desc: 'Same role as Bank A — a major FX dealer (JPMorgan, UBS, Citi, Deutsche Bank, Barclays). The top 5 dealer banks control ~50% of global spot FX volume. Banks also trade with each other in the interbank market when offloading inventory, via bilateral credit lines or through prime brokerage on ECNs. Each bank runs its own eFX pricing stack with real-time risk management.',
     terms: ['dealer bank', 'market making', 'inventory', 'bilateral credit', 'prime broker', 'credit line'],
     connects: ['corp', 'hedge', 'retail', 'bankA', 'lp', 'ecn']
   },
   lp: {
-    title: 'Liquidity Providers (Non-Bank)',
-    tier: 'infra', label: 'Non-Bank MM',
-    desc: `Electronic market makers — XTX Markets, Citadel Securities, Jump Trading, Virtu Financial — that stream continuous two-way prices to banks and ECNs using statistical models and ultra-low-latency infrastructure. They earn the bid/offer spread on high volumes while carefully managing directional risk. Banks use them as an outsourced hedging venue: when a bank accumulates unwanted inventory, it hits an LP's streaming quote to offload the risk. LPs have largely displaced traditional voice brokers in major spot pairs and compete aggressively on reject rate and fill quality.`,
+    title: 'Liquidity Providers (Non-Bank)', tier: 'infra', label: 'Non-Bank MM',
+    desc: 'Electronic market makers — XTX Markets, Citadel Securities, Jump Trading, Virtu Financial — streaming continuous two-way prices to banks and ECNs. They earn the bid/offer spread on high volumes while managing directional risk. Banks use them as an outsourced hedge: when a bank accumulates unwanted inventory, it hits an LP\'s streaming quote to offload risk. LPs compete on spread width, reject rate, and fill quality.',
     terms: ['XTX Markets', 'streaming', 'two-way price', 'reject rate', 'co-location', 'market making', 'HFT'],
     connects: ['bankA', 'bankB', 'ecn']
   },
   ecn: {
-    title: 'ECN (EBS / Refinitiv)',
-    tier: 'infra', label: 'Venue',
-    desc: `Electronic Communication Networks are anonymous central limit order books (CLOB) where banks and LPs post firm bids and offers. EBS Market (CME Group) dominates EUR/USD and USD/JPY price discovery; Refinitiv Matching handles other G10 pairs. The mid-price on EBS is effectively the global FX "reference rate" that banks anchor their own pricing engines to. Access requires prime brokerage for credit intermediation. These venues operate continuously during FX market hours — from Sunday evening New York time through to Friday evening.`,
+    title: 'ECN (EBS / Refinitiv)', tier: 'infra', label: 'Venue',
+    desc: 'Electronic Communication Networks — anonymous central limit order books (CLOB) where banks and LPs post firm bids and offers. EBS Market (CME Group) dominates EUR/USD and USD/JPY; Refinitiv Matching covers other G10 pairs. The EBS mid-price is the global FX "reference rate" that banks anchor their pricing to. Access requires prime brokerage. Operates continuously through FX market hours.',
     terms: ['CLOB', 'EBS', 'Refinitiv', 'anonymous matching', 'reference rate', 'prime broker', 'firm quote'],
     connects: ['bankA', 'bankB', 'lp']
   }
 };
 
-// ── EDGES ─────────────────────────────────────────────────────────────────────
-
-const EDGES = [
-  { from: 'corp',   to: 'bankA', label: 'RFQ',         bidir: true },
-  { from: 'hedge',  to: 'bankA', label: '',             bidir: true },
-  { from: 'hedge',  to: 'bankB', label: '',             bidir: true },
-  { from: 'retail', to: 'bankB', label: 'order flow',  bidir: true },
-  { from: 'bankA',  to: 'bankB', label: 'interbank',   bidir: true },
-  { from: 'bankA',  to: 'lp',    label: 'hedging',     bidir: true },
-  { from: 'bankB',  to: 'lp',    label: '',             bidir: true },
-  { from: 'bankA',  to: 'ecn',   label: '',             bidir: true },
-  { from: 'bankB',  to: 'ecn',   label: 'price disc.', bidir: true },
-  { from: 'lp',     to: 'ecn',   label: 'LP quotes',   bidir: true },
+var EDGES = [
+  { from: 'corp',   to: 'bankA', label: 'RFQ',        bidir: true },
+  { from: 'hedge',  to: 'bankA', label: '',            bidir: true },
+  { from: 'hedge',  to: 'bankB', label: '',            bidir: true },
+  { from: 'retail', to: 'bankB', label: 'order flow', bidir: true },
+  { from: 'bankA',  to: 'bankB', label: 'interbank',  bidir: true },
+  { from: 'bankA',  to: 'lp',   label: 'hedging',     bidir: true },
+  { from: 'bankB',  to: 'lp',   label: '',            bidir: true },
+  { from: 'bankA',  to: 'ecn',  label: '',            bidir: true },
+  { from: 'bankB',  to: 'ecn',  label: 'price disc.', bidir: true },
+  { from: 'lp',     to: 'ecn',  label: 'LP quotes',   bidir: true }
 ];
 
-const CONN_NAMES = {
-  corp: 'Corporate Clients',   hedge: 'Hedge Funds',
-  retail: 'Retail Clients',    bankA: 'Investment Bank A',
-  bankB: 'Investment Bank B',  lp: 'Liquidity Providers',
-  ecn: 'ECN (EBS / Refinitiv)'
+var CONN_NAMES = {
+  corp: 'Corporate Clients', hedge: 'Hedge Funds', retail: 'Retail Clients',
+  bankA: 'Investment Bank A', bankB: 'Investment Bank B',
+  lp: 'Liquidity Providers', ecn: 'ECN (EBS / Refinitiv)'
 };
 
 // ── SVG HELPERS ───────────────────────────────────────────────────────────────
-
-const ns = tag => document.createElementNS('http://www.w3.org/2000/svg', tag);
-const svgEl = document.getElementById('arrows-svg');
+var svgEl = document.getElementById('arrows-svg');
+function ns(tag) { return document.createElementNS('http://www.w3.org/2000/svg', tag); }
 
 function getCenter(el) {
-  const dr = document.getElementById('diagram').getBoundingClientRect();
-  const r  = el.getBoundingClientRect();
-  return { x: r.left - dr.left + r.width / 2, y: r.top - dr.top + r.height / 2, w: r.width, h: r.height };
+  var dr = document.getElementById('diagram').getBoundingClientRect();
+  var r  = el.getBoundingClientRect();
+  return { x: r.left - dr.left + r.width/2, y: r.top - dr.top + r.height/2, w: r.width, h: r.height };
 }
 
-function edgePt(cx, cy, w, h, tx, ty, pad) {
-  pad = pad || 7;
-  const dx = tx - cx, dy = ty - cy;
+function edgePt(cx, cy, w, h, tx, ty) {
+  var pad = 7, dx = tx - cx, dy = ty - cy;
   if (!dx && !dy) return { x: cx, y: cy };
-  const hw = w / 2 + pad, hh = h / 2 + pad;
-  const s = Math.min(hw / Math.abs(dx), hh / Math.abs(dy));
-  return { x: cx + dx * s, y: cy + dy * s };
+  var s = Math.min((w/2+pad)/Math.abs(dx), (h/2+pad)/Math.abs(dy));
+  return { x: cx + dx*s, y: cy + dy*s };
 }
 
 function renderArrows(activeId) {
   svgEl.innerHTML = '';
-
-  // Arrowhead markers
-  const defs = ns('defs');
-  [['dim', '#1e3d60'], ['hi', '#00ccf0']].forEach(function(pair) {
-    var id = pair[0], fill = pair[1];
+  var defs = ns('defs');
+  [['dim','#1e3d60'],['hi','#00ccf0']].forEach(function(p) {
     var m = ns('marker');
-    m.setAttribute('id', 'arr-' + id);
-    m.setAttribute('markerWidth', '7');
-    m.setAttribute('markerHeight', '7');
-    m.setAttribute('refX', '5');
-    m.setAttribute('refY', '3.5');
-    m.setAttribute('orient', 'auto');
-    var p = ns('path');
-    p.setAttribute('d', 'M0,0.5 L0,6.5 L7,3.5 z');
-    p.setAttribute('fill', fill);
-    m.appendChild(p);
-    defs.appendChild(m);
+    m.setAttribute('id','arr-'+p[0]); m.setAttribute('markerWidth','7');
+    m.setAttribute('markerHeight','7'); m.setAttribute('refX','5');
+    m.setAttribute('refY','3.5'); m.setAttribute('orient','auto');
+    var path = ns('path');
+    path.setAttribute('d','M0,0.5 L0,6.5 L7,3.5 z');
+    path.setAttribute('fill', p[1]);
+    m.appendChild(path); defs.appendChild(m);
   });
   svgEl.appendChild(defs);
 
-  var nodeMap = {};
-  document.querySelectorAll('.node').forEach(function(n) { nodeMap[n.dataset.id] = n; });
+  var nm = {};
+  document.querySelectorAll('.node').forEach(function(n) { nm[n.dataset.id] = n; });
 
   EDGES.forEach(function(e) {
-    var fa = nodeMap[e.from], ta = nodeMap[e.to];
+    var fa = nm[e.from], ta = nm[e.to];
     if (!fa || !ta) return;
     var fc = getCenter(fa), tc = getCenter(ta);
     var fp = edgePt(fc.x, fc.y, fc.w, fc.h, tc.x, tc.y);
     var tp = edgePt(tc.x, tc.y, tc.w, tc.h, fc.x, fc.y);
-
-    var active = activeId && (e.from === activeId || e.to === activeId);
-    var color  = active ? '#00ccf0' : '#1e3d60';
-    var width  = active ? 1.8 : 1.2;
-    var opa    = active ? 1 : 0.55;
-    var marker = active ? 'arr-hi' : 'arr-dim';
+    var act = activeId && (e.from===activeId || e.to===activeId);
+    var mk  = act ? 'arr-hi' : 'arr-dim';
 
     var line = ns('line');
     line.setAttribute('x1', fp.x); line.setAttribute('y1', fp.y);
     line.setAttribute('x2', tp.x); line.setAttribute('y2', tp.y);
-    line.setAttribute('stroke', color);
-    line.setAttribute('stroke-width', width);
-    line.setAttribute('opacity', opa);
-    line.setAttribute('marker-end', 'url(#' + marker + ')');
-    if (e.bidir) line.setAttribute('marker-start', 'url(#' + marker + ')');
+    line.setAttribute('stroke',       act ? '#00ccf0' : '#1e3d60');
+    line.setAttribute('stroke-width', act ? '1.8' : '1.2');
+    line.setAttribute('opacity',      act ? '1' : '0.55');
+    line.setAttribute('marker-end',   'url(#'+mk+')');
+    if (e.bidir) line.setAttribute('marker-start', 'url(#'+mk+')');
     svgEl.appendChild(line);
 
-    // Show label only on active edge
-    if (active && e.label) {
-      var mx = (fp.x + tp.x) / 2, my = (fp.y + tp.y) / 2;
+    if (act && e.label) {
       var t = ns('text');
-      t.setAttribute('x', mx); t.setAttribute('y', my);
-      t.setAttribute('text-anchor', 'middle');
-      t.setAttribute('dominant-baseline', 'middle');
-      t.setAttribute('fill', '#00b8d8');
-      t.setAttribute('font-size', '9.5');
-      t.setAttribute('font-weight', '600');
-      t.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
-      // Small background rectangle for readability
+      t.setAttribute('x', (fp.x+tp.x)/2); t.setAttribute('y', (fp.y+tp.y)/2);
+      t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','middle');
+      t.setAttribute('fill','#00b8d8'); t.setAttribute('font-size','9.5');
+      t.setAttribute('font-weight','600');
+      t.setAttribute('font-family','Segoe UI, system-ui, sans-serif');
       t.textContent = e.label;
       svgEl.appendChild(t);
     }
@@ -494,28 +632,23 @@ function renderArrows(activeId) {
 }
 
 // ── PANEL ─────────────────────────────────────────────────────────────────────
-
 var activeId = null;
 var tierBadge = { client: 'badge-client', bank: 'badge-bank', infra: 'badge-infra' };
 
 function openPanel(id) {
   var d = NODES[id];
   document.getElementById('panel-hint').style.display = 'none';
-  var body = document.getElementById('panel-body');
-  body.classList.add('open');
-
+  document.getElementById('panel-body').classList.add('open');
   var badge = document.getElementById('pb-badge');
   badge.className = 'pb-badge ' + tierBadge[d.tier];
   badge.textContent = d.label;
   document.getElementById('pb-title').textContent = d.title;
   document.getElementById('pb-desc').textContent  = d.desc;
-
   document.getElementById('pb-terms').innerHTML = d.terms
-    .map(function(t) { return '<span class="term">' + t + '</span>'; }).join('');
-
+    .map(function(t) { return '<span class="term">'+t+'</span>'; }).join('');
   document.getElementById('pb-conns').innerHTML = d.connects
     .map(function(cid) {
-      return '<div class="conn-item"><span class="conn-arr">⇄</span><span>' + CONN_NAMES[cid] + '</span></div>';
+      return '<div class="conn-item"><span class="conn-arr">⇄</span><span>'+CONN_NAMES[cid]+'</span></div>';
     }).join('');
 }
 
@@ -524,43 +657,266 @@ function closePanel() {
   document.getElementById('panel-body').classList.remove('open');
 }
 
-// ── INTERACTION ───────────────────────────────────────────────────────────────
-
 document.querySelectorAll('.node').forEach(function(node) {
   node.addEventListener('click', function(e) {
     e.stopPropagation();
     var id = node.dataset.id;
-
     if (activeId === id) {
-      node.classList.remove('active');
-      activeId = null;
-      closePanel();
-      renderArrows(null);
-      return;
+      node.classList.remove('active'); activeId = null;
+      closePanel(); renderArrows(null); return;
     }
-
     document.querySelectorAll('.node.active').forEach(function(n) { n.classList.remove('active'); });
-    node.classList.add('active');
-    activeId = id;
-    openPanel(id);
-    renderArrows(id);
+    node.classList.add('active'); activeId = id;
+    openPanel(id); renderArrows(id);
   });
 });
 
 document.addEventListener('click', function() {
   if (!activeId) return;
   document.querySelectorAll('.node.active').forEach(function(n) { n.classList.remove('active'); });
-  activeId = null;
-  closePanel();
-  renderArrows(null);
+  activeId = null; closePanel(); renderArrows(null);
+});
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.tab === tab);
+    });
+    document.getElementById('view-map').style.display   = tab === 'map'   ? 'flex' : 'none';
+    var cards = document.getElementById('view-cards');
+    if (tab === 'cards') { cards.classList.add('active'); }
+    else                 { cards.classList.remove('active'); }
+    if (tab === 'map') { renderArrows(activeId); }
+  });
+});
+
+// ── TRADE SIMULATION ──────────────────────────────────────────────────────────
+var SIM_PATH  = ['hedge', 'bankA', 'lp', 'bankA', 'hedge'];
+var SIM_STEPS = [
+  null,
+  { pill: 'Step 1 / 4', msg: 'Hedge fund sends RFQ — bank quotes a spread of ~0.5 pip',       color: '#4ff7b0' },
+  { pill: 'Step 2 / 4', msg: 'Execution point — LP fills the bank at a tighter internal price', color: '#b880f7' },
+  { pill: 'Step 3 / 4', msg: 'Spread captured — bank earned the bid/offer difference ✓',        color: '#4ff7b0' },
+  { pill: 'Step 4 / 4', msg: 'Client filled — trade complete ✓',                                color: '#4fc3f7' }
+];
+var simRunning = false;
+
+document.getElementById('sim-btn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  if (simRunning) return;
+
+  // Clear node selection
+  document.querySelectorAll('.node.active').forEach(function(n) { n.classList.remove('active'); });
+  activeId = null; closePanel(); renderArrows(null);
+
+  var nodeMap = {};
+  document.querySelectorAll('.node').forEach(function(n) { nodeMap[n.dataset.id] = n; });
+  var pts = SIM_PATH.map(function(id) { return getCenter(nodeMap[id]); });
+
+  var dot = ns('circle');
+  dot.setAttribute('r','7'); dot.setAttribute('fill','#00d4f5');
+  dot.style.filter = 'drop-shadow(0 0 6px #00d4f5)';
+  svgEl.appendChild(dot);
+
+  var segLine = ns('line');
+  segLine.setAttribute('stroke','#00d4f5'); segLine.setAttribute('stroke-width','2.5');
+  segLine.setAttribute('opacity','0.55'); segLine.setAttribute('stroke-dasharray','5 4');
+  svgEl.appendChild(segLine);
+
+  var statusEl = document.getElementById('sim-status');
+  var pillEl   = document.getElementById('sim-step-pill');
+  var msgEl    = document.getElementById('sim-msg');
+
+  var btn = document.getElementById('sim-btn');
+  btn.disabled = true; btn.textContent = '● Simulating…';
+  statusEl.classList.add('visible');
+  pillEl.textContent = 'Starting…'; msgEl.textContent = 'Tracing: Hedge Fund → Bank → LP → Bank → Client';
+
+  var SEG_DUR = 950;
+  var totalSegs = SIM_PATH.length - 1;
+  var totalDur  = totalSegs * SEG_DUR;
+  var fired = {};
+  var startTs = null;
+
+  simRunning = true;
+
+  function frame(ts) {
+    if (!startTs) startTs = ts;
+    var prog   = Math.min((ts - startTs) / totalDur, 1);
+    var segPrg = prog * totalSegs;
+    var si     = Math.min(Math.floor(segPrg), totalSegs - 1);
+    var t      = segPrg - si;
+    var p0 = pts[si], p1 = pts[si + 1];
+    var cx = p0.x + (p1.x - p0.x) * t;
+    var cy = p0.y + (p1.y - p0.y) * t;
+
+    dot.setAttribute('cx', cx); dot.setAttribute('cy', cy);
+    segLine.setAttribute('x1', p0.x); segLine.setAttribute('y1', p0.y);
+    segLine.setAttribute('x2', cx);   segLine.setAttribute('y2', cy);
+
+    for (var i = 1; i <= totalSegs; i++) {
+      if (!fired[i] && prog >= i / totalSegs) {
+        fired[i] = true;
+        var step = SIM_STEPS[i];
+        if (step) {
+          pillEl.textContent = step.pill;
+          msgEl.textContent  = step.msg;
+          msgEl.style.color  = step.color;
+          var nd = nodeMap[SIM_PATH[i]];
+          nd.classList.remove('sim-pulse');
+          void nd.offsetWidth;
+          nd.classList.add('sim-pulse');
+        }
+      }
+    }
+
+    if (prog < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      simRunning = false;
+      btn.disabled = false; btn.textContent = '▶ Simulate Trade';
+      setTimeout(function() {
+        dot.remove(); segLine.remove();
+      }, 900);
+    }
+  }
+  requestAnimationFrame(frame);
+});
+
+// ── FLASHCARD DATA ────────────────────────────────────────────────────────────
+var CARDS = [
+  // FX Basics
+  { cat: 'fx-basics', q: 'What is a bid/ask spread?',
+    a: 'The gap between the price a market maker will buy (bid) and sell (ask). It\'s the maker\'s profit margin. E.g. EUR/USD 1.0850 / 1.0851 = 1-pip spread. Tighter spreads signal a more competitive, liquid market.' },
+  { cat: 'fx-basics', q: 'What is a pip?',
+    a: 'Percentage in Point — the smallest standard price increment. For EUR/USD, 1 pip = 0.0001. For USD/JPY, 1 pip = 0.01. Spreads, P&L, and move sizes are quoted in pips.' },
+  { cat: 'fx-basics', q: 'Why do spreads widen in low liquidity?',
+    a: 'Fewer market makers posting prices and higher inventory risk per trade. Makers widen spreads to cover the risk of adverse moves and being picked off by informed flow. Common at Asian open and around major data releases.' },
+  { cat: 'fx-basics', q: 'What is spot FX?',
+    a: 'Exchange of two currencies at today\'s rate for settlement in T+2 business days (T+1 for USD/CAD). The largest FX segment by volume. Contrasts with forwards (future date) and swaps (two settlement legs).' },
+  { cat: 'fx-basics', q: 'What is an FX Forward?',
+    a: 'Agreement to exchange currencies at a fixed rate on a future date. Used by corporates to lock in exchange rates and eliminate uncertainty. Priced as spot rate ± forward points, which reflect the interest rate differential between the two currencies.' },
+  { cat: 'fx-basics', q: 'What is the WMR / 4pm Fix?',
+    a: 'The WM/Refinitiv benchmark rate calculated from actual trades in a 5-minute window around 4pm London. Fund managers use it to value FX positions and execute at a transparent reference rate. Has been subject to historic manipulation scandals.' },
+  // eFX
+  { cat: 'efx', q: 'What is eFX?',
+    a: 'Electronic foreign exchange — execution via platforms and APIs rather than voice. Covers bank e-portals (SDPs), multi-dealer platforms, and ECNs. Now ~75%+ of spot FX volume. Enables tighter spreads, faster execution, and full STP.' },
+  { cat: 'efx', q: 'What is "last look"?',
+    a: 'A bank\'s contractual right to reject an incoming trade after reviewing it — typically within 5–100ms. Protects against latency arbitrage on stale prices. Controversial: hedge funds prefer "no last look" venues. Reject rate is a key LP quality metric.' },
+  { cat: 'efx', q: 'What is internalization?',
+    a: 'When a bank matches a client buy against a client sell in its own book — earning the full spread on both sides without any external hedge. Top banks target 80%+ internalization. The higher the rate, the more profitable the eFX business.' },
+  { cat: 'efx', q: 'What is STP?',
+    a: 'Straight-Through Processing — automatic routing from trade execution to settlement with zero manual steps. STP breaks ("exceptions") require manual intervention, increasing cost and operational risk. A core efficiency KPI for eFX desks.' },
+  { cat: 'efx', q: 'What is a streaming price?',
+    a: 'A live, continuously updated two-way quote sent electronically to a client or venue. Hedge funds consume streams via FIX API and click-to-trade instantly. Contrasts with RFQ, where the client must request each price individually.' },
+  { cat: 'efx', q: 'What is toxic flow?',
+    a: 'Client orders that consistently pick off stale prices, generating losses for the market maker. HFT latency-arb strategies produce toxic flow. Banks detect it via P&L attribution and respond by widening spreads, enabling last look, or cutting credit.' },
+  // Market Structure
+  { cat: 'market-structure', q: 'What is an ECN?',
+    a: 'Electronic Communication Network — an anonymous central limit order book (CLOB). EBS dominates EUR/USD and USD/JPY price discovery; Refinitiv covers other G10 pairs. Sets the global FX reference rate. Requires prime brokerage for credit intermediation.' },
+  { cat: 'market-structure', q: 'Who are the top FX dealer banks?',
+    a: 'JPMorgan, UBS, Citi, Deutsche Bank, and Barclays — the top 5 control ~50% of global spot FX volume. They act as market makers to all client segments and compete on spread, fill rate, internalization, and platform quality.' },
+  { cat: 'market-structure', q: 'What is a non-bank LP?',
+    a: 'An electronic market maker (XTX Markets, Citadel Securities, Jump Trading, Virtu) providing two-way prices to banks and ECNs. They replaced voice brokers in major pairs. XTX is now the world\'s largest FX market maker by volume.' },
+  { cat: 'market-structure', q: 'What is prime brokerage in FX?',
+    a: 'A service where a large bank extends credit, allowing a hedge fund to trade with multiple counterparties under one relationship. Essential for ECN access — the fund trades anonymously under the prime broker\'s name. A major revenue stream for top banks.' },
+  { cat: 'market-structure', q: 'What is a single-dealer platform (SDP)?',
+    a: 'A bank\'s own e-trading portal — e.g. Barclays BARX, Citi Velocity, JPMorgan Markets. Clients get streaming prices, execution, analytics, and order management in one place. Banks invest heavily in SDP UX to retain client flow.' },
+  { cat: 'market-structure', q: 'What is the interbank market?',
+    a: 'Where large banks trade FX directly with each other — bilaterally via credit lines or anonymously on ECNs. Sets the benchmark mid-rate used to price all client trades. Dominated by the top 10 dealer banks.' }
+];
+
+var CAT_NAMES = {
+  'fx-basics': 'FX Basics',
+  'efx': 'eFX Concepts',
+  'market-structure': 'Market Structure'
+};
+
+// ── FLASHCARD STATE ───────────────────────────────────────────────────────────
+var FC = {
+  cat: 'all',
+  idx: 0,
+  flipped: false,
+  known: {}
+};
+
+function fcFiltered() {
+  if (FC.cat === 'all') return CARDS;
+  return CARDS.filter(function(c) { return c.cat === FC.cat; });
+}
+
+function fcOrigIdx(card) { return CARDS.indexOf(card); }
+
+function fcRender() {
+  var deck  = fcFiltered();
+  var total = deck.length;
+  if (FC.idx >= total) FC.idx = 0;
+  var card  = deck[FC.idx];
+
+  document.getElementById('fc-q').textContent      = card.q;
+  document.getElementById('fc-a').textContent      = card.a;
+  document.getElementById('fc-cat-lbl').textContent = CAT_NAMES[card.cat] || '';
+
+  var known = FC.known[fcOrigIdx(card)];
+  document.getElementById('fc-count').textContent =
+    'Card ' + (FC.idx + 1) + ' of ' + total +
+    (Object.keys(FC.known).length ? ' · ' + Object.keys(FC.known).length + ' known ✓' : '');
+
+  var dots = document.getElementById('fc-dots');
+  dots.innerHTML = '';
+  for (var i = 0; i < Math.min(total, 20); i++) {
+    var d = document.createElement('div');
+    var origI = fcOrigIdx(deck[i]);
+    d.className = 'fc-dot' +
+      (i === FC.idx ? ' cur' : '') +
+      (FC.known[origI] ? ' known' : '');
+    dots.appendChild(d);
+  }
+}
+
+function fcFlip() {
+  FC.flipped = !FC.flipped;
+  document.getElementById('card-inner').classList.toggle('flipped', FC.flipped);
+}
+
+function fcNext(knew) {
+  if (knew) {
+    var card = fcFiltered()[FC.idx];
+    FC.known[fcOrigIdx(card)] = true;
+    var back = document.getElementById('card-back-face');
+    back.classList.remove('flash');
+    void back.offsetWidth;
+    back.classList.add('flash');
+  }
+  var deck = fcFiltered();
+  FC.idx = (FC.idx + 1) % deck.length;
+  FC.flipped = false;
+  document.getElementById('card-inner').classList.remove('flipped');
+  fcRender();
+}
+
+document.getElementById('card-inner').addEventListener('click', fcFlip);
+document.getElementById('btn-flip').addEventListener('click', fcFlip);
+document.getElementById('btn-knew').addEventListener('click', function() { fcNext(true); });
+document.getElementById('btn-next').addEventListener('click', function() { fcNext(false); });
+
+document.querySelectorAll('.fc-cat').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.fc-cat').forEach(function(b) {
+      b.classList.toggle('active', b === btn);
+    });
+    FC.cat = btn.dataset.cat;
+    FC.idx = 0; FC.flipped = false;
+    document.getElementById('card-inner').classList.remove('flipped');
+    fcRender();
+  });
 });
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-
 window.addEventListener('resize', function() { renderArrows(activeId); });
-requestAnimationFrame(function() {
-  requestAnimationFrame(function() { renderArrows(null); });
-});
+requestAnimationFrame(function() { requestAnimationFrame(function() { renderArrows(null); fcRender(); }); });
 </script>
 </body>
 </html>
