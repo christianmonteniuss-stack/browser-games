@@ -236,6 +236,100 @@
     .legend-dot  { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
     .footer-note { margin-left:auto; color:#142030; }
 
+    /* ── TRÄNA VIEW ── */
+    #view-train { flex:1; display:none; flex-direction:column; min-height:0; }
+    #view-train.active { display:flex; }
+    .sub-tabs { flex-shrink:0; display:flex; background:#060d18; border-bottom:1px solid #0e1e2e; padding:0 20px; }
+    .sub-tab  { padding:6px 14px; font-size:0.7rem; font-weight:600; color:#2a5070; background:none; border:none; border-bottom:2px solid transparent; cursor:pointer; transition:color 0.15s; letter-spacing:0.02em; }
+    .sub-tab:hover { color:#5a8aaa; }
+    .sub-tab.active { color:#5bc8f5; border-bottom-color:#5bc8f5; }
+    .sub-view { flex:1; display:none; overflow-y:auto; min-height:0; justify-content:flex-start; align-items:center; flex-direction:column; }
+    .sub-view.active { display:flex; }
+    .sub-view::-webkit-scrollbar { width:4px; }
+    .sub-view::-webkit-scrollbar-thumb { background:#1a3050; border-radius:2px; }
+
+    /* rate compass */
+    .rc-wrap { max-width:740px; width:100%; padding:24px 24px 8px; }
+    .rc-wrap h3 { font-size:0.88rem; font-weight:700; color:#4fc3f7; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid #162840; }
+    .rc-row  { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    .rc-step { background:#0d1e30; border:1px solid #1e3550; border-radius:8px; padding:10px 14px; text-align:center; min-width:128px; flex-shrink:0; }
+    .rc-row.pos .rc-step { border-color:#1e4a30; background:#091a12; }
+    .rc-row.neg .rc-step { border-color:#4a1e1e; background:#1a0808; }
+    .rc-step-head { font-size:0.57rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:3px; }
+    .rc-row.pos .rc-step-head { color:#4ff7b0; }
+    .rc-row.neg .rc-step-head { color:#f07070; }
+    .rc-step-body { font-size:0.72rem; color:#8ab8d4; line-height:1.3; }
+    .rc-arrow { font-size:1rem; flex-shrink:0; }
+    .rc-row.pos .rc-arrow { color:#2a5a40; }
+    .rc-row.neg .rc-arrow { color:#5a2a2a; }
+    .rc-result { font-size:1.1rem; font-weight:800; padding:10px 16px; border-radius:8px; border:1.5px solid; }
+    .rc-row.pos .rc-result { color:#4ff7b0; border-color:#2a5a40; background:#091a12; }
+    .rc-row.neg .rc-result { color:#f07070; border-color:#5a2a2a; background:#1a0808; }
+    .rc-insight { background:#091828; border:1px solid #1e3d60; border-radius:9px; padding:14px 18px; font-size:0.77rem; color:#7aacca; line-height:1.7; margin:14px 0 0; }
+    .rc-insight strong { color:#c8e8f8; }
+    .rc-example { background:#0d1428; border:1px solid #1e2e50; border-radius:9px; padding:14px 18px; font-size:0.77rem; color:#8ab0d4; line-height:1.7; margin-top:10px; }
+    .rc-example strong { color:#a0c8f0; }
+    .rc-nums { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 0; }
+    .rc-num  { background:#0d1e30; border:1px solid #1e3550; border-radius:7px; padding:8px 14px; text-align:center; flex:1; min-width:100px; }
+    .rc-num-val { font-size:1.1rem; font-weight:800; color:#5bc8f5; }
+    .rc-num-lbl { font-size:0.62rem; color:#2a5070; margin-top:2px; }
+
+    /* memory */
+    .mem-wrap { max-width:520px; width:100%; padding:20px 20px 12px; }
+    .mem-hdr  { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+    .mem-stats { font-size:0.7rem; color:#3a6a8a; display:flex; gap:14px; }
+    .mem-stats strong { color:#5bc8f5; }
+    .mem-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
+    .mem-card { height:74px; cursor:pointer; position:relative; }
+    .mem-card.done { pointer-events:none; }
+    .mem-ci   { width:100%; height:100%; transform-style:preserve-3d; transition:transform 0.32s; position:relative; }
+    .mem-card.flipped .mem-ci, .mem-card.matched .mem-ci { transform:rotateY(180deg); }
+    .mem-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; align-items:center; justify-content:center; padding:7px; border-radius:8px; border:1.5px solid; }
+    .mem-front { background:#0a1828; border-color:#1e3d60; flex-direction:column; gap:4px; }
+    .mem-back  { background:#0f2035; border-color:#1e3a60; transform:rotateY(180deg); font-size:0.63rem; color:#8ab8d4; text-align:center; line-height:1.35; }
+    .mem-back.is-term { font-weight:700; font-size:0.75rem; color:#5bc8f5; }
+    .mem-card.matched .mem-front,.mem-card.matched .mem-back { border-color:#2dd28a; }
+    .mem-card.matched .mem-back { color:#4ff7b0; background:#091a12; }
+    .mem-dotgrid { display:grid; grid-template-columns:1fr 1fr; gap:3px; }
+    .mem-dot { width:4px; height:4px; border-radius:50%; background:#1e3d60; }
+    .mem-lbl { font-size:0.5rem; color:#1e3d60; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; }
+    .mem-footer { display:flex; gap:10px; margin-top:12px; align-items:center; height:36px; }
+    .mem-reset { padding:6px 16px; font-size:0.7rem; font-weight:600; background:#0d2235; border:1px solid #1e4060; color:#5bc8f5; border-radius:7px; cursor:pointer; }
+    .mem-reset:hover { border-color:#4fc3f7; }
+    .mem-done-msg { font-size:0.8rem; color:#4ff7b0; display:none; }
+
+    /* quiz */
+    .quiz-wrap  { max-width:580px; width:100%; padding:20px; display:flex; flex-direction:column; gap:12px; }
+    .quiz-prog  { display:flex; align-items:center; gap:10px; }
+    .qp-bar     { flex:1; height:4px; background:#0e1e2e; border-radius:2px; overflow:hidden; }
+    .qp-fill    { height:100%; background:#2d7dd2; border-radius:2px; transition:width 0.3s; }
+    .qp-txt     { font-size:0.66rem; color:#3a6a8a; white-space:nowrap; }
+    .quiz-card  { background:#0d1e30; border:1px solid #1e3550; border-radius:12px; padding:20px 22px; }
+    .quiz-flag  { font-size:1.6rem; margin-bottom:8px; }
+    .quiz-prompt{ font-size:0.57rem; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:#2a5a7a; margin-bottom:5px; }
+    .quiz-event { font-size:0.9rem; font-weight:600; color:#c8e8f8; line-height:1.4; margin-bottom:4px; }
+    .quiz-ccy   { font-size:0.7rem; color:#2a6a8a; }
+    .quiz-choices { display:flex; gap:9px; }
+    .qc { flex:1; padding:11px 6px; border-radius:9px; border:1.5px solid #1e3550; background:#091828; cursor:pointer; text-align:center; font-size:0.78rem; font-weight:600; color:#7aacca; transition:all 0.15s; line-height:1.3; }
+    .qc:hover:not(:disabled) { border-color:#4fc3f7; background:#0d2035; }
+    .qc:disabled { cursor:default; }
+    .qc.correct { background:#091a12; border-color:#4ff7b0; color:#4ff7b0; }
+    .qc.wrong   { background:#1a0808; border-color:#4a1010; color:#6a3030; }
+    .qc.dim     { opacity:0.3; }
+    .quiz-expl  { background:#091a12; border:1px solid #1a4020; border-radius:8px; padding:12px 16px; font-size:0.74rem; color:#7ad4a0; line-height:1.65; display:none; }
+    .quiz-expl.show { display:block; }
+    .quiz-expl strong { color:#b0f0c0; }
+    .quiz-actions { display:flex; justify-content:flex-end; min-height:36px; }
+    .quiz-next { padding:8px 20px; font-size:0.74rem; font-weight:600; background:#0d2235; border:1px solid #1e4060; color:#5bc8f5; border-radius:8px; cursor:pointer; display:none; }
+    .quiz-next.show { display:block; }
+    .quiz-next:hover { border-color:#4fc3f7; }
+    .quiz-end  { text-align:center; background:#0d1e30; border:1px solid #1e3550; border-radius:12px; padding:30px 24px; display:none; flex-direction:column; align-items:center; gap:12px; }
+    .quiz-end.show { display:flex; }
+    .quiz-end-num  { font-size:3rem; font-weight:800; color:#5bc8f5; line-height:1; }
+    .quiz-end-lbl  { font-size:0.8rem; color:#3a6a8a; }
+    .quiz-restart  { padding:8px 22px; font-size:0.74rem; font-weight:600; background:#0d2235; border:1px solid #2d7dd2; color:#5bc8f5; border-radius:8px; cursor:pointer; margin-top:6px; }
+    .quiz-restart:hover { border-color:#4fc3f7; }
+
     @media (max-width:720px) {
       body { overflow:auto; height:auto; }
       #view-map { flex-direction:column; }
@@ -265,6 +359,7 @@
   <button class="tab-btn active" data-tab="map">Marknadskarta</button>
   <button class="tab-btn" data-tab="about">Om FX-marknaden</button>
   <button class="tab-btn" data-tab="events">Vad rör FX?</button>
+  <button class="tab-btn" data-tab="train">Träna</button>
   <button class="tab-btn" data-tab="cards">Flashkort</button>
 </div>
 
@@ -604,6 +699,100 @@
   </div>
 </div>
 
+<!-- ══ TRÄNA VIEW ══ -->
+<div id="view-train">
+  <div class="sub-tabs">
+    <button class="sub-tab active" data-sub="rate">Räntekompass</button>
+    <button class="sub-tab" data-sub="memory">Memory</button>
+    <button class="sub-tab" data-sub="quiz">Valutaquiz</button>
+  </div>
+
+  <!-- Rate compass -->
+  <div class="sub-view active" id="sv-rate">
+    <div class="rc-wrap">
+      <h3>Ränta → Valuta — mekanismen steg för steg</h3>
+      <div class="rc-row pos">
+        <div class="rc-step"><div class="rc-step-head">Utlösare</div><div class="rc-step-body">Centralbanken <strong>höjer</strong> räntan</div></div>
+        <div class="rc-arrow">→</div>
+        <div class="rc-step"><div class="rc-step-head">Effekt 1</div><div class="rc-step-body">Avkastning på statsobligationer stiger</div></div>
+        <div class="rc-arrow">→</div>
+        <div class="rc-step"><div class="rc-step-head">Effekt 2</div><div class="rc-step-body">Utländskt kapital köper landets obligationer</div></div>
+        <div class="rc-arrow">→</div>
+        <div class="rc-step"><div class="rc-step-head">Effekt 3</div><div class="rc-step-body">Måste köpa valutan för att köpa obligationerna</div></div>
+        <div class="rc-arrow">→</div>
+        <div class="rc-result">Valutan stärks ↑</div>
+      </div>
+      <div class="rc-row neg">
+        <div class="rc-step"><div class="rc-step-head">Utlösare</div><div class="rc-step-body">Centralbanken <strong>sänker</strong> räntan</div></div>
+        <div class="rc-arrow">→</div>
+        <div class="rc-step"><div class="rc-step-head">Effekt 1</div><div class="rc-step-body">Avkastning på statsobligationer faller</div></div>
+        <div class="rc-arrow">→</div>
+        <div class="rc-step"><div class="rc-step-head">Effekt 2</div><div class="rc-step-body">Kapital söker bättre avkastning i andra länder</div></div>
+        <div class="rc-arrow">→</div>
+        <div class="rc-step"><div class="rc-step-head">Effekt 3</div><div class="rc-step-body">Valutan säljs för att köpa annan valuta</div></div>
+        <div class="rc-arrow">→</div>
+        <div class="rc-result">Valutan försvagas ↓</div>
+      </div>
+      <div class="rc-insight">
+        <strong>Viktigast att förstå:</strong> FX reagerar på <em>avvikelser</em> från förväntningar — inte på beslutet i sig. Om alla vet att Fed ska höja 25 bp och de höjer 25 bp — USD rör sig knappt. Om de höjer 50 bp (surprise) — USD stärks kraftigt. Det är skillnaden mot konsensus som driver rörelsen.
+      </div>
+      <div class="rc-example">
+        <strong>Japan 2022–2024 i siffror:</strong>
+        <div class="rc-nums">
+          <div class="rc-num"><div class="rc-num-val">−0,1%</div><div class="rc-num-lbl">BOJ styrränta</div></div>
+          <div class="rc-num"><div class="rc-num-val">5,25%</div><div class="rc-num-lbl">Fed styrränta</div></div>
+          <div class="rc-num"><div class="rc-num-val">5,35%</div><div class="rc-num-lbl">Räntedifferens</div></div>
+          <div class="rc-num"><div class="rc-num-val">−40%</div><div class="rc-num-lbl">Yen vs USD</div></div>
+        </div>
+        Investerare lånade yen (gratis), köpte dollar-obligationer med 5,25% avkastning. Detta kräver att man säljer yen → konstant säljtryck. USD/JPY steg från 115 till 160. Det kallas <strong>carry trade</strong>.
+      </div>
+    </div>
+  </div>
+
+  <!-- Memory game -->
+  <div class="sub-view" id="sv-memory">
+    <div class="mem-wrap">
+      <div class="mem-hdr">
+        <span style="font-size:0.8rem;font-weight:700;color:#c8e8f8">Memory — para ihop term med förklaring</span>
+        <div class="mem-stats">Drag: <strong id="mem-moves">0</strong> &nbsp; Tid: <strong id="mem-time">0:00</strong></div>
+      </div>
+      <div class="mem-grid" id="mem-grid"></div>
+      <div class="mem-footer">
+        <button class="mem-reset" id="mem-reset">↺ Ny omgång</button>
+        <span class="mem-done-msg" id="mem-done-msg"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="sub-view" id="sv-quiz">
+    <div class="quiz-wrap">
+      <div class="quiz-prog">
+        <div class="qp-bar"><div class="qp-fill" id="qp-fill" style="width:0%"></div></div>
+        <div class="qp-txt" id="qp-txt">Fråga 1 av 10 · Poäng: 0</div>
+      </div>
+      <div class="quiz-card" id="quiz-card">
+        <div class="quiz-flag" id="quiz-flag"></div>
+        <div class="quiz-prompt">Scenario — vad händer med valutan?</div>
+        <div class="quiz-event" id="quiz-event"></div>
+        <div class="quiz-ccy"   id="quiz-ccy"></div>
+      </div>
+      <div class="quiz-choices" id="quiz-choices">
+        <button class="qc" id="qc-up">↑ Stärks</button>
+        <button class="qc" id="qc-down">↓ Försvagas</button>
+        <button class="qc" id="qc-neu">→ Oförändrat</button>
+      </div>
+      <div class="quiz-expl" id="quiz-expl"></div>
+      <div class="quiz-actions"><button class="quiz-next" id="quiz-next">Nästa →</button></div>
+      <div class="quiz-end" id="quiz-end">
+        <div class="quiz-end-num" id="quiz-end-num"></div>
+        <div class="quiz-end-lbl" id="quiz-end-lbl"></div>
+        <button class="quiz-restart" id="quiz-restart">↺ Spela igen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="footer">
   <div class="legend-item"><div class="legend-dot" style="background:#2d7dd2"></div>Köpsida</div>
   <div class="legend-item"><div class="legend-dot" style="background:#2dd28a"></div>Säljsida</div>
@@ -760,6 +949,7 @@ document.querySelectorAll('.tab-btn').forEach(function(btn){
     document.getElementById('view-map').style.display=tab==='map'?'flex':'none';
     document.getElementById('view-about').classList.toggle('active',tab==='about');
     document.getElementById('view-events').classList.toggle('active',tab==='events');
+    document.getElementById('view-train').classList.toggle('active',tab==='train');
     document.getElementById('view-cards').classList.toggle('active',tab==='cards');
     if(tab==='map')renderArrows(activeId);
   });
@@ -863,9 +1053,177 @@ document.querySelectorAll('.fc-cat').forEach(function(btn){
   });
 });
 
+// ── SUB-TABS ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.sub-tab').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var sub=btn.dataset.sub;
+    document.querySelectorAll('.sub-tab').forEach(function(b){b.classList.toggle('active',b===btn);});
+    document.querySelectorAll('.sub-view').forEach(function(v){v.classList.toggle('active',v.id==='sv-'+sub);});
+  });
+});
+
+// ── MEMORY GAME ───────────────────────────────────────────────────────────────
+var MEM_PAIRS=[
+  {id:0,term:'Carry trade',     def:'Lån i lågräntevaluta, placering i högräntevaluta för räntevinst'},
+  {id:1,term:'Spread',          def:'Skillnad mellan bankens köp- (bid) och säljpris (ask)'},
+  {id:2,term:'Pip',             def:'Minsta standardprisrörelse — 0,0001 för EUR/USD'},
+  {id:3,term:'Last look',       def:'Bankens rätt att neka en order efter att ha sett den'},
+  {id:4,term:'ECN',             def:'Anonym elektronisk orderbok för interbankyprissättning'},
+  {id:5,term:'Internalisering', def:'Banken matchar köp/sälj internt — behåller hela spreaden'},
+  {id:6,term:'STP',             def:'Automatisk handel utan manuella steg till avveckling'},
+  {id:7,term:'Likv.-leverantör',def:'Elektronisk grossist som strömmar live-priser till banker dygnet runt'}
+];
+var MEM={cards:[],flipped:[],matched:[],moves:0,locked:false,startTime:null,interval:null};
+
+function memShuffle(){
+  var arr=[];
+  MEM_PAIRS.forEach(function(p){
+    arr.push({pairId:p.id,type:'term',text:p.term});
+    arr.push({pairId:p.id,type:'def', text:p.def});
+  });
+  for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  MEM.cards=arr;MEM.flipped=[];MEM.matched=[];MEM.moves=0;MEM.locked=false;MEM.startTime=null;
+  clearInterval(MEM.interval);MEM.interval=null;
+}
+function memRenderStats(){
+  document.getElementById('mem-moves').textContent=MEM.moves;
+  if(MEM.matched.length===MEM_PAIRS.length){
+    clearInterval(MEM.interval);MEM.interval=null;
+    var msg=document.getElementById('mem-done-msg');
+    msg.style.display='inline';
+    msg.textContent='Klart! '+MEM.moves+' drag ✓';
+    document.querySelectorAll('.mem-card').forEach(function(c){c.classList.add('done');});
+  }
+}
+function memTick(){
+  if(!MEM.startTime)return;
+  var s=Math.floor((Date.now()-MEM.startTime)/1000);
+  var mm=Math.floor(s/60),ss=s%60;
+  document.getElementById('mem-time').textContent=mm+':'+(ss<10?'0':'')+ss;
+}
+function memBuild(){
+  var grid=document.getElementById('mem-grid');grid.innerHTML='';
+  document.getElementById('mem-done-msg').style.display='none';
+  document.getElementById('mem-moves').textContent='0';
+  document.getElementById('mem-time').textContent='0:00';
+  MEM.cards.forEach(function(card,idx){
+    var el=document.createElement('div');el.className='mem-card';el.dataset.idx=idx;
+    el.innerHTML='<div class="mem-ci"><div class="mem-face mem-front"><div class="mem-dotgrid"><div class="mem-dot"></div><div class="mem-dot"></div><div class="mem-dot"></div><div class="mem-dot"></div></div><div class="mem-lbl">FX</div></div><div class="mem-face mem-back'+(card.type==='term'?' is-term':'')+'">'+card.text+'</div></div>';
+    el.addEventListener('click',function(){memClick(idx);});
+    grid.appendChild(el);
+  });
+}
+function memClick(idx){
+  if(MEM.locked)return;
+  if(MEM.matched.indexOf(idx)>=0)return;
+  if(MEM.flipped.indexOf(idx)>=0)return;
+  if(MEM.flipped.length>=2)return;
+  if(!MEM.startTime){MEM.startTime=Date.now();MEM.interval=setInterval(memTick,500);}
+  MEM.flipped.push(idx);
+  var el=document.querySelectorAll('.mem-card')[idx];el.classList.add('flipped');
+  if(MEM.flipped.length===2){
+    MEM.moves++;
+    document.getElementById('mem-moves').textContent=MEM.moves;
+    var a=MEM.cards[MEM.flipped[0]],b=MEM.cards[MEM.flipped[1]];
+    if(a.pairId===b.pairId){
+      MEM.matched.push(MEM.flipped[0],MEM.flipped[1]);
+      MEM.flipped.forEach(function(i){document.querySelectorAll('.mem-card')[i].classList.add('matched','done');});
+      MEM.flipped=[];
+      memRenderStats();
+    } else {
+      MEM.locked=true;
+      setTimeout(function(){
+        MEM.flipped.forEach(function(i){document.querySelectorAll('.mem-card')[i].classList.remove('flipped');});
+        MEM.flipped=[];MEM.locked=false;
+      },950);
+    }
+  }
+}
+function memReset(){memShuffle();memBuild();}
+document.getElementById('mem-reset').addEventListener('click',memReset);
+
+// ── QUIZ ──────────────────────────────────────────────────────────────────────
+var QUIZ_QS=[
+  {flag:'🇺🇸',event:'Fed höjer oväntat styrräntan med 75 bp',      ccy:'USD',answer:'up',  expl:'<strong>Höjning → bättre avkastning</strong> på dollar-tillgångar → utländskt kapital flödar in → USD stärks. "Surprise"-höjningen förstärker rörelsen extra.'},
+  {flag:'🇯🇵',event:'BOJ håller −0,1% medan Fed är på 5,25%',      ccy:'JPY',answer:'down',expl:'<strong>Räntedifferens på 5,35%</strong> driver massiv carry trade — investerare lånar billig yen, köper dollar-obligationer. Konstant säljtryck → yen försvagas.'},
+  {flag:'🇪🇺',event:'ECB sänker räntan mer än väntat',              ccy:'EUR',answer:'down',expl:'<strong>Lägre avkastning</strong> på euro-obligationer → kapital söker bättre alternativ → EUR säljs → försvagas.'},
+  {flag:'🇬🇧',event:'Storbrittanien röstar oväntat för att lämna EU',ccy:'GBP',answer:'down',expl:'<strong>Politisk chock + handelsoäkerhet</strong> → extrem osäkerhet om framtiden → GBP/USD föll ~10% på fyra timmar natten efter omröstningen.'},
+  {flag:'🌍',event:'Global finanskris — börser kraschar, banker faller', ccy:'USD · JPY · CHF',answer:'up',expl:'<strong>Safe-haven-flöden</strong>: i kris söker investerare trygghet. USD (världsreservvaluta), JPY (inhemska investerare repatrierar) och CHF (politisk neutralitet) stärks.'},
+  {flag:'🇹🇷',event:'Turkiet sänker styrräntan mitt i 65% inflation', ccy:'TRY',answer:'down',expl:'<strong>Centralbanken förlorar trovärdighet</strong> → kapitalflykt → TRY såldes aggressivt. Valutan förlorade 90% mot USD 2018–2024.'},
+  {flag:'🇺🇸',event:'NFP: 350 000 nya jobb vs 200 000 väntat',       ccy:'USD',answer:'up',  expl:'<strong>Stark arbetsmarknad → Fed håller höga räntor längre</strong> → USD stärks. Det är avvikelsen från 200k-konsensus, inte 350k-siffran i sig, som driver rörelsen.'},
+  {flag:'🇨🇭',event:'SNB avskaffar plötsligt fastkursen EUR/CHF=1,20',ccy:'CHF',answer:'up', expl:'<strong>Undertryckt rörelse frigörs</strong>: peget höll CHF konstlat svag sedan 2011. När det togs bort stärktes CHF 25% på sekunder.'},
+  {flag:'🇸🇪',event:'Riksbanken pausar höjningar — exakt som marknaden väntade',ccy:'SEK',answer:'neu',expl:'<strong>Prissatt redan</strong> — ingen överraskning, ingen rörelse. "Buy the rumour, sell the fact." FX reagerar på avvikelse från förväntningar, inte på beslutet i sig.'},
+  {flag:'🇳🇴',event:'Oljepriset stiger kraftigt pga utbudsbegränsningar', ccy:'NOK',answer:'up',expl:'<strong>Norge är oljeexportör</strong> → högre exportintäkter → terms of trade förbättras → NOK stärks. Råvaruvalutor (NOK, CAD, AUD) korrelerar starkt med sitt råvarupris.'}
+];
+var QUIZ={qs:[],cur:0,score:0,answered:false};
+
+function quizShuffle(){QUIZ.qs=QUIZ_QS.slice().sort(function(){return Math.random()-0.5;});QUIZ.cur=0;QUIZ.score=0;QUIZ.answered=false;}
+function quizRender(){
+  var total=QUIZ.qs.length;
+  var qEnd=document.getElementById('quiz-end');
+  if(QUIZ.cur>=total){
+    qEnd.classList.add('show');
+    document.getElementById('quiz-card').style.display='none';
+    document.getElementById('quiz-choices').style.display='none';
+    document.getElementById('quiz-expl').classList.remove('show');
+    document.getElementById('quiz-actions').style.display='none';
+    document.getElementById('qp-fill').style.width='100%';
+    document.getElementById('qp-txt').textContent='Klar!';
+    document.getElementById('quiz-end-num').textContent=QUIZ.score+'/'+total;
+    var pct=Math.round(QUIZ.score/total*100);
+    var lbl=pct>=80?'Utmärkt! Intervjuklar 🎯':pct>=60?'Bra jobbat — repetera händelserna':'Fortsätt nöta — gå igenom Vad rör FX?';
+    document.getElementById('quiz-end-lbl').textContent=lbl;
+    return;
+  }
+  qEnd.classList.remove('show');
+  document.getElementById('quiz-card').style.display='';
+  document.getElementById('quiz-choices').style.display='';
+  document.getElementById('quiz-actions').style.display='';
+  var q=QUIZ.qs[QUIZ.cur];
+  document.getElementById('qp-fill').style.width=((QUIZ.cur/total)*100)+'%';
+  document.getElementById('qp-txt').textContent='Fråga '+(QUIZ.cur+1)+' av '+total+' · Poäng: '+QUIZ.score;
+  document.getElementById('quiz-flag').textContent=q.flag;
+  document.getElementById('quiz-event').textContent=q.event;
+  document.getElementById('quiz-ccy').textContent='Valuta att bedöma: '+q.ccy;
+  document.getElementById('quiz-expl').classList.remove('show');
+  document.getElementById('quiz-expl').innerHTML='';
+  document.getElementById('quiz-next').classList.remove('show');
+  ['qc-up','qc-down','qc-neu'].forEach(function(id){
+    var b=document.getElementById(id);b.disabled=false;b.className='qc';
+  });
+  QUIZ.answered=false;
+}
+function quizAnswer(chosen){
+  if(QUIZ.answered)return;
+  QUIZ.answered=true;
+  var q=QUIZ.qs[QUIZ.cur];
+  var correct=q.answer;
+  var map={up:'qc-up',down:'qc-down',neu:'qc-neu'};
+  if(chosen===correct)QUIZ.score++;
+  ['up','down','neu'].forEach(function(k){
+    var b=document.getElementById(map[k]);
+    b.disabled=true;
+    if(k===correct){b.classList.add('correct');}
+    else if(k===chosen){b.classList.add('wrong');}
+    else{b.classList.add('dim');}
+  });
+  var expl=document.getElementById('quiz-expl');
+  expl.innerHTML=(chosen===correct?'✓ Rätt! ':'✗ Fel. ')+q.expl;
+  expl.classList.add('show');
+  document.getElementById('quiz-next').classList.add('show');
+  document.getElementById('qp-txt').textContent='Fråga '+(QUIZ.cur+1)+' av '+QUIZ.qs.length+' · Poäng: '+QUIZ.score;
+}
+document.getElementById('qc-up').addEventListener('click',  function(){quizAnswer('up');});
+document.getElementById('qc-down').addEventListener('click', function(){quizAnswer('down');});
+document.getElementById('qc-neu').addEventListener('click',  function(){quizAnswer('neu');});
+document.getElementById('quiz-next').addEventListener('click',function(){QUIZ.cur++;QUIZ.answered=false;quizRender();});
+document.getElementById('quiz-restart').addEventListener('click',function(){quizShuffle();quizRender();});
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('resize',function(){renderArrows(activeId);});
-requestAnimationFrame(function(){requestAnimationFrame(function(){renderArrows(null);fcRender();});});
+requestAnimationFrame(function(){requestAnimationFrame(function(){
+  renderArrows(null);fcRender();memShuffle();memBuild();quizShuffle();quizRender();
+});});
 </script>
 </body>
 </html>
