@@ -319,10 +319,10 @@
     .quiz-expl  { background:#091a12; border:1px solid #1a4020; border-radius:8px; padding:12px 16px; font-size:0.74rem; color:#7ad4a0; line-height:1.65; display:none; }
     .quiz-expl.show { display:block; }
     .quiz-expl strong { color:#b0f0c0; }
-    .quiz-actions { display:flex; justify-content:flex-end; min-height:36px; }
-    .quiz-next { padding:8px 20px; font-size:0.74rem; font-weight:600; background:#0d2235; border:1px solid #1e4060; color:#5bc8f5; border-radius:8px; cursor:pointer; display:none; }
+    .quiz-actions { display:flex; justify-content:flex-end; }
+    .quiz-next { padding:10px 26px; font-size:0.8rem; font-weight:700; background:#0d2a40; border:1.5px solid #2d7dd2; color:#5bc8f5; border-radius:9px; cursor:pointer; display:none; letter-spacing:0.02em; transition:all 0.15s; }
     .quiz-next.show { display:block; }
-    .quiz-next:hover { border-color:#4fc3f7; }
+    .quiz-next:hover { border-color:#4fc3f7; background:#102c40; box-shadow:0 0 12px rgba(79,195,247,0.2); }
     .quiz-end  { text-align:center; background:#0d1e30; border:1px solid #1e3550; border-radius:12px; padding:30px 24px; display:none; flex-direction:column; align-items:center; gap:12px; }
     .quiz-end.show { display:flex; }
     .quiz-end-num  { font-size:3rem; font-weight:800; color:#5bc8f5; line-height:1; }
@@ -1144,16 +1144,28 @@ document.getElementById('mem-reset').addEventListener('click',memReset);
 
 // ── QUIZ ──────────────────────────────────────────────────────────────────────
 var QUIZ_QS=[
-  {flag:'🇺🇸',event:'Fed höjer oväntat styrräntan med 75 bp',      ccy:'USD',answer:'up',  expl:'<strong>Höjning → bättre avkastning</strong> på dollar-tillgångar → utländskt kapital flödar in → USD stärks. "Surprise"-höjningen förstärker rörelsen extra.'},
-  {flag:'🇯🇵',event:'BOJ håller −0,1% medan Fed är på 5,25%',      ccy:'JPY',answer:'down',expl:'<strong>Räntedifferens på 5,35%</strong> driver massiv carry trade — investerare lånar billig yen, köper dollar-obligationer. Konstant säljtryck → yen försvagas.'},
-  {flag:'🇪🇺',event:'ECB sänker räntan mer än väntat',              ccy:'EUR',answer:'down',expl:'<strong>Lägre avkastning</strong> på euro-obligationer → kapital söker bättre alternativ → EUR säljs → försvagas.'},
-  {flag:'🇬🇧',event:'Storbrittanien röstar oväntat för att lämna EU',ccy:'GBP',answer:'down',expl:'<strong>Politisk chock + handelsoäkerhet</strong> → extrem osäkerhet om framtiden → GBP/USD föll ~10% på fyra timmar natten efter omröstningen.'},
-  {flag:'🌍',event:'Global finanskris — börser kraschar, banker faller', ccy:'USD · JPY · CHF',answer:'up',expl:'<strong>Safe-haven-flöden</strong>: i kris söker investerare trygghet. USD (världsreservvaluta), JPY (inhemska investerare repatrierar) och CHF (politisk neutralitet) stärks.'},
-  {flag:'🇹🇷',event:'Turkiet sänker styrräntan mitt i 65% inflation', ccy:'TRY',answer:'down',expl:'<strong>Centralbanken förlorar trovärdighet</strong> → kapitalflykt → TRY såldes aggressivt. Valutan förlorade 90% mot USD 2018–2024.'},
-  {flag:'🇺🇸',event:'NFP: 350 000 nya jobb vs 200 000 väntat',       ccy:'USD',answer:'up',  expl:'<strong>Stark arbetsmarknad → Fed håller höga räntor längre</strong> → USD stärks. Det är avvikelsen från 200k-konsensus, inte 350k-siffran i sig, som driver rörelsen.'},
-  {flag:'🇨🇭',event:'SNB avskaffar plötsligt fastkursen EUR/CHF=1,20',ccy:'CHF',answer:'up', expl:'<strong>Undertryckt rörelse frigörs</strong>: peget höll CHF konstlat svag sedan 2011. När det togs bort stärktes CHF 25% på sekunder.'},
-  {flag:'🇸🇪',event:'Riksbanken pausar höjningar — exakt som marknaden väntade',ccy:'SEK',answer:'neu',expl:'<strong>Prissatt redan</strong> — ingen överraskning, ingen rörelse. "Buy the rumour, sell the fact." FX reagerar på avvikelse från förväntningar, inte på beslutet i sig.'},
-  {flag:'🇳🇴',event:'Oljepriset stiger kraftigt pga utbudsbegränsningar', ccy:'NOK',answer:'up',expl:'<strong>Norge är oljeexportör</strong> → högre exportintäkter → terms of trade förbättras → NOK stärks. Råvaruvalutor (NOK, CAD, AUD) korrelerar starkt med sitt råvarupris.'}
+  {flag:'🇺🇸',event:'Fed höjer oväntat styrräntan med 75 bp',           ccy:'USD',  answer:'up',  expl:'<strong>Höjning → bättre avkastning</strong> på dollar-tillgångar → utländskt kapital flödar in → USD stärks. "Surprise"-höjningen förstärker rörelsen extra.'},
+  {flag:'🇯🇵',event:'BOJ håller −0,1% medan Fed är på 5,25%',           ccy:'JPY',  answer:'down',expl:'<strong>Räntedifferens på 5,35%</strong> driver massiv carry trade — investerare lånar billig yen, köper dollar-obligationer. Konstant säljtryck → yen försvagas.'},
+  {flag:'🇪🇺',event:'ECB sänker räntan mer än väntat',                   ccy:'EUR',  answer:'down',expl:'<strong>Lägre avkastning</strong> på euro-obligationer → kapital söker bättre alternativ → EUR säljs → försvagas.'},
+  {flag:'🇬🇧',event:'Storbrittanien röstar oväntat för att lämna EU',    ccy:'GBP',  answer:'down',expl:'<strong>Politisk chock + handelsoäkerhet</strong> → extrem osäkerhet om framtiden → GBP/USD föll ~10% på fyra timmar natten efter omröstningen.'},
+  {flag:'🌍',event:'Global finanskris — börser kraschar, banker faller',  ccy:'USD · JPY · CHF',answer:'up',expl:'<strong>Safe-haven-flöden</strong>: i kris söker investerare trygghet. USD (världsreservvaluta), JPY (inhemska investerare repatrierar) och CHF (politisk neutralitet) stärks.'},
+  {flag:'🇹🇷',event:'Turkiet sänker styrräntan mitt i 65% inflation',     ccy:'TRY',  answer:'down',expl:'<strong>Centralbanken förlorar trovärdighet</strong> → kapitalflykt → TRY såldes aggressivt. Valutan förlorade 90% mot USD 2018–2024.'},
+  {flag:'🇺🇸',event:'NFP: 350 000 nya jobb vs 200 000 väntat',           ccy:'USD',  answer:'up',  expl:'<strong>Stark arbetsmarknad → Fed håller höga räntor längre</strong> → USD stärks. Det är avvikelsen från konsensus, inte siffran i sig, som driver rörelsen.'},
+  {flag:'🇨🇭',event:'SNB avskaffar plötsligt fastkursen EUR/CHF = 1,20', ccy:'CHF',  answer:'up',  expl:'<strong>Undertryckt rörelse frigörs</strong>: peget höll CHF konstlat svag sedan 2011. När det togs bort stärktes CHF 25% på sekunder.'},
+  {flag:'🇸🇪',event:'Riksbanken pausar höjningar — exakt som marknaden väntade', ccy:'SEK', answer:'neu', expl:'<strong>Prissatt redan</strong> — ingen överraskning, ingen rörelse. "Buy the rumour, sell the fact." FX reagerar på avvikelse från förväntningar, inte på beslutet i sig.'},
+  {flag:'🇳🇴',event:'Oljepriset stiger kraftigt pga utbudsbegränsningar', ccy:'NOK',  answer:'up',  expl:'<strong>Norge är oljeexportör</strong> → högre exportintäkter → terms of trade förbättras → NOK stärks. Råvaruvalutor (NOK, CAD, AUD) korrelerar med sitt exportpris.'},
+  {flag:'🇨🇦',event:'Oljepriset kraschar 30% på OPEC-nyheter',           ccy:'CAD',  answer:'down',expl:'<strong>Kanada är stor oljeexportör</strong> → lägre exportintäkter → terms of trade försämras → CAD försvagas. "Petrodollar"-sambandet är starkt och välkänt.'},
+  {flag:'🇯🇵',event:'BOJ höjer oväntat räntan från 0,1% till 0,5%',      ccy:'JPY',  answer:'up',  expl:'<strong>Räntehöjning → carry trades reversar</strong>: investerare stänger yen-lån, säljer dollar och köper yen tillbaka → JPY stärks snabbt. Hände faktiskt sommaren 2024.'},
+  {flag:'🇺🇸',event:'USA:s KPI (inflation) slår kraftigt under förväntan — 2,1% vs 3,4% väntat', ccy:'USD', answer:'down', expl:'<strong>Lägre inflation → Fed kan sänka räntan</strong> → sämre avkastning på dollar-tillgångar → kapital flödar ut → USD försvagas. Marknaden prisar in sänkningar snabbt.'},
+  {flag:'🇬🇧',event:'Bank of England signalerar att räntesänkningscykeln börjar', ccy:'GBP', answer:'down', expl:'<strong>Kommande sänkningar → sämre avkastning</strong> på GBP-tillgångar → kapital söker alternativ → GBP försvagas. Förväntningar rör valutan innan beslutet är fattat.'},
+  {flag:'🇦🇺',event:'Kina annonserar stort stimulanspaket för ekonomin',  ccy:'AUD',  answer:'up',  expl:'<strong>Australien är Kinas största råvaruleverantör</strong> → kinesisk tillväxt driver efterfrågan på järnmalm och kol → AUD stärks. AUD kallas "proxy" för kinesisk tillväxt.'},
+  {flag:'🇪🇺',event:'Ryssland stänger av gasleveranser till Europa vintertid', ccy:'EUR', answer:'down', expl:'<strong>Energikris drabbar europeisk industri</strong> → tillväxtprognosen faller → ECB tvekar att höja räntan → EUR försvagas. Exakt vad som hände 2022 — EUR/USD föll under paritet.'},
+  {flag:'🌏',event:'Fed signalerar att räntehöjningscykeln är avslutad',   ccy:'USD',  answer:'down',expl:'<strong>Topp-ränta prissatt → framtida sänkningar förväntas</strong> → avkastningsfördelen för USD minskar → kapital roterar tillbaka till tillväxtmarknader och EUR → USD försvagas.'},
+  {flag:'🇨🇳',event:'Kinas centralbank (PBOC) devalverar yuan oväntat',   ccy:'CNY',  answer:'down',expl:'<strong>Medveten försvagning av valutan</strong> → gör kinesisk export billigare. Skapar oro för "valutakrig" och kapitalflykt från Kina. Händde 2015 och skapade global volatilitet.'},
+  {flag:'🇺🇸',event:'USA:s detaljhandelsdata +1,8% vs +0,3% väntat',      ccy:'USD',  answer:'up',  expl:'<strong>Stark konsumtion → ekonomin hetare än väntat</strong> → Fed behöver hålla räntan hög längre → USD stärks. Konsumtionsdata är en ledande indikator för Fed-policy.'},
+  {flag:'🇪🇺',event:'ECB höjer räntan i linje med exakt vad marknaden räknade med', ccy:'EUR', answer:'neu', expl:'<strong>Ingen överraskning → ingen stor rörelse</strong>. EUR kan röra sig lite på konferensretoriken efteråt (hawkish/dovish kommentarer), men grundbeslutet är prissatt. Förväntad rörelse = ingen rörelse.'},
+  {flag:'🇨🇭',event:'Eurozonens banksektor drabbas av systemkris (ej Schweiz)', ccy:'CHF', answer:'up', expl:'<strong>Safe-haven-flöde till CHF</strong> — trots att Schweiz är geografiskt mitt i Europa är landet politiskt neutralt och utanför EU. Investerare söker schweiziska franc som skydd mot europeisk risk.'},
+  {flag:'🇸🇪',event:'Riksbanken höjer räntan med 50 bp — marknaden väntade 25 bp', ccy:'SEK', answer:'up', expl:'<strong>Surprise-höjning</strong>: 25 bp var prissatt, extra 25 bp var inte det → avkastningsfördelen för SEK ökar oväntat → SEK stärks. Avvikelsen från konsensus är nyckeln, inte storleken.'}
 ];
 var QUIZ={qs:[],cur:0,score:0,answered:false};
 
@@ -1210,7 +1222,9 @@ function quizAnswer(chosen){
   var expl=document.getElementById('quiz-expl');
   expl.innerHTML=(chosen===correct?'✓ Rätt! ':'✗ Fel. ')+q.expl;
   expl.classList.add('show');
-  document.getElementById('quiz-next').classList.add('show');
+  var nxtBtn=document.getElementById('quiz-next');
+  nxtBtn.classList.add('show');
+  nxtBtn.scrollIntoView({behavior:'smooth',block:'nearest'});
   document.getElementById('qp-txt').textContent='Fråga '+(QUIZ.cur+1)+' av '+QUIZ.qs.length+' · Poäng: '+QUIZ.score;
 }
 document.getElementById('qc-up').addEventListener('click',  function(){quizAnswer('up');});
