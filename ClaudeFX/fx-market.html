@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FX Market Structure</title>
+  <title>FX Marknadsstruktur</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -351,29 +351,29 @@
 <div class="hdr">
   <div class="hdr-icon">📊</div>
   <div>
-    <div class="hdr-title">FX Market Structure</div>
-    <div class="hdr-sub">Global foreign exchange ecosystem</div>
+    <div class="hdr-title">FX Marknadsstruktur</div>
+    <div class="hdr-sub">Det globala valutamarknadens ekosystem</div>
   </div>
-  <div class="hdr-pill">eFX Education</div>
+  <div class="hdr-pill">eFX Utbildning</div>
 </div>
 
 <!-- TABS -->
 <div class="tabs">
-  <button class="tab-btn active" data-tab="map">Market Map</button>
-  <button class="tab-btn" data-tab="cards">Flashcards</button>
+  <button class="tab-btn active" data-tab="map">Marknadskarta</button>
+  <button class="tab-btn" data-tab="cards">Flashkort</button>
 </div>
 
 <!-- MAP VIEW -->
 <div id="view-map">
   <div class="diagram-wrap">
-    <button id="sim-btn">▶ Simulate Trade</button>
+    <button id="sim-btn">▶ Simulera handel</button>
 
     <div class="tier-labels">
       <div class="tier-lbl" style="color:#2d7dd2">
-        <div class="tier-lbl-dot" style="background:#2d7dd2"></div>Clients
+        <div class="tier-lbl-dot" style="background:#2d7dd2"></div>Kunder
       </div>
       <div class="tier-lbl" style="color:#2dd28a">
-        <div class="tier-lbl-dot" style="background:#2dd28a"></div>Banks
+        <div class="tier-lbl-dot" style="background:#2dd28a"></div>Banker
       </div>
       <div class="tier-lbl" style="color:#8a4dd2">
         <div class="tier-lbl-dot" style="background:#8a4dd2"></div>Infra
@@ -385,43 +385,43 @@
 
       <div class="diagram-row">
         <div class="node" data-id="corp" data-tier="client">
-          <div class="node-cat">Buy-Side</div>
-          <div class="node-name">Corporate<br>Clients</div>
-          <div class="node-sub">importers · exporters</div>
+          <div class="node-cat">Köpsida</div>
+          <div class="node-name">Företags-<br>kunder</div>
+          <div class="node-sub">importörer · exportörer</div>
         </div>
         <div class="node" data-id="hedge" data-tier="client">
-          <div class="node-cat">Buy-Side</div>
-          <div class="node-name">Hedge<br>Funds</div>
-          <div class="node-sub">macro · quant · HFT</div>
+          <div class="node-cat">Köpsida</div>
+          <div class="node-name">Hedge-<br>fonder</div>
+          <div class="node-sub">makro · kvant · HFT</div>
         </div>
         <div class="node" data-id="retail" data-tier="client">
-          <div class="node-cat">Buy-Side</div>
-          <div class="node-name">Retail<br>Clients</div>
-          <div class="node-sub">via brokers</div>
+          <div class="node-cat">Köpsida</div>
+          <div class="node-name">Privat-<br>kunder</div>
+          <div class="node-sub">via mäklare</div>
         </div>
       </div>
 
       <div class="diagram-row">
         <div class="node" data-id="bankA" data-tier="bank">
-          <div class="node-cat">Sell-Side</div>
-          <div class="node-name">Investment<br>Bank A</div>
+          <div class="node-cat">Säljsida</div>
+          <div class="node-name">Investment-<br>bank A</div>
           <div class="node-sub">JPM · Citi · Deutsche</div>
         </div>
         <div class="node" data-id="bankB" data-tier="bank">
-          <div class="node-cat">Sell-Side</div>
-          <div class="node-name">Investment<br>Bank B</div>
+          <div class="node-cat">Säljsida</div>
+          <div class="node-name">Investment-<br>bank B</div>
           <div class="node-sub">UBS · Barclays · MS</div>
         </div>
       </div>
 
       <div class="diagram-row">
         <div class="node" data-id="lp" data-tier="infra">
-          <div class="node-cat">Non-Bank MM</div>
-          <div class="node-name">Liquidity<br>Providers</div>
+          <div class="node-cat">Icke-bank MM</div>
+          <div class="node-name">Likviditets-<br>leverantörer</div>
           <div class="node-sub">XTX · Citadel · Jump</div>
         </div>
         <div class="node" data-id="ecn" data-tier="infra">
-          <div class="node-cat">Venue</div>
+          <div class="node-cat">Handelsplats</div>
           <div class="node-name">ECN</div>
           <div class="node-sub">EBS · Refinitiv</div>
         </div>
@@ -438,15 +438,15 @@
   <div class="panel">
     <div class="panel-hint" id="panel-hint">
       <div class="hint-ring">←</div>
-      <p>Click any node to learn about its role in the FX ecosystem</p>
+      <p>Klicka på en nod för att lära dig om dess roll i FX-ekosystemet</p>
     </div>
     <div class="panel-body" id="panel-body">
       <div id="pb-badge" class="pb-badge"></div>
       <div id="pb-title" class="pb-title"></div>
       <div id="pb-desc"  class="pb-desc"></div>
-      <div class="pb-section">Key Terms</div>
+      <div class="pb-section">Nyckeltermer</div>
       <div class="terms" id="pb-terms"></div>
-      <div class="pb-section">Connected To</div>
+      <div class="pb-section">Kopplad till</div>
       <div id="pb-conns"></div>
     </div>
   </div>
@@ -455,30 +455,30 @@
 <!-- FLASHCARD VIEW -->
 <div id="view-cards">
   <div class="fc-cats">
-    <button class="fc-cat active" data-cat="all">All Cards</button>
-    <button class="fc-cat" data-cat="fx-basics">FX Basics</button>
-    <button class="fc-cat" data-cat="efx">eFX Concepts</button>
-    <button class="fc-cat" data-cat="market-structure">Market Structure</button>
+    <button class="fc-cat active" data-cat="all">Alla kort</button>
+    <button class="fc-cat" data-cat="fx-basics">FX Grunderna</button>
+    <button class="fc-cat" data-cat="efx">eFX Begrepp</button>
+    <button class="fc-cat" data-cat="market-structure">Marknadsstruktur</button>
   </div>
 
   <div class="card-scene">
     <div id="card-inner" class="card-inner">
       <div class="card-face card-front">
-        <div class="card-hint">Question — click card or press Flip</div>
+        <div class="card-hint">Fråga — klicka på kortet eller tryck Vänd</div>
         <div class="card-q" id="fc-q"></div>
         <div class="card-cat-lbl" id="fc-cat-lbl"></div>
       </div>
       <div class="card-face card-back" id="card-back-face">
-        <div class="card-hint">Answer</div>
+        <div class="card-hint">Svar</div>
         <div class="card-a" id="fc-a"></div>
       </div>
     </div>
   </div>
 
   <div class="fc-btns">
-    <button class="fc-btn btn-flip" id="btn-flip">↻ Flip</button>
-    <button class="fc-btn btn-knew" id="btn-knew">✓ I Knew It</button>
-    <button class="fc-btn btn-next" id="btn-next">Next →</button>
+    <button class="fc-btn btn-flip" id="btn-flip">↻ Vänd</button>
+    <button class="fc-btn btn-knew" id="btn-knew">✓ Kunde det</button>
+    <button class="fc-btn btn-next" id="btn-next">Nästa →</button>
   </div>
 
   <div class="fc-prog">
@@ -489,82 +489,86 @@
 
 <!-- FOOTER -->
 <div class="footer">
-  <div class="legend-item"><div class="legend-dot" style="background:#2d7dd2"></div>Buy-side</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#2dd28a"></div>Sell-side</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#8a4dd2"></div>Infrastructure</div>
-  <div class="legend-item" style="margin-left:10px;color:#1e3858">⇄ bidirectional flow</div>
-  <div class="footer-note">$7.5T daily volume · 24h/5d</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#2d7dd2"></div>Köpsida</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#2dd28a"></div>Säljsida</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#8a4dd2"></div>Infrastruktur</div>
+  <div class="legend-item" style="margin-left:10px;color:#1e3858">⇄ dubbelriktat flöde</div>
+  <div class="footer-note">$7,5 biljoner daglig volym · 24h/5d</div>
 </div>
 
 <script>
 'use strict';
 
-// ── NODE DATA ─────────────────────────────────────────────────────────────────
+// ── NODDATA ───────────────────────────────────────────────────────────────────
 var NODES = {
   corp: {
-    title: 'Corporate Clients', tier: 'client', label: 'Buy-Side',
-    desc: 'Multinational companies, importers, and exporters converting currencies for trade settlement, payroll, or treasury management. They submit Requests for Quote (RFQ) via a bank\'s e-portal — platforms like Barclays BARX, Deutsche Autobahn, or Citi Velocity. Corporates prioritize certainty of execution and predictable spreads over the best possible price, and often use FX forwards and NDFs to hedge future currency exposure.',
-    terms: ['RFQ', 'e-portal', 'FX Forward', 'NDF', 'STP', 'WMR Fix', 'hedge ratio'],
+    title: 'Företagskunder', tier: 'client', label: 'Köpsida',
+    desc: 'Multinationella företag, importörer och exportörer som behöver växla valutor för handelspapper, löneutbetalningar eller finansförvaltning. De skickar prisförfrågningar (RFQ) via bankens e-portal — plattformar som Barclays BARX, Deutsche Autobahn eller Citi Velocity. Företagskunder prioriterar säkerhet i exekvering och förutsägbara spreadar framför bästa möjliga pris, och använder ofta FX-terminer och NDF:er för att säkra framtida valutaexponering.',
+    terms: ['RFQ', 'e-portal', 'FX-termin', 'NDF', 'STP', 'WMR Fix', 'säkringskvot'],
     connects: ['bankA', 'bankB']
   },
   hedge: {
-    title: 'Hedge Funds', tier: 'client', label: 'Buy-Side',
-    desc: 'Sophisticated, price-sensitive investors running macro, quant, CTA, or stat-arb strategies. They connect to banks via FIX API to receive streaming prices and execute at high speed. Hedge funds shop multiple venues simultaneously, making them sensitive to "last look" — the bank\'s right to reject a trade after seeing the order. Their flow is labelled "toxic" if it consistently picks off stale quotes, causing banks to widen spreads.',
-    terms: ['last look', 'FIX API', 'streaming', 'toxic flow', 'fill ratio', 'latency', 'prime brokerage'],
+    title: 'Hedgefonder', tier: 'client', label: 'Köpsida',
+    desc: 'Sofistikerade, priskänsliga investerare som kör makro-, kvant-, CTA- eller stat-arb-strategier. De ansluter till banker via FIX API för att ta emot strömmande priser och exekvera med hög hastighet. Hedgefonder handlar på flera ställen samtidigt, vilket gör dem känsliga för "last look" — bankens rätt att neka en handel efter att ha sett ordern. Deras flöde kallas "toxiskt" om det systematiskt plockar av inaktuella priser, vilket får banker att vidga spreadar.',
+    terms: ['last look', 'FIX API', 'streaming', 'toxiskt flöde', 'fyllnadsgrad', 'latens', 'prime brokerage'],
     connects: ['bankA', 'bankB']
   },
   retail: {
-    title: 'Retail Clients', tier: 'client', label: 'Buy-Side',
-    desc: 'Individual traders accessing FX through retail brokers such as IG, OANDA, or Saxo Bank. They typically trade CFDs or rolling spot contracts rather than deliverable spot FX. Retail brokers either internalize client orders ("B-booking") or hedge residual exposure with a prime bank ("A-booking"). Retail clients face the widest spreads — often 1–3 pips on EUR/USD versus sub-0.1 pip in the interbank market.',
-    terms: ['CFD', 'rolling spot', 'A-book', 'B-book', 'spread', 'pip', 'retail broker'],
+    title: 'Privatkunder', tier: 'client', label: 'Köpsida',
+    desc: 'Privatpersoner som handlar valuta via mäklare som IG, OANDA eller Saxo Bank. De handlar vanligtvis CFD:er eller rullande spotkontrakt snarare än leverabel spotvaluta. Detaljmäklare internaliserar kundorder ("B-bokning") eller säkrar nettoexponeringen hos en primärbank ("A-bokning"). Privatkunder möter de bredaste spreadarna — ofta 1–3 pips på EUR/USD jämfört med under 0,1 pip på interbankmarknaden.',
+    terms: ['CFD', 'rullande spot', 'A-bokning', 'B-bokning', 'spread', 'pip', 'detaljmäklare'],
     connects: ['bankA', 'bankB']
   },
   bankA: {
-    title: 'Investment Bank (Dealer)', tier: 'bank', label: 'Sell-Side',
-    desc: 'The central intermediary in electronic FX. Banks receive client flow, price it through an eFX engine, then decide whether to internalize the risk (match against opposite client flow) or hedge externally with an LP or ECN. The goal is to maximize internalization rate — capturing the full bid/offer spread as profit. Residual inventory is hedged externally. Banks compete on spread tightness, fill rate, and last-look rejection rates.',
-    terms: ['internalization', 'risk recycling', 'eFX engine', 'SDP', 'skew', 'last look', 'algo pricing'],
+    title: 'Investmentbank (Dealer)', tier: 'bank', label: 'Säljsida',
+    desc: 'Den centrala intermediären i elektronisk FX. Banker tar emot kundflöde, prissätter det via en eFX-prissättningsmotor och beslutar om de ska internalisera risken (matcha mot motsatt kundflöde) eller externalisera den (säkra med en LP eller ECN). Målet är att maximera internaliseringsgraden — fånga hela bid/offer-spreaden som vinst. Kvarvarande lager säkras externt. Banker konkurrerar på spreadstyrka, fyllnadsgrad och last look-avvisningsfrekvenser.',
+    terms: ['internalisering', 'riskåtervinning', 'eFX-motor', 'SDP', 'skev', 'last look', 'algoprissättning'],
     connects: ['corp', 'hedge', 'retail', 'bankB', 'lp', 'ecn']
   },
   bankB: {
-    title: 'Investment Bank (Dealer)', tier: 'bank', label: 'Sell-Side',
-    desc: 'Same role as Bank A — a major FX dealer (JPMorgan, UBS, Citi, Deutsche Bank, Barclays). The top 5 dealer banks control ~50% of global spot FX volume. Banks also trade with each other in the interbank market when offloading inventory, via bilateral credit lines or through prime brokerage on ECNs. Each bank runs its own eFX pricing stack with real-time risk management.',
-    terms: ['dealer bank', 'market making', 'inventory', 'bilateral credit', 'prime broker', 'credit line'],
+    title: 'Investmentbank (Dealer)', tier: 'bank', label: 'Säljsida',
+    desc: 'Samma roll som Bank A — en stor FX-dealer (JPMorgan, UBS, Citi, Deutsche Bank, Barclays). De fem största dealerbankerna kontrollerar ~50% av den globala spotvalutavolymen. Banker handlar också med varandra på interbankmarknaden när de behöver avlasta lager, via bilaterala kreditlinjer eller via prime brokerage på ECN:er. Varje bank kör sin egen eFX-prissättningsstack med realtidsriskhantering.',
+    terms: ['dealerbank', 'market making', 'lager', 'bilateral kreditlinje', 'prime broker', 'kreditlimit'],
     connects: ['corp', 'hedge', 'retail', 'bankA', 'lp', 'ecn']
   },
   lp: {
-    title: 'Liquidity Providers (Non-Bank)', tier: 'infra', label: 'Non-Bank MM',
-    desc: 'Electronic market makers — XTX Markets, Citadel Securities, Jump Trading, Virtu Financial — streaming continuous two-way prices to banks and ECNs. They earn the bid/offer spread on high volumes while managing directional risk. Banks use them as an outsourced hedge: when a bank accumulates unwanted inventory, it hits an LP\'s streaming quote to offload risk. LPs compete on spread width, reject rate, and fill quality.',
-    terms: ['XTX Markets', 'streaming', 'two-way price', 'reject rate', 'co-location', 'market making', 'HFT'],
+    title: 'Likviditetsleverantörer (Icke-bank)', tier: 'infra', label: 'Icke-bank MM',
+    desc: 'Elektroniska market makers — XTX Markets, Citadel Securities, Jump Trading, Virtu Financial — som strömmar kontinuerliga tvåvägspriser till banker och ECN:er med sofistikerade modeller och ultrasnabb infrastruktur. De tjänar bid/offer-spreaden på höga volymer medan de hanterar riktningsrisk. Banker använder dem som ett externt säkringsverktyg: när en bank ackumulerar oönskat lager träffar den en LP:s strömmande pris för att avlasta risken. LP:er konkurrerar på spreadbredd, avvisningsfrekvens och fyllnadskvalitet.',
+    terms: ['XTX Markets', 'streaming', 'tvåvägspris', 'avvisningsfrekvens', 'co-location', 'market making', 'HFT'],
     connects: ['bankA', 'bankB', 'ecn']
   },
   ecn: {
-    title: 'ECN (EBS / Refinitiv)', tier: 'infra', label: 'Venue',
-    desc: 'Electronic Communication Networks — anonymous central limit order books (CLOB) where banks and LPs post firm bids and offers. EBS Market (CME Group) dominates EUR/USD and USD/JPY; Refinitiv Matching covers other G10 pairs. The EBS mid-price is the global FX "reference rate" that banks anchor their pricing to. Access requires prime brokerage. Operates continuously through FX market hours.',
-    terms: ['CLOB', 'EBS', 'Refinitiv', 'anonymous matching', 'reference rate', 'prime broker', 'firm quote'],
+    title: 'ECN (EBS / Refinitiv)', tier: 'infra', label: 'Handelsplats',
+    desc: 'Electronic Communication Networks — anonyma centrala limitorderböcker (CLOB) där banker och LP:er lägger ut fasta bud och erbjudanden. EBS Market (CME Group) dominerar prissättningen för EUR/USD och USD/JPY; Refinitiv Matching täcker andra G10-par. EBS mitt-priset är det globala FX-referenspriset som banker förankrar sin prissättning till. Tillgång kräver prime brokerage för kreditförmedling. Är öppna under hela FX-marknadens handelstimmar.',
+    terms: ['CLOB', 'EBS', 'Refinitiv', 'anonym matchning', 'referenspris', 'prime broker', 'fast kurs'],
     connects: ['bankA', 'bankB', 'lp']
   }
 };
 
 var EDGES = [
-  { from: 'corp',   to: 'bankA', label: 'RFQ',        bidir: true },
-  { from: 'hedge',  to: 'bankA', label: '',            bidir: true },
-  { from: 'hedge',  to: 'bankB', label: '',            bidir: true },
-  { from: 'retail', to: 'bankB', label: 'order flow', bidir: true },
-  { from: 'bankA',  to: 'bankB', label: 'interbank',  bidir: true },
-  { from: 'bankA',  to: 'lp',   label: 'hedging',     bidir: true },
-  { from: 'bankB',  to: 'lp',   label: '',            bidir: true },
-  { from: 'bankA',  to: 'ecn',  label: '',            bidir: true },
-  { from: 'bankB',  to: 'ecn',  label: 'price disc.', bidir: true },
-  { from: 'lp',     to: 'ecn',  label: 'LP quotes',   bidir: true }
+  { from: 'corp',   to: 'bankA', label: 'RFQ',          bidir: true },
+  { from: 'hedge',  to: 'bankA', label: '',              bidir: true },
+  { from: 'hedge',  to: 'bankB', label: '',              bidir: true },
+  { from: 'retail', to: 'bankB', label: 'orderflöde',   bidir: true },
+  { from: 'bankA',  to: 'bankB', label: 'interbank',    bidir: true },
+  { from: 'bankA',  to: 'lp',   label: 'säkring',       bidir: true },
+  { from: 'bankB',  to: 'lp',   label: '',              bidir: true },
+  { from: 'bankA',  to: 'ecn',  label: '',              bidir: true },
+  { from: 'bankB',  to: 'ecn',  label: 'prissättning',  bidir: true },
+  { from: 'lp',     to: 'ecn',  label: 'LP-priser',     bidir: true }
 ];
 
 var CONN_NAMES = {
-  corp: 'Corporate Clients', hedge: 'Hedge Funds', retail: 'Retail Clients',
-  bankA: 'Investment Bank A', bankB: 'Investment Bank B',
-  lp: 'Liquidity Providers', ecn: 'ECN (EBS / Refinitiv)'
+  corp:  'Företagskunder',
+  hedge: 'Hedgefonder',
+  retail:'Privatkunder',
+  bankA: 'Investmentbank A',
+  bankB: 'Investmentbank B',
+  lp:    'Likviditetsleverantörer',
+  ecn:   'ECN (EBS / Refinitiv)'
 };
 
-// ── SVG HELPERS ───────────────────────────────────────────────────────────────
+// ── SVG-HJÄLPARE ──────────────────────────────────────────────────────────────
 var svgEl = document.getElementById('arrows-svg');
 function ns(tag) { return document.createElementNS('http://www.w3.org/2000/svg', tag); }
 
@@ -677,14 +681,14 @@ document.addEventListener('click', function() {
   activeId = null; closePanel(); renderArrows(null);
 });
 
-// ── TABS ──────────────────────────────────────────────────────────────────────
+// ── FLIKAR ────────────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     var tab = btn.dataset.tab;
     document.querySelectorAll('.tab-btn').forEach(function(b) {
       b.classList.toggle('active', b.dataset.tab === tab);
     });
-    document.getElementById('view-map').style.display   = tab === 'map'   ? 'flex' : 'none';
+    document.getElementById('view-map').style.display = tab === 'map' ? 'flex' : 'none';
     var cards = document.getElementById('view-cards');
     if (tab === 'cards') { cards.classList.add('active'); }
     else                 { cards.classList.remove('active'); }
@@ -692,14 +696,14 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
   });
 });
 
-// ── TRADE SIMULATION ──────────────────────────────────────────────────────────
+// ── HANDELSSIMULERING ─────────────────────────────────────────────────────────
 var SIM_PATH  = ['hedge', 'bankA', 'lp', 'bankA', 'hedge'];
 var SIM_STEPS = [
   null,
-  { pill: 'Step 1 / 4', msg: 'Hedge fund sends RFQ — bank quotes a spread of ~0.5 pip',       color: '#4ff7b0' },
-  { pill: 'Step 2 / 4', msg: 'Execution point — LP fills the bank at a tighter internal price', color: '#b880f7' },
-  { pill: 'Step 3 / 4', msg: 'Spread captured — bank earned the bid/offer difference ✓',        color: '#4ff7b0' },
-  { pill: 'Step 4 / 4', msg: 'Client filled — trade complete ✓',                                color: '#4fc3f7' }
+  { pill: 'Steg 1 / 4', msg: 'Hedgefond skickar RFQ — banken quotar en spread på ~0,5 pip',       color: '#4ff7b0' },
+  { pill: 'Steg 2 / 4', msg: 'Exekveringspunkt — LP fyller banken till ett snävare internt pris',  color: '#b880f7' },
+  { pill: 'Steg 3 / 4', msg: 'Spread fångad — banken tjänade bid/offer-skillnaden ✓',              color: '#4ff7b0' },
+  { pill: 'Steg 4 / 4', msg: 'Kund fylld — handel slutförd ✓',                                     color: '#4fc3f7' }
 ];
 var simRunning = false;
 
@@ -707,7 +711,6 @@ document.getElementById('sim-btn').addEventListener('click', function(e) {
   e.stopPropagation();
   if (simRunning) return;
 
-  // Clear node selection
   document.querySelectorAll('.node.active').forEach(function(n) { n.classList.remove('active'); });
   activeId = null; closePanel(); renderArrows(null);
 
@@ -728,18 +731,16 @@ document.getElementById('sim-btn').addEventListener('click', function(e) {
   var statusEl = document.getElementById('sim-status');
   var pillEl   = document.getElementById('sim-step-pill');
   var msgEl    = document.getElementById('sim-msg');
+  var btn      = document.getElementById('sim-btn');
 
-  var btn = document.getElementById('sim-btn');
-  btn.disabled = true; btn.textContent = '● Simulating…';
+  btn.disabled = true; btn.textContent = '● Simulerar…';
   statusEl.classList.add('visible');
-  pillEl.textContent = 'Starting…'; msgEl.textContent = 'Tracing: Hedge Fund → Bank → LP → Bank → Client';
+  pillEl.textContent = 'Startar…';
+  msgEl.textContent  = 'Spårar: Hedgefond → Bank → LP → Bank → Kund';
+  msgEl.style.color  = '#4fc3f7';
 
-  var SEG_DUR = 950;
-  var totalSegs = SIM_PATH.length - 1;
-  var totalDur  = totalSegs * SEG_DUR;
-  var fired = {};
-  var startTs = null;
-
+  var SEG_DUR = 950, totalSegs = SIM_PATH.length - 1;
+  var totalDur = totalSegs * SEG_DUR, fired = {}, startTs = null;
   simRunning = true;
 
   function frame(ts) {
@@ -776,77 +777,69 @@ document.getElementById('sim-btn').addEventListener('click', function(e) {
       requestAnimationFrame(frame);
     } else {
       simRunning = false;
-      btn.disabled = false; btn.textContent = '▶ Simulate Trade';
-      setTimeout(function() {
-        dot.remove(); segLine.remove();
-      }, 900);
+      btn.disabled = false; btn.textContent = '▶ Simulera handel';
+      setTimeout(function() { dot.remove(); segLine.remove(); }, 900);
     }
   }
   requestAnimationFrame(frame);
 });
 
-// ── FLASHCARD DATA ────────────────────────────────────────────────────────────
+// ── FLASHKORTDATA ─────────────────────────────────────────────────────────────
 var CARDS = [
-  // FX Basics
-  { cat: 'fx-basics', q: 'What is a bid/ask spread?',
-    a: 'The gap between the price a market maker will buy (bid) and sell (ask). It\'s the maker\'s profit margin. E.g. EUR/USD 1.0850 / 1.0851 = 1-pip spread. Tighter spreads signal a more competitive, liquid market.' },
-  { cat: 'fx-basics', q: 'What is a pip?',
-    a: 'Percentage in Point — the smallest standard price increment. For EUR/USD, 1 pip = 0.0001. For USD/JPY, 1 pip = 0.01. Spreads, P&L, and move sizes are quoted in pips.' },
-  { cat: 'fx-basics', q: 'Why do spreads widen in low liquidity?',
-    a: 'Fewer market makers posting prices and higher inventory risk per trade. Makers widen spreads to cover the risk of adverse moves and being picked off by informed flow. Common at Asian open and around major data releases.' },
-  { cat: 'fx-basics', q: 'What is spot FX?',
-    a: 'Exchange of two currencies at today\'s rate for settlement in T+2 business days (T+1 for USD/CAD). The largest FX segment by volume. Contrasts with forwards (future date) and swaps (two settlement legs).' },
-  { cat: 'fx-basics', q: 'What is an FX Forward?',
-    a: 'Agreement to exchange currencies at a fixed rate on a future date. Used by corporates to lock in exchange rates and eliminate uncertainty. Priced as spot rate ± forward points, which reflect the interest rate differential between the two currencies.' },
-  { cat: 'fx-basics', q: 'What is the WMR / 4pm Fix?',
-    a: 'The WM/Refinitiv benchmark rate calculated from actual trades in a 5-minute window around 4pm London. Fund managers use it to value FX positions and execute at a transparent reference rate. Has been subject to historic manipulation scandals.' },
-  // eFX
-  { cat: 'efx', q: 'What is eFX?',
-    a: 'Electronic foreign exchange — execution via platforms and APIs rather than voice. Covers bank e-portals (SDPs), multi-dealer platforms, and ECNs. Now ~75%+ of spot FX volume. Enables tighter spreads, faster execution, and full STP.' },
-  { cat: 'efx', q: 'What is "last look"?',
-    a: 'A bank\'s contractual right to reject an incoming trade after reviewing it — typically within 5–100ms. Protects against latency arbitrage on stale prices. Controversial: hedge funds prefer "no last look" venues. Reject rate is a key LP quality metric.' },
-  { cat: 'efx', q: 'What is internalization?',
-    a: 'When a bank matches a client buy against a client sell in its own book — earning the full spread on both sides without any external hedge. Top banks target 80%+ internalization. The higher the rate, the more profitable the eFX business.' },
-  { cat: 'efx', q: 'What is STP?',
-    a: 'Straight-Through Processing — automatic routing from trade execution to settlement with zero manual steps. STP breaks ("exceptions") require manual intervention, increasing cost and operational risk. A core efficiency KPI for eFX desks.' },
-  { cat: 'efx', q: 'What is a streaming price?',
-    a: 'A live, continuously updated two-way quote sent electronically to a client or venue. Hedge funds consume streams via FIX API and click-to-trade instantly. Contrasts with RFQ, where the client must request each price individually.' },
-  { cat: 'efx', q: 'What is toxic flow?',
-    a: 'Client orders that consistently pick off stale prices, generating losses for the market maker. HFT latency-arb strategies produce toxic flow. Banks detect it via P&L attribution and respond by widening spreads, enabling last look, or cutting credit.' },
-  // Market Structure
-  { cat: 'market-structure', q: 'What is an ECN?',
-    a: 'Electronic Communication Network — an anonymous central limit order book (CLOB). EBS dominates EUR/USD and USD/JPY price discovery; Refinitiv covers other G10 pairs. Sets the global FX reference rate. Requires prime brokerage for credit intermediation.' },
-  { cat: 'market-structure', q: 'Who are the top FX dealer banks?',
-    a: 'JPMorgan, UBS, Citi, Deutsche Bank, and Barclays — the top 5 control ~50% of global spot FX volume. They act as market makers to all client segments and compete on spread, fill rate, internalization, and platform quality.' },
-  { cat: 'market-structure', q: 'What is a non-bank LP?',
-    a: 'An electronic market maker (XTX Markets, Citadel Securities, Jump Trading, Virtu) providing two-way prices to banks and ECNs. They replaced voice brokers in major pairs. XTX is now the world\'s largest FX market maker by volume.' },
-  { cat: 'market-structure', q: 'What is prime brokerage in FX?',
-    a: 'A service where a large bank extends credit, allowing a hedge fund to trade with multiple counterparties under one relationship. Essential for ECN access — the fund trades anonymously under the prime broker\'s name. A major revenue stream for top banks.' },
-  { cat: 'market-structure', q: 'What is a single-dealer platform (SDP)?',
-    a: 'A bank\'s own e-trading portal — e.g. Barclays BARX, Citi Velocity, JPMorgan Markets. Clients get streaming prices, execution, analytics, and order management in one place. Banks invest heavily in SDP UX to retain client flow.' },
-  { cat: 'market-structure', q: 'What is the interbank market?',
-    a: 'Where large banks trade FX directly with each other — bilaterally via credit lines or anonymously on ECNs. Sets the benchmark mid-rate used to price all client trades. Dominated by the top 10 dealer banks.' }
+  // FX Grunderna
+  { cat: 'fx-basics', q: 'Vad är en bid/ask-spread?',
+    a: 'Skillnaden mellan det pris en market maker köper (bid) och säljer (ask) till. Det är makarens vinstmarginal. T.ex. EUR/USD 1,0850 / 1,0851 = 1 pips spread. Snävare spread signalerar en mer konkurrensutsatt och likvid marknad.' },
+  { cat: 'fx-basics', q: 'Vad är en pip?',
+    a: 'Percentage in Point — den minsta standardiserade prisrörelsen. För EUR/USD är 1 pip = 0,0001. För USD/JPY är 1 pip = 0,01. Spreadar, P&L och rörelsestorlekar uttrycks i pips.' },
+  { cat: 'fx-basics', q: 'Varför vidgas spreadar vid låg likviditet?',
+    a: 'Färre market makers som lägger ut priser och högre lagerrisk per handel. Market makers vidgar spreaden för att täcka risken för ogynnsamma prisrörelser och att bli exploaterade av informerat flöde. Vanligt vid Asiens öppning och runt stora datapublikationer.' },
+  { cat: 'fx-basics', q: 'Vad är spot-FX?',
+    a: 'Byte av två valutor till dagens kurs för avveckling inom T+2 bankdagar (T+1 för USD/CAD). Det största FX-segmentet volymmässigt. Skiljer sig från terminer (framtida datum) och swappar (två avvecklingsben).' },
+  { cat: 'fx-basics', q: 'Vad är en FX-termin (Forward)?',
+    a: 'Avtal om att byta valutor till ett fast pris på ett framtida datum. Används av företag för att låsa in växelkurser och eliminera valutaosäkerhet. Prissätts som spotkurs ± terminspunkter, som härleds från räntedifferensen mellan de två valutorna.' },
+  { cat: 'fx-basics', q: 'Vad är WMR-fixingen (16:00-fixing)?',
+    a: 'WM/Refinitivs referenskurs beräknad utifrån faktiska affärer i ett 5-minutersfönster kring 16:00 London-tid. Fondförvaltare använder den för att värdera valutapositioner och exekvera till ett transparent referenspris. Har historiskt utsatts för manipulationsskandaler.' },
+  // eFX Begrepp
+  { cat: 'efx', q: 'Vad är eFX?',
+    a: 'Elektronisk valutahandel — exekvering via plattformar och API:er snarare än via telefon. Täcker bankportaler (SDP:er), multi-dealer-plattformar och ECN:er. Nu ~75%+ av spotvalutavolymen. Möjliggör snävare spreadar, snabbare exekvering och fullständig STP.' },
+  { cat: 'efx', q: 'Vad är "last look"?',
+    a: 'En banks avtalsenliga rätt att avvisa en inkommande handel efter att ha granskat den — typiskt inom 5–100 ms. Skyddar mot latensarbitrage på inaktuella priser. Kontroversiellt: hedgefonder föredrar ställen utan last look. Avvisningsfrekvensen är ett viktigt kvalitetsmått för LP:er.' },
+  { cat: 'efx', q: 'Vad är internalisering?',
+    a: 'När en bank matchar en kunds köp mot en annan kunds sälj i sin egen bok och tjänar hela spreaden på båda sidor utan extern säkring. Toppbanker siktar på >80% internaliseringsgrad. Ju högre grad, desto lönsammare är eFX-verksamheten.' },
+  { cat: 'efx', q: 'Vad är STP?',
+    a: 'Straight-Through Processing — automatisk routing från handelsexekvering till avveckling utan manuella steg. Avbrott i STP kräver manuell hantering och ökar kostnader och operativ risk. Ett centralt effektivitetsmått för eFX-deskar.' },
+  { cat: 'efx', q: 'Vad är ett strömmande pris (streaming)?',
+    a: 'En levande, kontinuerligt uppdaterad tvåvägskurs som skickas elektroniskt till en kund eller handelsplats. Hedgefonder tar emot strömmar via FIX API och kan handla direkt med ett klick. Skiljer sig från RFQ, där kunden begär varje pris separat.' },
+  { cat: 'efx', q: 'Vad är toxiskt flöde?',
+    a: 'Kundorder som systematiskt plockar av inaktuella priser och genererar förluster för market makern. HFT-latensarb-strategier producerar toxiskt flöde. Banker identifierar det via P&L-attribution och svarar med vidgade spreadar, aktivering av last look eller minskad kredit.' },
+  // Marknadsstruktur
+  { cat: 'market-structure', q: 'Vad är en ECN?',
+    a: 'Electronic Communication Network — en anonym central limitorderbok (CLOB). EBS dominerar prissättningen för EUR/USD och USD/JPY; Refinitiv Matching täcker andra G10-par. Sätter det globala FX-referenspriset. Kräver prime brokerage för kreditförmedling.' },
+  { cat: 'market-structure', q: 'Vilka är de ledande FX-dealerbankerna?',
+    a: 'JPMorgan, UBS, Citi, Deutsche Bank och Barclays — de fem största kontrollerar ~50% av global spotvalutavolym. De agerar som market makers för alla kundsegment och konkurrerar på spread, fyllnadsgrad, internalisering och plattformskvalitet.' },
+  { cat: 'market-structure', q: 'Vad är en icke-bank LP?',
+    a: 'En elektronisk market maker (XTX Markets, Citadel Securities, Jump Trading, Virtu) som tillhandahåller tvåvägspriser till banker och ECN:er. De ersatte röstmäklare i de stora valutaparen. XTX är nu världens största FX-market maker volymmässigt.' },
+  { cat: 'market-structure', q: 'Vad är prime brokerage inom FX?',
+    a: 'En tjänst där en stor bank utökar kredit, vilket gör det möjligt för en hedgefond att handla med flera motparter under ett enda förhållande. Nödvändigt för ECN-åtkomst — fonden handlar anonymt under prime brokerns namn. En viktig intäktskälla för toppbanker.' },
+  { cat: 'market-structure', q: 'Vad är en single-dealer-plattform (SDP)?',
+    a: 'En banks egna e-handelsportal — t.ex. Barclays BARX, Citi Velocity, JPMorgan Markets. Kunder får strömmande priser, exekvering, analyser och orderhantering på ett ställe. Banker investerar kraftigt i SDP:ernas UX för att behålla kundflödet.' },
+  { cat: 'market-structure', q: 'Vad är interbankmarknaden?',
+    a: 'Marknaden där stora banker handlar valuta direkt med varandra — bilateralt via kreditlinjer eller anonymt på ECN:er. Sätter de referensmitt-priser som används för att prissätta alla kundaffärer. Domineras av de tio största dealerbankerna.' }
 ];
 
 var CAT_NAMES = {
-  'fx-basics': 'FX Basics',
-  'efx': 'eFX Concepts',
-  'market-structure': 'Market Structure'
+  'fx-basics':        'FX Grunderna',
+  'efx':              'eFX Begrepp',
+  'market-structure': 'Marknadsstruktur'
 };
 
-// ── FLASHCARD STATE ───────────────────────────────────────────────────────────
-var FC = {
-  cat: 'all',
-  idx: 0,
-  flipped: false,
-  known: {}
-};
+// ── FLASHKORT-STATE ───────────────────────────────────────────────────────────
+var FC = { cat: 'all', idx: 0, flipped: false, known: {} };
 
 function fcFiltered() {
   if (FC.cat === 'all') return CARDS;
   return CARDS.filter(function(c) { return c.cat === FC.cat; });
 }
-
 function fcOrigIdx(card) { return CARDS.indexOf(card); }
 
 function fcRender() {
@@ -859,10 +852,10 @@ function fcRender() {
   document.getElementById('fc-a').textContent      = card.a;
   document.getElementById('fc-cat-lbl').textContent = CAT_NAMES[card.cat] || '';
 
-  var known = FC.known[fcOrigIdx(card)];
+  var knownCount = Object.keys(FC.known).length;
   document.getElementById('fc-count').textContent =
-    'Card ' + (FC.idx + 1) + ' of ' + total +
-    (Object.keys(FC.known).length ? ' · ' + Object.keys(FC.known).length + ' known ✓' : '');
+    'Kort ' + (FC.idx + 1) + ' av ' + total +
+    (knownCount ? ' · ' + knownCount + ' kända ✓' : '');
 
   var dots = document.getElementById('fc-dots');
   dots.innerHTML = '';
