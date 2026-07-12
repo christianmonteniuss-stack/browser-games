@@ -195,6 +195,27 @@
     .ev-diff { background:#0d1428; border:1px solid #1e2e50; border-radius:7px; padding:10px 14px; font-size:0.73rem; color:#8ab0d4; line-height:1.65; margin-top:8px; }
     .ev-diff strong { color:#a0c8f0; }
 
+    /* ── INSTRUMENT & HEDGING VIEW ── */
+    #view-instruments { flex:1; display:none; overflow-y:auto; min-height:0; }
+    #view-instruments.active { display:block; }
+    #view-instruments::-webkit-scrollbar { width:4px; }
+    #view-instruments::-webkit-scrollbar-thumb { background:#1a3050; border-radius:2px; }
+    .stats-grid.cols4 { grid-template-columns:repeat(4,1fr); }
+    .dc.mk .dc-title { color:#5bc8f5; }
+    .dc.tk .dc-title { color:#b880f7; }
+    .formula-box { background:#091828; border:1px solid #1e3d60; border-radius:8px; padding:14px 18px; font-family:'Consolas','Courier New',monospace; font-size:0.77rem; color:#8ac8d8; line-height:1.85; margin:10px 0 14px; overflow-x:auto; white-space:nowrap; }
+    .formula-box .fvar { color:#5bc8f5; }
+    .formula-box .flbl { display:block; font-family:'Segoe UI',system-ui,sans-serif; font-size:0.57rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#1e4a6a; margin-bottom:6px; white-space:normal; }
+    .calc-box { background:#0d1e30; border:1px solid #1e3550; border-radius:10px; padding:18px 20px; margin:14px 0 4px; }
+    .calc-title { font-size:0.78rem; font-weight:700; color:#c8e8f8; margin-bottom:14px; }
+    .calc-row { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
+    .calc-field { flex:1; min-width:150px; }
+    .calc-field label { display:block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#2a5a7a; margin-bottom:6px; }
+    .calc-field input { width:100%; background:#091828; border:1px solid #1e3550; color:#c8e8f8; font-size:0.85rem; padding:8px 10px; border-radius:6px; font-family:inherit; }
+    .calc-field input:focus { outline:none; border-color:#4fc3f7; }
+    .calc-verdict { font-size:0.77rem; color:#7aacca; line-height:1.7; margin-top:12px; padding-top:12px; border-top:1px solid #0e1e2e; }
+    .calc-verdict strong { color:#c8e8f8; }
+
     /* ── FLASHCARD VIEW ── */
     #view-cards { flex:1; display:none; flex-direction:column; align-items:center; justify-content:center; min-height:0; overflow:hidden; padding:16px 24px 12px; gap:14px; }
     #view-cards.active { display:flex; }
@@ -337,10 +358,12 @@
       .diagram-wrap { padding:18px 14px 0 38px; min-height:300px; }
       .tier-labels { padding:26px 0 44px; }
       .stats-grid,.drivers-cols { grid-template-columns:1fr 1fr; }
+      .stats-grid.cols4 { grid-template-columns:1fr 1fr; }
       .driver-grid { grid-template-columns:1fr; }
       .about-wrap,.events-wrap { padding:20px 16px 32px; }
       .fc-btns { flex-wrap:wrap; justify-content:center; }
       .compare-table { font-size:0.65rem; }
+      .calc-row { flex-direction:column; }
     }
   </style>
 </head>
@@ -358,6 +381,7 @@
 <div class="tabs">
   <button class="tab-btn active" data-tab="map">Marknadskarta</button>
   <button class="tab-btn" data-tab="about">Om FX-marknaden</button>
+  <button class="tab-btn" data-tab="instruments">Instrument &amp; Hedging</button>
   <button class="tab-btn" data-tab="events">Vad rör FX?</button>
   <button class="tab-btn" data-tab="train">Träna</button>
   <button class="tab-btn" data-tab="cards">Flashkort</button>
@@ -471,6 +495,197 @@
         <div class="chain-row ecn"><span class="chain-actor">LP → ECN (interbank)</span><span class="chain-spread">~0,02 pips</span><span class="chain-note">— det "riktiga" referenspriset</span></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ══ INSTRUMENT & HEDGING VIEW ══ -->
+<div id="view-instruments">
+  <div class="events-wrap">
+
+    <div class="about-hero" style="margin-bottom:24px">
+      <h1>Instrument, market makers &amp; hedging</h1>
+      <p>FX-marknaden handlar inte bara om spotkurser. Fyra instrumenttyper — spot, termin (forward), swap och option — täcker allt från direktbyten till fleråriga säkringsstrategier. Nedan: hur varje instrument fungerar och prissätts, vem som ställer priserna (market makers), och hur ett företag konkret skyddar sig mot valutarisk (hedging).</p>
+    </div>
+
+    <div style="margin-bottom:24px">
+      <h2>De fyra instrumenten — andel av daglig volym</h2>
+      <div class="stats-grid cols4">
+        <div class="stat-card"><div class="stat-num">51%</div><div class="stat-label">FX-swappar — störst av alla, används för funding &amp; likviditet</div></div>
+        <div class="stat-card"><div class="stat-num">28%</div><div class="stat-label">Spot — direktbyte, avveckling T+2</div></div>
+        <div class="stat-card"><div class="stat-num">16%</div><div class="stat-label">Outright-terminer (forwards) — säkring till framtida datum</div></div>
+        <div class="stat-card"><div class="stat-num">4%</div><div class="stat-label">Optioner — rätt men inte skyldighet</div></div>
+      </div>
+      <p style="font-size:0.78rem;color:#7aacca;line-height:1.75">Källa: BIS Triennial Survey (avrundat, andel av ~$7,5 biljoner daglig volym). Lägg märke till att <strong style="color:#c8e8f8">spot inte är störst</strong> — FX-swappar dominerar eftersom banker konstant lånar och lånar ut valuta för att finansiera positioner i olika valutor, snarare än att spekulera i kursrörelser.</p>
+    </div>
+
+    <div style="margin-bottom:24px">
+      <h2>Hur instrumenten fungerar &amp; prissätts</h2>
+
+      <!-- SPOT -->
+      <div class="ev-card">
+        <div class="ev-header">
+          <div class="ev-flag">💱</div>
+          <div class="ev-meta">
+            <div class="ev-name">Spot</div>
+            <div class="ev-sub">Direktbyte · avveckling T+2 (T+1 för USD/CAD)</div>
+          </div>
+          <div class="ev-badge blue">~28% av volym</div>
+          <div class="ev-chev">▼</div>
+        </div>
+        <div class="ev-body">
+          <div class="ev-intro">Det enklaste FX-instrumentet: byt en valuta mot en annan till dagens marknadskurs. Ingen ränteberäkning, inget framtida datum — bara ett pris och avveckling två bankdagar senare.</div>
+          <div class="formula-box"><span class="flbl">Hur det prissätts</span>Inget formelbaserat pris — spot <span class="fvar">sätts</span> av utbud &amp; efterfrågan i realtid, aggregerat från interbankmarknaden (EBS/Refinitiv) ner till varje banks och LP:s egen prissättningsmotor. Spot <em>är</em> referenspriset alla andra instrument bygger vidare på.</div>
+          <div class="ev-takeaway"><strong>Exempel:</strong> Ett företag som betalar en leverantörsfaktura idag växlar till spotkurs — säg EUR/USD 1,0850 — och beloppet avvecklas om två bankdagar.</div>
+        </div>
+      </div>
+
+      <!-- FORWARD -->
+      <div class="ev-card">
+        <div class="ev-header">
+          <div class="ev-flag">📅</div>
+          <div class="ev-meta">
+            <div class="ev-name">Termin (Outright Forward)</div>
+            <div class="ev-sub">Bindande avtal · fast kurs · framtida datum</div>
+          </div>
+          <div class="ev-badge blue">~16% av volym</div>
+          <div class="ev-chev">▼</div>
+        </div>
+        <div class="ev-body">
+          <div class="ev-intro">Ett bindande avtal att byta valuta till ett i förväg bestämt pris på ett framtida datum (t.ex. om 90 dagar). Priset är <em>inte</em> en prognos av framtida spotkurs — det härleds matematiskt från dagens spotkurs och räntedifferensen mellan valutorna.</div>
+          <div class="formula-box">
+            <span class="flbl">Covered Interest Rate Parity (CIRP)</span>
+            F = S × (1 + i<span class="fvar">quote</span>·t) / (1 + i<span class="fvar">base</span>·t)
+          </div>
+          <p style="font-size:0.77rem;color:#7aacca;line-height:1.72;margin-bottom:12px">Principen: ingen ska kunna tjäna riskfri arbitrage genom att låna i en valuta och placera i en annan. Valutan med <strong style="color:#c8e8f8">högre ränta handlas till terminsrabatt</strong> (svagare i terminsmarknaden) mot valutan med lägre ränta — räntefördelen äts upp av den sämre terminskursen.</p>
+          <div class="ev-takeaway"><strong>Exempel (EUR/USD, 90 dagar):</strong> Spot 1,0850. USD-ränta 5,25%, EUR-ränta 3,75%. F = 1,0850 × (1+0,0525×0,25)/(1+0,0375×0,25) ≈ <strong>1,0890</strong>. USD (högre ränta) handlas ~40 terminspunkter svagare — konsekvent med att USD är dyrare att låna i men "billigare" framåt i tiden.</div>
+        </div>
+      </div>
+
+      <!-- SWAP -->
+      <div class="ev-card">
+        <div class="ev-header">
+          <div class="ev-flag">🔄</div>
+          <div class="ev-meta">
+            <div class="ev-name">FX-swap</div>
+            <div class="ev-sub">Spot + omvänd termin i ett paket · funding, inte spekulation</div>
+          </div>
+          <div class="ev-badge blue">~51% av volym</div>
+          <div class="ev-chev">▼</div>
+        </div>
+        <div class="ev-body">
+          <div class="ev-intro">Två ben i en och samma affär: t.ex. låna USD och låna ut EUR idag (spot-benet), och reversera exakt det på ett framtida datum till en förutbestämd kurs (termins-benet). Nettoeffekten är att låna i en valuta och samtidigt ha säkerhet i en annan — utan att ta någon riktningsrisk i valutan.</div>
+          <div class="formula-box"><span class="flbl">Prissättning</span>Swappunkter = samma terminspunkter som i en outright forward (CIRP-formeln ovan) — skillnaden mellan spot- och terminsbenets kurs. Kallas ofta "cost of carry".</div>
+          <div class="ev-takeaway"><strong>Varför störst till volym:</strong> Banker behöver konstant omfördela likviditet mellan valutor för att finansiera sina bokade positioner (t.ex. en bank med mycket USD-utlåning men EUR-inlåning). Det är rörmokeri, inte spekulation — men det görs i enorm skala varje dag.</div>
+        </div>
+      </div>
+
+      <!-- OPTION -->
+      <div class="ev-card">
+        <div class="ev-header">
+          <div class="ev-flag">🎯</div>
+          <div class="ev-meta">
+            <div class="ev-name">Valutaoption</div>
+            <div class="ev-sub">Rätt men inte skyldighet · premie betalas i förväg</div>
+          </div>
+          <div class="ev-badge blue">~4% av volym</div>
+          <div class="ev-chev">▼</div>
+        </div>
+        <div class="ev-body">
+          <div class="ev-intro">Ger köparen <em>rätten</em> (inte skyldigheten) att köpa (call) eller sälja (put) en valuta till ett bestämt lösenpris (strike) på eller före ett visst datum. Säljaren (ofta en bank) tar emot en premie i förväg i utbyte mot att bära risken.</div>
+          <div class="formula-box">
+            <span class="flbl">Garman–Kohlhagen (Black-Scholes för FX)</span>
+            C = S·e<sup>−r<span class="fvar">f</span>T</sup>·N(d1) − K·e<sup>−r<span class="fvar">d</span>T</sup>·N(d2)<br>
+            d1 = [ln(S/K) + (r<span class="fvar">d</span>−r<span class="fvar">f</span>+σ²/2)T] / (σ√T)
+          </div>
+          <p style="font-size:0.77rem;color:#7aacca;line-height:1.72;margin-bottom:12px">Skiljer sig från aktieoptioner genom att <strong style="color:#c8e8f8">två räntor</strong> ingår istället för en — den inhemska (r<span style="color:#5bc8f5">d</span>) och utländska (r<span style="color:#5bc8f5">f</span>) räntan, eftersom båda valutorna i paret kan placeras räntebärande. Priset beror på spot, strike, volatilitet, tid till förfall och räntedifferensen.</p>
+          <div class="ev-takeaway"><strong>Exempel:</strong> Ett företag köper en EUR-put/USD-call med strike 1,08 för att säkra ett golv om euron faller, men behåller uppsidan om euron stiger — till skillnad från en termin som låser kursen helt åt båda hållen.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARKET MAKER -->
+    <div style="margin-bottom:24px">
+      <h2>Vad är en market maker?</h2>
+      <p style="font-size:0.8rem;color:#7aacca;line-height:1.75;margin-bottom:12px">En market maker ställer <strong style="color:#c8e8f8">kontinuerliga tvåvägspriser</strong> — både ett köppris (bid) och ett säljpris (ask/offer) — och är alltid redo att handla åt någon som vill. De tjänar på spreaden mellan bid och ask, men bär risken att sitta med en position ("lager") som rör sig emot dem innan de hunnit säkra den. Motsatsen är en <strong style="color:#c8e8f8">liquidity taker</strong>, som accepterar de priser som redan finns istället för att ställa egna.</p>
+      <div class="drivers-cols">
+        <div class="dc mk">
+          <div class="dc-title">Market maker (price maker)</div>
+          <div class="di"><div class="di-ico">📊</div><div><div class="di-name">Ställer priser</div><div class="di-desc">Kvoterar bid/ask kontinuerligt, oavsett om de själva vill handla just då</div></div></div>
+          <div class="di"><div class="di-ico">💰</div><div><div class="di-name">Tjänar spreaden</div><div class="di-desc">Vinsten kommer från skillnaden mellan bid och ask, inte från att förutsäga riktning</div></div></div>
+          <div class="di"><div class="di-ico">⚠️</div><div><div class="di-name">Bär lagerrisk</div><div class="di-desc">Sitter tillfälligt med en position tills den säkrats eller matchats mot motsatt flöde</div></div></div>
+        </div>
+        <div class="dc tk">
+          <div class="dc-title">Liquidity taker (price taker)</div>
+          <div class="di"><div class="di-ico">🎯</div><div><div class="di-name">Accepterar priser</div><div class="di-desc">Handlar mot befintliga bud/erbjudanden — köper på ask, säljer på bid</div></div></div>
+          <div class="di"><div class="di-ico">💸</div><div><div class="di-name">Betalar spreaden</div><div class="di-desc">Kostnaden för att få omedelbar exekvering istället för att vänta på ett bättre pris</div></div></div>
+          <div class="di"><div class="di-ico">🏃</div><div><div class="di-name">Söker riktning</div><div class="di-desc">Handlar för att en syn på marknaden — hedging, spekulation eller ett underliggande behov</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WHO MAKES MARKETS -->
+    <div style="margin-bottom:24px">
+      <h2>Vilka är market makers i FX — och vem handlar med vad?</h2>
+      <table class="role-table">
+        <thead><tr><th>Market maker</th><th>Hur de ställer priser</th><th>Primärt instrument</th></tr></thead>
+        <tbody>
+          <tr><td class="rt-name"><span class="rt-dot" style="background:#2dd28a"></span>Toppbanker (JPM, UBS, Citi…)</td><td class="rt-why">Kvoterar till kunder via e-portaler/SDP:er, säkrar risk internt eller externt</td><td class="rt-earns">Spot, terminer, swappar, optioner — hela paletten</td></tr>
+          <tr><td class="rt-name"><span class="rt-dot" style="background:#8a4dd2"></span>Icke-bank LP:er (XTX, Citadel, Jump)</td><td class="rt-why">Strömmar algoritmiska tvåvägspriser dygnet runt med extremt hög hastighet</td><td class="rt-earns">Nästan uteslutande spot</td></tr>
+          <tr><td class="rt-name"><span class="rt-dot" style="background:#8a4dd2"></span>ECN (EBS/Refinitiv)</td><td class="rt-why">Är ingen market maker själv — matchar andras priser i en anonym orderbok</td><td class="rt-earns">Spot &amp; interbank-swappar</td></tr>
+        </tbody>
+      </table>
+      <table class="role-table" style="margin-top:16px">
+        <thead><tr><th>Aktör (liquidity taker)</th><th>Primärt instrument</th><th>Varför</th></tr></thead>
+        <tbody>
+          <tr><td class="rt-name"><span class="rt-dot" style="background:#2d7dd2"></span>Företagskunder</td><td class="rt-earns">Termin (forward)</td><td class="rt-why">Vet exakt belopp och datum för en framtida betalning — låser kursen och eliminerar osäkerhet</td></tr>
+          <tr><td class="rt-name"><span class="rt-dot" style="background:#2d7dd2"></span>Hedgefonder</td><td class="rt-earns">Spot &amp; option</td><td class="rt-why">Spot för snabb riktningsexponering, optioner för asymmetriska satsningar med begränsad nedsida</td></tr>
+          <tr><td class="rt-name"><span class="rt-dot" style="background:#2d7dd2"></span>Privatkunder</td><td class="rt-earns">Rullande spot (CFD)</td><td class="rt-why">Enklast att förstå och handla via mäklarplattformar, ofta med hävstång</td></tr>
+          <tr><td class="rt-name"><span class="rt-dot" style="background:#2dd28a"></span>Banker (sinsemellan)</td><td class="rt-earns">FX-swap</td><td class="rt-why">Finansierar och omfördelar likviditet mellan valutor — den absoluta merparten av all volym</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- HEDGING -->
+    <div>
+      <h2>Hedging — hur ett företag skyddar sig mot valutarisk</h2>
+      <p style="font-size:0.8rem;color:#7aacca;line-height:1.75;margin-bottom:14px">Ett svenskt företag som ska betala en amerikansk leverantör <strong style="color:#c8e8f8">$1 000 000 om 90 dagar</strong> vet inte idag vad det kommer kosta i kronor — kostnaden beror på var USD/SEK står om tre månader. Det är valutarisk (FX-exponering). Hedging betyder att man använder ett instrument för att göra den framtida kostnaden känd eller begränsad redan idag.</p>
+
+      <div class="rc-wrap" style="max-width:none;width:100%;padding:0 0 4px">
+        <div class="rc-row pos">
+          <div class="rc-step"><div class="rc-step-head">Utlösare</div><div class="rc-step-body">Företaget vet: $1M ska betalas om 90 dagar</div></div>
+          <div class="rc-arrow">→</div>
+          <div class="rc-step"><div class="rc-step-head">Utan säkring</div><div class="rc-step-body">SEK-kostnaden är okänd — beror helt på framtida spotkurs</div></div>
+          <div class="rc-arrow">→</div>
+          <div class="rc-step"><div class="rc-step-head">Med terminssäkring</div><div class="rc-step-body">Banken låser en kurs idag för avveckling om 90 dagar</div></div>
+          <div class="rc-arrow">→</div>
+          <div class="rc-result">Kostnad känd redan idag ✓</div>
+        </div>
+      </div>
+
+      <table class="compare-table" style="margin-top:6px">
+        <thead><tr><th>Scenario om 90 dagar</th><th class="ct-fx">Utan säkring</th><th class="ct-eq">Med terminssäkring</th><th class="ct-bo">Med optionssäkring</th></tr></thead>
+        <tbody>
+          <tr><td class="ct-prop">USD stärks 10% mot SEK</td><td class="ct-fx">Betalar mer — full nedsida</td><td class="ct-eq">Betalar exakt terminskursen — skyddad</td><td class="ct-bo">Betalar högst strike (golv) — skyddad, minus premie</td></tr>
+          <tr><td class="ct-prop">Kursen oförändrad</td><td class="ct-fx">Ingen skillnad</td><td class="ct-eq">Betalar terminskursen (kan avvika något från spot)</td><td class="ct-bo">Betalar spot, minus premien man redan betalat</td></tr>
+          <tr><td class="ct-prop">USD försvagas 10% mot SEK</td><td class="ct-fx">Betalar mindre — får hela uppsidan</td><td class="ct-eq">Betalar ändå terminskursen — missar uppsidan</td><td class="ct-bo">Betalar den billigare spotkursen — behåller uppsidan, minus premie</td></tr>
+        </tbody>
+      </table>
+      <div class="ct-note" style="margin-bottom:24px">
+        <strong>Avvägningen:</strong> En termin är gratis att ingå men låser kursen helt åt båda hållen. En option kostar en premie i förväg men ger skydd nedåt <em>och</em> behåller uppsidan. De flesta storföretag terminssäkrar sina mest förutsägbara flöden och använder optioner för mer osäkra eller strategiskt viktiga exponeringar.
+      </div>
+
+      <div class="calc-box">
+        <div class="calc-title">🧮 Prova själv: hedgad vs ohedgad kostnad</div>
+        <div class="calc-row">
+          <div class="calc-field"><label>Belopp (USD)</label><input type="number" id="hc-amount" value="1000000" step="10000"></div>
+          <div class="calc-field"><label>Avtalad terminskurs (USD/SEK)</label><input type="number" id="hc-fwd" value="10.50" step="0.01"></div>
+          <div class="calc-field"><label>Framtida spotkurs (USD/SEK)</label><input type="number" id="hc-spot" value="11.00" step="0.01"></div>
+        </div>
+        <div class="rc-nums" id="hc-result"></div>
+        <div class="calc-verdict" id="hc-verdict"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -673,6 +888,7 @@
     <button class="fc-cat" data-cat="fx-basics">FX Grunderna</button>
     <button class="fc-cat" data-cat="efx">eFX Begrepp</button>
     <button class="fc-cat" data-cat="market-structure">Marknadsstruktur</button>
+    <button class="fc-cat" data-cat="instruments">Instrument</button>
     <button class="fc-cat" data-cat="events">Marknadshändelser</button>
   </div>
   <div class="card-scene">
@@ -948,6 +1164,7 @@ document.querySelectorAll('.tab-btn').forEach(function(btn){
     document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab===tab);});
     document.getElementById('view-map').style.display=tab==='map'?'flex':'none';
     document.getElementById('view-about').classList.toggle('active',tab==='about');
+    document.getElementById('view-instruments').classList.toggle('active',tab==='instruments');
     document.getElementById('view-events').classList.toggle('active',tab==='events');
     document.getElementById('view-train').classList.toggle('active',tab==='train');
     document.getElementById('view-cards').classList.toggle('active',tab==='cards');
@@ -991,6 +1208,26 @@ document.querySelectorAll('.ev-header').forEach(function(hdr){
   hdr.addEventListener('click',function(){hdr.closest('.ev-card').classList.toggle('open');});
 });
 
+// ── HEDGE-KALKYLATOR ──────────────────────────────────────────────────────────
+function hcRecalc(){
+  var amount=parseFloat(document.getElementById('hc-amount').value)||0;
+  var fwd=parseFloat(document.getElementById('hc-fwd').value)||0;
+  var spot=parseFloat(document.getElementById('hc-spot').value)||0;
+  var costHedge=amount*fwd, costNoHedge=amount*spot, diff=costNoHedge-costHedge;
+  var fmt=function(n){return Math.round(n).toLocaleString('sv-SE');};
+  document.getElementById('hc-result').innerHTML=
+    '<div class="rc-num"><div class="rc-num-val">'+fmt(costNoHedge)+' kr</div><div class="rc-num-lbl">Utan säkring</div></div>'+
+    '<div class="rc-num"><div class="rc-num-val">'+fmt(costHedge)+' kr</div><div class="rc-num-lbl">Med terminssäkring</div></div>'+
+    '<div class="rc-num"><div class="rc-num-val" style="color:'+(diff>=0?'#4ff7b0':'#f07070')+'">'+(diff>=0?'+':'')+fmt(diff)+' kr</div><div class="rc-num-lbl">Säkringen sparade/kostade</div></div>';
+  var verdict=diff>0
+    ? 'I det här scenariot <strong>tjänade</strong> säkringen pengar — spotkursen blev sämre än den terminskurs banken erbjöd. Men det vet man aldrig i förväg — poängen med hedging är inte att gissa rätt, utan att göra kostnaden <strong>känd</strong> i förväg.'
+    : diff<0
+      ? 'I det här scenariot hade det <strong>varit billigare att inte säkra</strong> — spotkursen blev bättre än terminskursen. Det är priset för förutsägbarhet: man ger upp en eventuell uppsida i utbyte mot att eliminera nedsidan.'
+      : 'Spot och termin sammanföll exakt — säkringen varken kostade eller sparade något denna gång.';
+  document.getElementById('hc-verdict').innerHTML=verdict;
+}
+['hc-amount','hc-fwd','hc-spot'].forEach(function(id){document.getElementById(id).addEventListener('input',hcRecalc);});
+
 // ── FLASHKORT DATA ────────────────────────────────────────────────────────────
 var CARDS=[
   {cat:'fx-basics',q:'Vad är en bid/ask-spread?',a:'Skillnaden mellan det pris en market maker köper (bid) och säljer (ask) till. Det är makarens vinstmarginal. T.ex. EUR/USD 1,0850/1,0851 = 1 pip spread. Snävare spread signalerar en mer konkurrensutsatt och likvid marknad.'},
@@ -1011,6 +1248,12 @@ var CARDS=[
   {cat:'market-structure',q:'Vad är prime brokerage inom FX?',a:'En tjänst där en stor bank utökar kredit, vilket gör det möjligt för en hedgefond att handla med flera motparter under ett enda förhållande. Nödvändigt för ECN-åtkomst.'},
   {cat:'market-structure',q:'Vad är en SDP (single-dealer-platform)?',a:'En banks egna e-handelsportal — t.ex. Barclays BARX, Citi Velocity, JPMorgan Markets. Kunder får strömmande priser, exekvering, analyser och orderhantering på ett ställe.'},
   {cat:'market-structure',q:'Vad är interbankmarknaden?',a:'Marknaden där stora banker handlar valuta direkt med varandra — bilateralt via kreditlinjer eller anonymt på ECN:er. Sätter de referensmittpriser som används för alla kundaffärer.'},
+  {cat:'instruments',q:'Vad är skillnaden mellan spot och termin (forward)?',a:'Spot avvecklas direkt (T+2) till dagens kurs. En termin (forward) är ett bindande avtal om att byta valuta till ett fast pris på ett framtida datum — priset härleds från spotkursen justerad för räntedifferensen (terminspunkter), inte från en gissning om framtida kurs.'},
+  {cat:'instruments',q:'Vad är en FX-swap och varför är den störst till volym?',a:'En FX-swap kombinerar en spot-affär med en omvänd termin i ett paket — t.ex. låna USD och låna ut EUR idag, reversera vid ett framtida datum till en förutbestämd kurs. Banker använder den för att finansiera positioner i olika valutor, inte för att spekulera — därför är volymen enorm (~51% av all FX-handel).'},
+  {cat:'instruments',q:'Vad säger interest rate parity (IRP) om terminspriset?',a:'IRP säger att terminskursen justeras exakt för räntedifferensen mellan två valutor, så att ingen kan tjäna riskfri arbitrage genom att låna i en valuta och placera i en annan. Valutan med högre ränta handlas till terminsrabatt (svagare i terminsmarknaden) mot valutan med lägre ränta.'},
+  {cat:'instruments',q:'Hur prissätts en valutaoption?',a:'Med Garman–Kohlhagen-modellen (Black-Scholes anpassad för FX) — priset beror på spotkurs, lösenpris (strike), volatilitet, tid till förfall samt båda valutornas räntor (istället för en enda ränta som i aktieoptioner).'},
+  {cat:'instruments',q:'Vad är skillnaden på en market maker och en liquidity taker?',a:'En market maker ("price maker") ställer köp- och säljpriser kontinuerligt och tjänar spreaden, men bär lagerrisk. En liquidity taker ("price taker") accepterar de priser som redan finns i marknaden — de betalar spreaden istället för att tjäna den.'},
+  {cat:'instruments',q:'Varför skulle ett företag använda en option istället för en termin för att hedga?',a:'En termin låser en fast kurs — bra skydd men man missar uppsidan om valutan rör sig gynnsamt. En option ger ett golv (skydd mot nedsida) men behåller uppsidan, mot en premie betald i förväg. Dyrare, men mer flexibel.'},
   {cat:'events',q:'Vad är carry trade?',a:'En strategi där du lånar i en lågräntevaluta (t.ex. yen vid −0,1%) och investerar i en högräntevaluta (t.ex. dollar vid 5,25%). Vinsten = räntedifferensen. Risk: om ränteläget förändras snabbt reverseras positionerna snabbt och valutan rör sig kraftigt i omvänd riktning.'},
   {cat:'events',q:'Varför föll japanska yenen ~40% mot dollarn 2022–2024?',a:'Fed höjde räntan till 5,25%, BOJ höll −0,1% ("yield curve control"). Räntedifferensen på ~5,35% triggade massiv carry trade: investerare sålde yen, köpte dollar. USD/JPY steg från 115 till 160. BOJ:s interventioner (~$100mdr) bromsade men stoppade inte rörelsen.'},
   {cat:'events',q:'Vad hände med pundet (GBP) natten för Brexit 2016?',a:'GBP/USD föll från ~1,49 till ~1,32 på fyra timmar (−10%) — historiens snabbaste stora valutarörelse i fredstid. Algoritmer sålde GBP automatiskt i takt med att Leave-resultaten kom in. FX prissatte hela resultatet medan Londonbörsen var stängd.'},
@@ -1019,7 +1262,7 @@ var CARDS=[
   {cat:'events',q:'Varför är centralbanksindependens avgörande för en valuta?',a:'Om marknaden tror att politiker styr räntepolitiken prissätts en riskpremie in. Turkiet under Erdogan: räntan sänktes mitt i 80% inflation. Kapital flydde, TRY tappade 90% mot USD 2018–2024. Centralbanksindependens är valutans trovärdighetsankare.'}
 ];
 
-var CAT_NAMES={'fx-basics':'FX Grunderna','efx':'eFX Begrepp','market-structure':'Marknadsstruktur','events':'Marknadshändelser'};
+var CAT_NAMES={'fx-basics':'FX Grunderna','efx':'eFX Begrepp','market-structure':'Marknadsstruktur','instruments':'Instrument','events':'Marknadshändelser'};
 
 // ── FLASHKORT LOGIK ───────────────────────────────────────────────────────────
 var FC={cat:'all',idx:0,flipped:false,known:{}};
@@ -1236,7 +1479,7 @@ document.getElementById('quiz-restart').addEventListener('click',function(){quiz
 // ── INIT ──────────────────────────────────────────────────────────────────────
 window.addEventListener('resize',function(){renderArrows(activeId);});
 requestAnimationFrame(function(){requestAnimationFrame(function(){
-  renderArrows(null);fcRender();memShuffle();memBuild();quizShuffle();quizRender();
+  renderArrows(null);fcRender();memShuffle();memBuild();quizShuffle();quizRender();hcRecalc();
 });});
 </script>
 </body>
