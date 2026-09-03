@@ -76,6 +76,9 @@ class GameManager {
     send(socket, S2C.LOBBY_STATE, this._lobbyState());
     if (this.activeMode) {
       send(socket, S2C.MODE_STARTED, { modeId: this.activeMode.id });
+      // Let the mode redraw the current screen for a host that (re)connected
+      // in the middle of a game.
+      if (this.activeMode.onHostJoin) this.activeMode.onHostJoin(this._ctx());
     }
   }
 
@@ -169,6 +172,10 @@ class GameManager {
     // Either way, push fresh lobby state so every screen re-renders which
     // characters are taken, in real time.
     this._broadcastLobby();
+
+    // If a game is already running, hand this now-ready player the current
+    // screen (they may have been stuck on character select).
+    if (result.ok && this.activeMode) this._resyncPlayer(player);
   }
 
   // ── THE GAME-MODE INTERFACE ───────────────────────────────────────────────

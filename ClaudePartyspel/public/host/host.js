@@ -43,6 +43,7 @@
       send(action, data) {
         sendMsg(C2S.HOST_ACTION, { action, data });
       },
+      characters: () => state.characters,
     };
   }
 
@@ -231,6 +232,12 @@
       state.modes.map(
         (m) =>
           new Promise((resolve) => {
+            if (m.css) {
+              const l = document.createElement('link');
+              l.rel = 'stylesheet';
+              l.href = '/host/modes/' + m.id + '.css';
+              document.head.appendChild(l);
+            }
             const s = document.createElement('script');
             s.src = '/host/modes/' + m.id + '.js';
             s.onload = resolve;

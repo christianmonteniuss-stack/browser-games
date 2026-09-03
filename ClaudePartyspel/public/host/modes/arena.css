@@ -1,0 +1,104 @@
+/* ── ARENA (host) ── loaded automatically because the mode sets css:true ── */
+
+.arena-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+}
+
+/* "Rummet" — all characters in a row */
+.arena-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 22px;
+}
+.arena-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 100px;
+}
+.arena-name { font-weight: 700; }
+.arena-score {
+  font-size: 14px;
+  color: var(--muted);
+  background: var(--panel);
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+.arena-slot.blink .char-avatar {
+  animation: arena-blink 0.55s steps(1, end) infinite;
+}
+@keyframes arena-blink {
+  50% { opacity: 0.15; transform: scale(1.1); }
+}
+
+.arena-mid { text-align: center; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.round-value { font-size: 20px; }
+.round-value strong { color: var(--accent); font-size: 24px; }
+.arena-turn { font-size: 22px; }
+.arena-notice { color: var(--bad); font-weight: 600; }
+
+.countdown {
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--fg);
+  min-width: 1.4em;
+}
+.countdown.urgent { color: var(--bad); animation: cd-pulse 0.5s ease-in-out infinite; }
+@keyframes cd-pulse { 50% { transform: scale(1.18); } }
+
+/* Golf leaderboard */
+.golf-board { width: min(460px, 100%); }
+.golf-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.golf-list li {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
+  padding: 10px 16px;
+  border-radius: 10px;
+}
+.golf-list li.leader {
+  border: 2px solid var(--good);
+  background: linear-gradient(90deg, rgba(62, 207, 142, .16), var(--panel));
+}
+.golf-list li.leader .pos::before { content: '★ '; color: var(--good); }
+.golf-list .pos { color: var(--muted); font-weight: 700; }
+.golf-list .pts { font-weight: 800; font-size: 18px; }
+.golf-hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
+
+/* Result animation */
+.arena-result {
+  width: 100%;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 18px;
+  margin-bottom: 20px;
+  animation: result-in 0.35s ease-out both;
+}
+.arena-result.celebrate {
+  background: radial-gradient(circle at 50% 40%, rgba(62, 207, 142, .28), transparent 70%);
+}
+.arena-result.miss {
+  background: radial-gradient(circle at 50% 40%, rgba(255, 92, 108, .28), transparent 70%);
+  animation: result-in 0.35s ease-out both, result-shake 0.4s ease-in-out 2;
+}
+.result-text { font-size: 44px; text-align: center; }
+.arena-result.celebrate .result-text { color: var(--good); }
+.arena-result.miss .result-text { color: var(--bad); }
+.result-sub { color: var(--muted); }
+.result-burst { font-size: 80px; animation: burst 0.6s ease-out both; }
+
+@keyframes result-in { from { opacity: 0; transform: translateY(12px); } }
+@keyframes burst { 0% { transform: scale(0.2); opacity: 0; } 60% { transform: scale(1.25); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes result-shake { 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }

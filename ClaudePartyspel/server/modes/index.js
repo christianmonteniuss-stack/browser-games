@@ -12,19 +12,27 @@
 //      no HTML edits needed.
 
 const createQuizMode = require('./quiz');
+const createArenaMode = require('./arena');
 
 /**
- * Each entry: { id, name, minPlayers, factory }.
+ * Each entry: { id, name, minPlayers, css?, factory }.
  * `factory()` must return a fresh mode instance every call so each game
  * starts with clean state.
+ * `css: true` makes the browser also load /(host|player)/modes/<id>.css.
  */
 const REGISTRY = [
   { id: 'quiz', name: 'Quiz', minPlayers: 1, factory: createQuizMode },
+  { id: 'arena', name: 'Arena', minPlayers: 2, css: true, factory: createArenaMode },
 ];
 
 /** Metadata for the host UI and the /api/modes endpoint. */
 function listModes() {
-  return REGISTRY.map(({ id, name, minPlayers }) => ({ id, name, minPlayers }));
+  return REGISTRY.map(({ id, name, minPlayers, css }) => ({
+    id,
+    name,
+    minPlayers,
+    css: !!css,
+  }));
 }
 
 /** Instantiate a mode by id, or null if unknown. */

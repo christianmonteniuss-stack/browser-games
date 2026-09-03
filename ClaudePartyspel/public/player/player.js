@@ -66,6 +66,7 @@
         sendMsg(C2S.PLAYER_ACTION, { modeId: state.currentMode, action, data });
       },
       me: () => state.playerId,
+      characters: () => state.characters,
     };
   }
 
@@ -122,6 +123,12 @@
 
       case S2C.MODE_STATE: {
         state.currentMode = payload.modeId;
+        // Don't skip character select — once a character is picked the server
+        // re-syncs us to the live game screen.
+        if (!state.characterId) {
+          render();
+          break;
+        }
         showScreen('screen-game');
         const mode = window.PartyModes[payload.modeId];
         if (mode && typeof mode.render === 'function') {
@@ -295,6 +302,12 @@
       list.map(
         (m) =>
           new Promise((resolve) => {
+            if (m.css) {
+              const l = document.createElement('link');
+              l.rel = 'stylesheet';
+              l.href = '/player/modes/' + m.id + '.css';
+              document.head.appendChild(l);
+            }
             const s = document.createElement('script');
             s.src = '/player/modes/' + m.id + '.js';
             s.onload = resolve;

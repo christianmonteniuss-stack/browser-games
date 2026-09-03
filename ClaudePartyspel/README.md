@@ -72,23 +72,28 @@ ClaudePartyspel/
 │   ├── gameManager.js    KÄRNAN: routar meddelanden, kör ETT spelläge, bygger `ctx`
 │   └── modes/
 │       ├── index.js      Registret över alla spellägen  ← lägg till din nya lek här
-│       └── quiz/
-│           ├── index.js       Quiz-lägets logik (referensimplementation)
-│           └── questions.js    Quiz-innehåll (bara data)
+│       ├── quiz/
+│       │   ├── index.js       Quiz-lägets logik (enkelt referensläge)
+│       │   └── questions.js    Quiz-innehåll (bara data)
+│       └── arena/
+│           ├── index.js       Huvudloopen (Rummet → runda → resultat)
+│           ├── config.js      Rundvärde + tider + MIN_PLAYERS (tunables)
+│           └── questions.js    Arena-frågor (bara data)
 └── public/
+    ├── assets/sounds/select.wav  Platshållar-ljud när en spelare lottas (byt ut fritt)
     ├── shared/events.js     Webbläsarkopia av meddelandetyperna (spegel av protocol.js)
     ├── shared/character.js  Enda stället som ritar en karaktär (emoji/färg-cirkel, eller bild om imageUrl finns)
     ├── shared/character.css Stilar för karaktärscirkeln + valrutnätet
     ├── host/
     │   ├── index.html    Host-skärmen
     │   ├── host.css
-    │   ├── host.js       Host-kärnan (lobby-UI, karaktärsöversikt, laddar renderare, WebSocket)
-    │   └── modes/quiz.js Host-renderare för quiz
+    │   ├── host.js       Host-kärnan (lobby-UI, karaktärsöversikt, laddar renderare + CSS, WebSocket)
+    │   └── modes/        quiz.js  ·  arena.js + arena.css (host-renderare per läge)
     └── player/
         ├── index.html    Spelar-vyn (mobil)
         ├── player.css
         ├── player.js     Spelar-kärnan (namn/join → karaktärsval → lobby, reconnect, WebSocket)
-        └── modes/quiz.js Spelar-renderare för quiz
+        └── modes/        quiz.js  ·  arena.js + arena.css (spelar-renderare per läge)
 ```
 
 ### Karaktärer
@@ -147,6 +152,49 @@ väljer delskärm utifrån `view` och ritar `data`.
 
 ---
 
+## Arena — huvudloopen
+
+`server/modes/arena/` är kärnspelsloopen. Host startar den som ett vanligt
+spelläge ("Starta Arena") och styr den med **en enda knapp: "Nästa runda"**.
+
+**Rummet** (host-skärmen mellan rundor): alla spelares karaktärer i rad, med
+poäng. Här sitter "Nästa runda"- och "Avsluta"-knapparna.
+
+**En runda:**
+
+1. Servern lottar EN ansluten karaktär. Dess avatar blinkar i Rummet och ett
+   ljud spelas (host). Ljudet: `public/assets/sounds/select.wav` — byt filen
+   (behåll namnet) eller ändra `SOUND_URL` överst i `public/host/modes/arena.js`.
+2. Den utvalda spelarens mobil visar en fråga med 4 alternativ. Övriga mobiler
+   visar "X svarar…". Host visar en nedräkning.
+3. **Rätt svar:** spelaren pekar sedan ut valfri annan karaktär på sin mobil.
+   Den får poäng lika med aktuellt **rundvärde**. Alla skärmar: "Let's go, X!".
+4. **Fel svar (eller tiden ut):** den som svarade får själv rundvärdet i poäng.
+   Alla skärmar: "You suck, X!".
+5. Efter animationen ökar rundvärdet och Rummet visas igen.
+
+**Rundvärde** börjar på `ROUND_VALUE_START` och ökar med `ROUND_VALUE_STEP`
+efter varje runda. Alla tunables (även svars-/pick-/resultat-tider och
+`MIN_PLAYERS`) ligger i `server/modes/arena/config.js`.
+
+**Poäng = golf:** lägst total vinner. Att få poäng är dåligt. Leaderboarden
+(`_standings()` i arena-läget) sorteras stigande, och `.leader` i toppen
+markeras grönt med ★. Den centrala poängtavlan i `Lobby` är oförändrad — det
+är arena-läget som sorterar om.
+
+**Frågor:** `server/modes/arena/questions.js`, en lista av
+`{ q, options: [4], correct: <index> }` (= fråga / alternativ / rättIndex).
+Lägg bara till fler — ingen spellogik rörs.
+
+**Per-läge CSS:** eftersom arena-läget har `css: true` i registret laddar
+host/mobil även `/(host|player)/modes/arena.css` automatiskt. (Quiz-läget har
+ingen egen CSS-fil; dess stilar ligger kvar i `host.css`/`player.css`.)
+
+**Reconnect:** `onHostJoin(ctx)` ritar om host-skärmen om host laddas om mitt
+i en runda; `onPlayerJoin(ctx, player)` re-synkar en mobil.
+
+---
+
 ## Lägg till ett nytt spelmoment
 
 Ett spelläge är tre filer + en rad i registret. Grundlogiken rörs aldrig.
@@ -174,6 +222,7 @@ function createMyMode() {
     onPlayerMessage(ctx, player, msg) {}, // { modeId, action, data } från en mobil
     onPlayerJoin(ctx, player) {},      // ge en (åter)ansluten spelare rätt skärm
     onPlayerLeave(ctx, player) {},     // en spelare tappade anslutningen
+    onHostJoin(ctx) {},                // rita om host-skärmen efter host-reconnect
     onEnd(ctx) {},                     // städning efter ctx.endMode()
   };
 }
