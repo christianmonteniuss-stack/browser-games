@@ -15,6 +15,7 @@ const { primaryLocalIPv4, localIPv4Addresses } = require('./net');
 const { createStaticServer } = require('./staticServer');
 const { GameManager } = require('./gameManager');
 const modes = require('./modes');
+const CHARACTERS = require('./characters');
 
 const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
@@ -40,6 +41,13 @@ const server = http.createServer((req, res) => {
   if (url.pathname === '/api/modes') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify(modes.listModes()));
+    return;
+  }
+
+  // The fixed character roster (id, name, colour, emoji, optional imageUrl).
+  if (url.pathname === '/api/characters') {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify(CHARACTERS));
     return;
   }
 

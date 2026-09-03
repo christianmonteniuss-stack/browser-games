@@ -70,12 +70,20 @@ h3 { font-size: 16px; color: var(--muted); margin: 18px 0 8px; }
   min-height: 40px;
 }
 .player-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   background: var(--panel);
-  padding: 10px 16px;
+  padding: 8px 14px;
   border-radius: 999px;
   font-weight: 600;
 }
 .player-list li.gone { opacity: .4; text-decoration: line-through; }
+.player-list li.choosing { opacity: .75; }
+.player-list li .muted { font-weight: 400; font-size: 13px; }
+
+#char-roster { margin: 6px 0 4px; }
+#char-roster .char-grid { gap: 10px; }
 
 .mode-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin: 18px 0; }
 .mode-btn {

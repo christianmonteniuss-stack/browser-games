@@ -9,6 +9,7 @@ window.EVENTS = {
     HOST_HELLO: 'host_hello',
     HOST_START_MODE: 'host_start_mode',
     HOST_ACTION: 'host_action',
+    CHOOSE_CHARACTER: 'choose_character',
   },
   // Server -> Client
   S2C: {

@@ -63,11 +63,12 @@ anslutningar — säg **ja** (privat nätverk), annars når mobilerna inte serve
 ```
 ClaudePartyspel/
 ├── server/
-│   ├── index.js          Startpunkt: HTTP + statiska filer + /api/modes + /qr + WebSocket
+│   ├── index.js          Startpunkt: HTTP + statiska filer + /api/modes + /api/characters + /qr + WebSocket
 │   ├── protocol.js       Alla meddelandetyper på tråden (+ säker send())
 │   ├── net.js            Hittar datorns lokala IP-adress
 │   ├── staticServer.js   Minimal filserver för public/
-│   ├── lobby.js          Lobby + Player: vilka är med, namn, poäng
+│   ├── characters.js     Fasta karaktärslistan (id, namn, färg, emoji, valfri imageUrl) — bara data
+│   ├── lobby.js          Lobby + Player: vilka är med, namn, poäng, vald karaktär
 │   ├── gameManager.js    KÄRNAN: routar meddelanden, kör ETT spelläge, bygger `ctx`
 │   └── modes/
 │       ├── index.js      Registret över alla spellägen  ← lägg till din nya lek här
@@ -75,18 +76,39 @@ ClaudePartyspel/
 │           ├── index.js       Quiz-lägets logik (referensimplementation)
 │           └── questions.js    Quiz-innehåll (bara data)
 └── public/
-    ├── shared/events.js  Webbläsarkopia av meddelandetyperna (spegel av protocol.js)
+    ├── shared/events.js     Webbläsarkopia av meddelandetyperna (spegel av protocol.js)
+    ├── shared/character.js  Enda stället som ritar en karaktär (emoji/färg-cirkel, eller bild om imageUrl finns)
+    ├── shared/character.css Stilar för karaktärscirkeln + valrutnätet
     ├── host/
     │   ├── index.html    Host-skärmen
     │   ├── host.css
-    │   ├── host.js       Host-kärnan (lobby-UI, laddar renderare, WebSocket)
+    │   ├── host.js       Host-kärnan (lobby-UI, karaktärsöversikt, laddar renderare, WebSocket)
     │   └── modes/quiz.js Host-renderare för quiz
     └── player/
         ├── index.html    Spelar-vyn (mobil)
         ├── player.css
-        ├── player.js     Spelar-kärnan (namn/join, reconnect, WebSocket)
+        ├── player.js     Spelar-kärnan (namn/join → karaktärsval → lobby, reconnect, WebSocket)
         └── modes/quiz.js Spelar-renderare för quiz
 ```
+
+### Karaktärer
+
+Karaktärsvalet är en **kärn-funktion i lobbyn**, inte ett spelläge. Flödet på
+mobilen är: skriv namn → **välj en ledig karaktär** → in i lobbyn. Man kommer
+inte vidare förrän en ledig karaktär är vald.
+
+* All data ligger i `server/characters.js` (`{ id, name, color, emoji, imageUrl? }`).
+  Servern skickar listan som JSON på `GET /api/characters`.
+* Servern är auktoritet: `Lobby.chooseCharacter()` avvisar en redan tagen
+  karaktär (`error: 'character_taken'`). Varje lyckat/misslyckat val följs av
+  en ny `lobby_state`-broadcast, så alla skärmar uppdaterar upptaget/ledigt i
+  realtid.
+* En karaktär hålls av spelaren så länge den finns i lobbyn (överlever
+  reconnect). Startas servern om nollställs allt.
+* **Byta till bilder senare:** sätt `imageUrl` på en karaktär i
+  `characters.js`. `public/shared/character.js` väljer då `<img>` istället för
+  emoji/färg-cirkeln — ingen annan kod behöver ändras.
+* Meddelande klient→server: `choose_character` `{ characterId }`.
 
 ### Så hänger det ihop
 
@@ -113,10 +135,12 @@ ClaudePartyspel/
 Varje WebSocket-meddelande är JSON: `{ type, payload }`. Typerna finns i
 `server/protocol.js` (och speglade i `public/shared/events.js`).
 
-Klient → server: `join`, `rejoin`, `player_action`, `host_hello`,
-`host_start_mode`, `host_action`
+Klient → server: `join`, `rejoin`, `choose_character`, `player_action`,
+`host_hello`, `host_start_mode`, `host_action`
 Server → klient: `joined`, `error`, `lobby_state`, `mode_started`,
 `mode_state`, `mode_ended`
+
+`lobby_state.players[]` innehåller `{ id, name, score, connected, characterId }`.
 
 `mode_state` bär `{ modeId, view, data }` — lägets renderare på host/mobil
 väljer delskärm utifrån `view` och ritar `data`.

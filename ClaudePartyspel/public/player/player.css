@@ -94,6 +94,14 @@ input[type="text"] {
 .neutral { color: var(--muted); }
 .big-rank { font-size: 34px; font-weight: 800; }
 
+/* ── lobby: who is here ── */
+
+.lobby-people { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.lobby-people li { display: flex; align-items: center; gap: 10px; }
+.lobby-people li .me { color: var(--accent); font-weight: 700; }
+
+#char-error { margin-top: 4px; }
+
 /* ── standings list (shared) ── */
 
 .standings { list-style: none; display: flex; flex-direction: column; gap: 6px; }

@@ -14,6 +14,7 @@ const C2S = {
   HOST_HELLO: 'host_hello', // host view: {} -> identifies this socket as the host screen
   HOST_START_MODE: 'host_start_mode', // host: { modeId } -> start a game mode
   HOST_ACTION: 'host_action', // host: { action, data } -> control the running mode
+  CHOOSE_CHARACTER: 'choose_character', // player: { characterId } -> claim a lobby character
 };
 
 // Server -> Client

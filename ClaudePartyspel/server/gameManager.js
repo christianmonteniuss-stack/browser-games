@@ -8,10 +8,11 @@
 const { S2C, send } = require('./protocol');
 const { Lobby } = require('./lobby');
 const modes = require('./modes');
+const CHARACTERS = require('./characters');
 
 class GameManager {
   constructor() {
-    this.lobby = new Lobby();
+    this.lobby = new Lobby(CHARACTERS);
     this.activeMode = null; // the running mode instance, or null in the lobby
     this.joinUrl = ''; // filled in once the HTTP server knows its address
   }
@@ -45,6 +46,8 @@ class GameManager {
         return this._onHostAction(socket, payload);
       case 'player_action':
         return this._onPlayerAction(socket, payload);
+      case 'choose_character':
+        return this._onChooseCharacter(socket, payload);
       default:
         return; // unknown type -> ignore
     }
@@ -80,7 +83,11 @@ class GameManager {
     const player = this.lobby.createPlayer(name);
     player.socket = socket;
     player.connected = true;
-    send(socket, S2C.JOINED, { playerId: player.id, name: player.name });
+    send(socket, S2C.JOINED, {
+      playerId: player.id,
+      name: player.name,
+      characterId: player.characterId,
+    });
     this._broadcastLobby();
     this._resyncPlayer(player);
   }
@@ -98,7 +105,11 @@ class GameManager {
     }
     player.socket = socket;
     player.connected = true;
-    send(socket, S2C.JOINED, { playerId: player.id, name: player.name });
+    send(socket, S2C.JOINED, {
+      playerId: player.id,
+      name: player.name,
+      characterId: player.characterId,
+    });
     this._broadcastLobby();
     if (this.activeMode) {
       send(socket, S2C.MODE_STARTED, { modeId: this.activeMode.id });
@@ -139,6 +150,25 @@ class GameManager {
     if (this.activeMode.onPlayerMessage) {
       this.activeMode.onPlayerMessage(this._ctx(), player, payload || {});
     }
+  }
+
+  _onChooseCharacter(socket, { characterId }) {
+    const player = this._playerBySocket(socket);
+    if (!player) return;
+
+    const result = this.lobby.chooseCharacter(player.id, characterId);
+    if (!result.ok) {
+      send(socket, S2C.ERROR, {
+        code: result.error,
+        message:
+          result.error === 'character_taken'
+            ? 'Någon annan hann välja den karaktären.'
+            : 'Kunde inte välja den karaktären.',
+      });
+    }
+    // Either way, push fresh lobby state so every screen re-renders which
+    // characters are taken, in real time.
+    this._broadcastLobby();
   }
 
   // ── THE GAME-MODE INTERFACE ───────────────────────────────────────────────

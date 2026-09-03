@@ -21,6 +21,7 @@
   const state = {
     ws: null,
     modes: [], // [{ id, name, minPlayers }]
+    characters: [], // [{ id, name, color, emoji, imageUrl? }]
     activeMode: null,
   };
 
@@ -53,6 +54,7 @@
         $('join-url').textContent = payload.joinUrl || '';
         state.activeMode = payload.activeMode;
         renderPlayers(payload.players || []);
+        renderCharRoster(payload.players || []);
         renderStandings(payload.players || []);
         setModeButtonsEnabled(!payload.activeMode);
         if (!payload.activeMode) showScreen('lobby');
@@ -89,11 +91,54 @@
   function renderPlayers(players) {
     $('player-count').textContent = players.length;
     $('player-list').innerHTML = players
-      .map(
-        (p) =>
-          `<li class="${p.connected ? '' : 'gone'}">${escapeHtml(p.name)}</li>`
-      )
+      .map((p) => {
+        const char = state.characters.find((c) => c.id === p.characterId);
+        const avatar = char
+          ? window.CharacterAvatar.html(char, { size: 32 })
+          : '<span class="char-avatar char-avatar-empty" ' +
+            'style="width:32px;height:32px;font-size:15px">…</span>';
+        const cls =
+          (p.connected ? '' : 'gone ') + (p.characterId ? '' : 'choosing');
+        const tail = p.characterId ? '' : '<span class="muted">väljer…</span>';
+        return (
+          `<li class="${cls.trim()}">${avatar}` +
+          `<span>${escapeHtml(p.name)}</span>${tail}</li>`
+        );
+      })
       .join('');
+  }
+
+  function renderCharRoster(players) {
+    const el = $('char-roster');
+    if (!el) return;
+    if (!state.characters.length) {
+      el.innerHTML = '';
+      return;
+    }
+    const takenBy = {};
+    for (const p of players) {
+      if (p.characterId) takenBy[p.characterId] = p.name;
+    }
+    const connected = players.filter((p) => p.connected);
+    const ready = connected.filter((p) => p.characterId).length;
+
+    el.innerHTML =
+      `<h3>Karaktärer &middot; ${ready}/${connected.length} redo</h3>` +
+      '<div class="char-grid">' +
+      state.characters
+        .map((c) => {
+          const owner = takenBy[c.id];
+          return (
+            `<div class="char-tile ${owner ? 'taken' : ''}">` +
+            window.CharacterAvatar.html(c, { size: 44 }) +
+            `<span class="char-name">${escapeHtml(c.name)}</span>` +
+            `<span class="char-status">${
+              owner ? escapeHtml(owner) : 'Ledig'
+            }</span></div>`
+          );
+        })
+        .join('') +
+      '</div>';
   }
 
   function renderStandings(players) {
@@ -197,6 +242,14 @@
     renderModeButtons();
   }
 
+  async function loadCharacters() {
+    try {
+      state.characters = await (await fetch('/api/characters')).json();
+    } catch {
+      state.characters = [];
+    }
+  }
+
   // ── shared helper ─────────────────────────────────────────────────────
 
   function escapeHtml(s) {
@@ -211,7 +264,7 @@
   // ── boot ─────────────────────────────────────────────────────────────
 
   (async function init() {
-    await loadModes();
+    await Promise.all([loadModes(), loadCharacters()]);
     connect();
   })();
 })();

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ClaudePartyspel — Host</title>
   <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/shared/character.css">
   <link rel="stylesheet" href="/host/host.css">
 </head>
 <body>
@@ -31,6 +32,8 @@
         <h2>Spelare (<span id="player-count">0</span>)</h2>
         <ul id="player-list" class="player-list"></ul>
 
+        <div id="char-roster"></div>
+
         <div id="mode-buttons" class="mode-buttons"></div>
         <button id="reset-scores" class="ghost-btn">Nollställ poäng</button>
 
@@ -45,6 +48,7 @@
   </main>
 
   <script src="/shared/events.js"></script>
+  <script src="/shared/character.js"></script>
   <script src="/host/host.js"></script>
 </body>
 </html>

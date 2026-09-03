@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#12131a">
   <title>ClaudePartyspel</title>
   <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/shared/character.css">
   <link rel="stylesheet" href="/player/player.css">
 </head>
 <body>
@@ -22,10 +23,19 @@
       <p id="join-error" class="error" hidden></p>
     </section>
 
+    <!-- Screen: pick a character before entering the lobby "for real" -->
+    <section id="screen-character" class="screen" hidden>
+      <h1>Välj karaktär</h1>
+      <p class="muted">Välj en ledig karaktär för att gå med i lobbyn.</p>
+      <div id="char-grid" class="char-grid"></div>
+      <p id="char-error" class="error" hidden></p>
+    </section>
+
     <!-- Screen: joined, waiting in the lobby -->
     <section id="screen-lobby" class="screen" hidden>
       <h1 id="lobby-greeting">Hej!</h1>
       <p class="muted">Du är med. Vänta på att värden startar en lek…</p>
+      <div id="lobby-players"></div>
       <div id="lobby-standings"></div>
     </section>
 
@@ -38,6 +48,7 @@
   <div id="conn-banner" hidden>Återansluter…</div>
 
   <script src="/shared/events.js"></script>
+  <script src="/shared/character.js"></script>
   <script src="/player/player.js"></script>
 </body>
 </html>

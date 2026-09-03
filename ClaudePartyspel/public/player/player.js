@@ -17,12 +17,15 @@
   window.PartyModes = window.PartyModes || {};
 
   const $ = (id) => document.getElementById(id);
-  const SCREENS = ['screen-join', 'screen-lobby', 'screen-game'];
+  const SCREENS = ['screen-join', 'screen-character', 'screen-lobby', 'screen-game'];
 
   const state = {
     ws: null,
     playerId: localStorage.getItem('cp_playerId') || null,
     name: localStorage.getItem('cp_name') || '',
+    characterId: null, // server-authoritative; set from JOINED / LOBBY_STATE
+    characters: [], // roster from /api/characters
+    players: [], // last known lobby player list
     currentMode: null,
   };
 
@@ -35,6 +38,12 @@
   function render() {
     if (!state.playerId) {
       showScreen('screen-join');
+      return;
+    }
+    if (!state.characterId) {
+      // Can't enter the lobby "for real" until a free character is picked.
+      showScreen('screen-character');
+      renderCharacterGrid();
       return;
     }
     if (state.currentMode && window.PartyModes[state.currentMode]) {
@@ -67,6 +76,7 @@
       case S2C.JOINED:
         state.playerId = payload.playerId;
         state.name = payload.name;
+        state.characterId = payload.characterId || null;
         localStorage.setItem('cp_playerId', state.playerId);
         localStorage.setItem('cp_name', state.name);
         hideJoinError();
@@ -77,15 +87,28 @@
         if (payload.code === 'unknown_session') {
           localStorage.removeItem('cp_playerId');
           state.playerId = null;
+          state.characterId = null;
           state.currentMode = null;
+          showJoinError(payload.message || 'Något gick fel.');
+        } else if (
+          payload.code === 'character_taken' ||
+          payload.code === 'unknown_character'
+        ) {
+          showCharError(payload.message || 'Karaktären är upptagen.');
         }
-        showJoinError(payload.message || 'Något gick fel.');
         render();
         break;
 
-      case S2C.LOBBY_STATE:
-        renderLobbyStandings(payload.players || []);
+      case S2C.LOBBY_STATE: {
+        state.players = payload.players || [];
+        const me = state.players.find((p) => p.id === state.playerId);
+        if (me) state.characterId = me.characterId || null;
+        renderLobbyPlayers(state.players);
+        renderLobbyStandings(state.players);
+        if (!state.characterId) renderCharacterGrid();
+        render();
         break;
+      }
 
       case S2C.MODE_STARTED:
         state.currentMode = payload.modeId;
@@ -110,6 +133,81 @@
         break;
       }
     }
+  }
+
+  // ── character select ──────────────────────────────────────────────────
+
+  function renderCharacterGrid() {
+    const grid = $('char-grid');
+    if (!grid) return;
+
+    const takenBy = {};
+    for (const p of state.players) {
+      if (p.characterId) takenBy[p.characterId] = p;
+    }
+
+    grid.innerHTML = '';
+    for (const char of state.characters) {
+      const owner = takenBy[char.id];
+      const mine = owner && owner.id === state.playerId;
+      const taken = owner && !mine;
+
+      const tile = document.createElement('button');
+      tile.type = 'button';
+      tile.className =
+        'char-tile' + (taken ? ' taken' : '') + (mine ? ' selected' : '');
+      tile.disabled = !!taken;
+      tile.innerHTML =
+        window.CharacterAvatar.html(char, { size: 72 }) +
+        `<span class="char-name">${escapeHtml(char.name)}</span>` +
+        `<span class="char-status">${
+          taken ? 'Upptagen' : mine ? 'Vald' : 'Ledig'
+        }</span>`;
+
+      if (!taken) {
+        tile.addEventListener('click', () => {
+          hideCharError();
+          sendMsg(C2S.CHOOSE_CHARACTER, { characterId: char.id });
+        });
+      }
+      grid.appendChild(tile);
+    }
+  }
+
+  function showCharError(msg) {
+    const n = $('char-error');
+    if (!n) return;
+    n.textContent = msg;
+    n.hidden = false;
+  }
+  function hideCharError() {
+    const n = $('char-error');
+    if (n) n.hidden = true;
+  }
+
+  // ── lobby: who is here (with their character) ─────────────────────────
+
+  function renderLobbyPlayers(players) {
+    const el = $('lobby-players');
+    if (!el) return;
+    el.innerHTML =
+      '<ul class="lobby-people">' +
+      players
+        .filter((p) => p.connected)
+        .map((p) => {
+          const char = state.characters.find((c) => c.id === p.characterId);
+          const avatar = char
+            ? window.CharacterAvatar.html(char, { size: 36 })
+            : '<span class="char-avatar char-avatar-empty" ' +
+              'style="width:36px;height:36px;font-size:18px">…</span>';
+          return (
+            `<li>${avatar}<span class="${
+              p.id === state.playerId ? 'me' : ''
+            }">${escapeHtml(p.name)}</span></li>`
+          );
+        })
+        .join('') +
+      '</ul>';
   }
 
   // ── lobby standings (between games) ─────────────────────────────────────
@@ -207,6 +305,14 @@
     );
   }
 
+  async function loadCharacters() {
+    try {
+      state.characters = await (await fetch('/api/characters')).json();
+    } catch {
+      state.characters = [];
+    }
+  }
+
   // ── shared helper ─────────────────────────────────────────────────────
 
   function escapeHtml(s) {
@@ -222,7 +328,7 @@
 
   (async function init() {
     if (state.name) $('name-input').value = state.name;
-    await loadModeRenderers();
+    await Promise.all([loadModeRenderers(), loadCharacters()]);
     connect();
     render();
   })();
