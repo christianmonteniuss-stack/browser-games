@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#12131a">
+  <title>ClaudePartyspel</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/player/player.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Screen: enter a name and join -->
+    <section id="screen-join" class="screen">
+      <h1>ClaudePartyspel</h1>
+      <p class="muted">Skriv ditt namn för att gå med i lobbyn.</p>
+      <form id="join-form" autocomplete="off">
+        <input id="name-input" type="text" inputmode="text" maxlength="24"
+               placeholder="Ditt namn" aria-label="Ditt namn" required>
+        <button type="submit" class="big-btn">Gå med</button>
+      </form>
+      <p id="join-error" class="error" hidden></p>
+    </section>
+
+    <!-- Screen: joined, waiting in the lobby -->
+    <section id="screen-lobby" class="screen" hidden>
+      <h1 id="lobby-greeting">Hej!</h1>
+      <p class="muted">Du är med. Vänta på att värden startar en lek…</p>
+      <div id="lobby-standings"></div>
+    </section>
+
+    <!-- Screen: a game mode is running; its renderer owns #game-root -->
+    <section id="screen-game" class="screen" hidden>
+      <div id="game-root"></div>
+    </section>
+  </div>
+
+  <div id="conn-banner" hidden>Återansluter…</div>
+
+  <script src="/shared/events.js"></script>
+  <script src="/player/player.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ClaudePartyspel — Host</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/host/host.css">
+</head>
+<body>
+  <header>
+    <h1>ClaudePartyspel</h1>
+    <div id="conn-dot" class="offline" title="Serveranslutning"></div>
+  </header>
+
+  <main>
+    <!-- Lobby: QR to join, player list, start buttons -->
+    <section id="screen-lobby" class="screen">
+      <div class="join-panel">
+        <h2>Gå med</h2>
+        <img id="qr" src="/qr" alt="QR-kod för att gå med"
+             onerror="this.style.display='none'">
+        <p class="join-url" id="join-url">…</p>
+        <p class="muted">
+          Skanna med mobilkameran, eller skriv adressen i webbläsaren.
+          Alla enheter måste vara på samma WiFi.
+        </p>
+      </div>
+
+      <div class="lobby-right">
+        <h2>Spelare (<span id="player-count">0</span>)</h2>
+        <ul id="player-list" class="player-list"></ul>
+
+        <div id="mode-buttons" class="mode-buttons"></div>
+        <button id="reset-scores" class="ghost-btn">Nollställ poäng</button>
+
+        <div id="standings-panel"></div>
+      </div>
+    </section>
+
+    <!-- A game mode is running; its renderer owns #game-root -->
+    <section id="screen-game" class="screen" hidden>
+      <div id="game-root"></div>
+    </section>
+  </main>
+
+  <script src="/shared/events.js"></script>
+  <script src="/host/host.js"></script>
+</body>
+</html>

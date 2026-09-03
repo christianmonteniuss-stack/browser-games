@@ -1,0 +1,17 @@
+{
+  "name": "claude-partyspel",
+  "version": "1.0.0",
+  "description": "Lokalt WiFi-partyspel: host kör servern pa datorn, kompisar joinar fran mobilen.",
+  "type": "commonjs",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4",
+    "ws": "^8.18.0"
+  }
+}

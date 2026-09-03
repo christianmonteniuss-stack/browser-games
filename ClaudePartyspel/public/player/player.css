@@ -1,0 +1,121 @@
+/* Player view — phone-first. Big touch targets, single column, dark. */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #12131a;
+  --panel: #1e2029;
+  --panel-2: #2c2f3a;
+  --fg: #f2f3f7;
+  --muted: #9aa0b0;
+  --accent: #5b8cff;
+  --good: #3ecf8e;
+  --bad: #ff5c6c;
+}
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px 18px 48px;
+  min-height: 100%;
+}
+
+.screen { display: flex; flex-direction: column; gap: 16px; }
+
+h1 { font-size: 28px; }
+h2 { font-size: 22px; }
+h3 { font-size: 17px; color: var(--muted); }
+.muted { color: var(--muted); }
+.error { color: var(--bad); }
+
+form { display: flex; flex-direction: column; gap: 12px; }
+
+input[type="text"] {
+  width: 100%;
+  padding: 16px;
+  font-size: 18px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-2);
+  background: var(--panel);
+  color: var(--fg);
+}
+
+.big-btn {
+  width: 100%;
+  padding: 18px;
+  font-size: 18px;
+  font-weight: 600;
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+.big-btn:active { transform: translateY(1px); }
+.big-btn:disabled { opacity: .45; }
+
+/* ── quiz ── */
+
+.quiz-progress { color: var(--muted); font-size: 14px; }
+.quiz-q h2 { margin-top: 4px; }
+
+.quiz-option {
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--panel-2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.quiz-option .letter {
+  display: inline-grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  flex: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+.quiz-option.picked { border-color: var(--accent); background: #223056; }
+
+.quiz-wait { color: var(--muted); margin-top: 8px; }
+.good { color: var(--good); }
+.bad { color: var(--bad); }
+.neutral { color: var(--muted); }
+.big-rank { font-size: 34px; font-weight: 800; }
+
+/* ── standings list (shared) ── */
+
+.standings { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.standings li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--panel);
+  padding: 10px 14px;
+  border-radius: 10px;
+}
+.standings li.me { border: 1px solid var(--accent); }
+
+/* ── connection banner ── */
+
+#conn-banner {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: var(--bad);
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
