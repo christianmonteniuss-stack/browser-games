@@ -175,3 +175,90 @@
   padding: 18px 0 26px;
   animation: result-in 0.3s ease-out both;
 }
+
+/* ── Reaktionstest (host) ── pure hype: strobing bg + a big moving/blinking C */
+.react-hype {
+  position: relative;
+  overflow: hidden;
+  min-height: 62vh;
+  border-radius: 16px;
+  animation: react-bg 0.22s steps(1, end) infinite;
+}
+.react-hype.go {
+  animation: none;
+  background: #10321f;
+}
+.react-c {
+  position: absolute;
+  left: 8%;
+  top: 12%;
+  font-size: clamp(90px, 22vw, 240px);
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  animation: react-move 1.3s linear infinite;
+}
+.react-c.blink { animation: react-move 1.3s linear infinite, react-blink 0.16s steps(1, end) infinite; }
+.react-c.go {
+  animation: none;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%) scale(1.35);
+  color: var(--good);
+  text-shadow: 0 0 60px var(--good), 0 0 20px var(--good);
+}
+.react-sub {
+  position: absolute;
+  left: 0; right: 0; bottom: 18px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+.react-go-text {
+  position: absolute;
+  left: 0; right: 0; top: 66%;
+  text-align: center;
+  font-size: 40px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--good);
+}
+.react-hype .answer-count {
+  position: absolute;
+  left: 0; right: 0; bottom: 16px;
+  text-align: center;
+}
+
+.react-tally .react-row {
+  display: grid;
+  grid-template-columns: 2rem 44px 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+  background: var(--panel);
+  padding: 8px 16px;
+  border-radius: 10px;
+}
+.react-row .rr-rank { color: var(--muted); font-weight: 800; }
+.react-row .rr-time { color: var(--muted); font-variant-numeric: tabular-nums; }
+.react-row .rt-slow { color: var(--bad); }
+.react-row .cr-pts { font-weight: 800; color: var(--bad); }
+
+@keyframes react-bg {
+  0%   { background: #c0392b; }
+  20%  { background: #2980b9; }
+  40%  { background: #27ae60; }
+  60%  { background: #8e44ad; }
+  80%  { background: #f39c12; }
+  100% { background: #16a085; }
+}
+@keyframes react-blink { 50% { opacity: 0.12; } }
+@keyframes react-move {
+  0%   { left: 6%;  top: 10%; }
+  20%  { left: 76%; top: 18%; }
+  40%  { left: 58%; top: 66%; }
+  60%  { left: 10%; top: 58%; }
+  80%  { left: 44%; top: 28%; }
+  100% { left: 6%;  top: 10%; }
+}

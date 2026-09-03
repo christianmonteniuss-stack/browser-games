@@ -84,7 +84,8 @@ ClaudePartyspel/
 │           └── rounds/
 │               ├── index.js    Rundtypsregister + viktad slump
 │               ├── quiz.js     Rundtyp: quiz
-│               └── choose.js   Rundtyp: Time to Choose
+│               ├── choose.js   Rundtyp: Time to Choose
+│               └── react.js    Rundtyp: reaktionstest
 └── public/
     ├── assets/sounds/select.wav  Platshållar-ljud när en spelare lottas (byt ut fritt)
     ├── assets/sounds/moose.wav   Platshållar-ljud för älgen (byt ut fritt)
@@ -206,6 +207,25 @@ Frågor: `server/modes/arena/questions.js`, `{ q, options: [4], correct }`.
 
 Påståenden: `server/modes/arena/statements.js`, `{ text }` — samma mönster
 som frågefilen. Lägg bara till fler.
+
+### Rundtyp: Reaktionstest (`rounds/react.js`)
+
+1. Host visar ett stort "C" som **rör sig och blinkar** medan bakgrunden
+   strobar i olika färger (rent för hajp). Alla mobiler visar en stor knapp +
+   "Vänta…" (knappen är inaktiv).
+2. Efter en slumpad fördröjning i `[REACT_DELAY_MIN, REACT_DELAY_MAX]` sekunder
+   **fryser C:et** — det är signalen. Mobilerna byter till "TRYCK NU!" och
+   knappen aktiveras. Servern startar tidtagning **från när den skickade
+   signalen** (mätt serverside, `Date.now() - signalAt`).
+3. Servern samlar in reaktionstiderna och sorterar snabbast → långsammast.
+   Trycker man inte inom `REACT_MAX_SECONDS` efter signalen räknas man som
+   sist. Tryck **före** signalen ignoreras (knappen är inaktiv i klienten).
+4. **Poäng:** rang `r` (0-indexerad) ger `r × rundvärde × ev. älg-multiplikator`
+   — snabbast (rang 0) får 0, näst snabbast rundvärdet × 1, osv.
+5. Host-resultatet listar alla, snabbast → långsammast, med tider och poäng.
+
+Inget innehåll att fylla på (helt slumpstyrt); tunables i `config.js`:
+`REACT_DELAY_MIN` / `REACT_DELAY_MAX` / `REACT_MAX_SECONDS`.
 
 **Lägg till en ny rundtyp:** skapa `server/modes/arena/rounds/<id>.js` (samma
 form som quiz/choose — `id`, `start`, `onPlayerMessage`, `syncPlayer`,

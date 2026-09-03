@@ -151,3 +151,41 @@
 .choose-row .cr-votes { color: var(--muted); }
 .choose-row .cr-pts { font-weight: 800; color: var(--bad); }
 .arena-result.choose { min-height: auto; }
+
+/* ── Reaktionstest (mobil) ── */
+.react-wait-title { text-align: center; color: var(--muted); }
+.react-go-title { text-align: center; font-size: 30px; letter-spacing: 2px; }
+.react-btn {
+  width: 100%;
+  min-height: 46vh;
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--panel-2);
+  color: var(--muted);
+  cursor: pointer;
+}
+.react-btn:disabled { opacity: .8; }
+.react-btn.go {
+  background: var(--good);
+  color: #06231a;
+  animation: react-btn-pulse 0.5s ease-in-out infinite;
+}
+.react-btn.go:disabled { animation: none; opacity: .6; }
+@keyframes react-btn-pulse { 50% { transform: scale(0.985); filter: brightness(1.1); } }
+
+.react-tally { list-style: none; display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+.react-tally .react-row {
+  display: grid;
+  grid-template-columns: 1.6rem 36px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
+  padding: 7px 12px;
+  border-radius: 10px;
+}
+.react-row .rr-rank { color: var(--muted); font-weight: 800; }
+.react-row .rr-time { color: var(--muted); font-variant-numeric: tabular-nums; }
+.react-row .cr-pts { font-weight: 800; color: var(--bad); }

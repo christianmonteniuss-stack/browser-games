@@ -5,6 +5,7 @@
 //     msg = { modeId, view, data }
 //        view: 'room' | 'moose' | 'answer' | 'waiting' | 'pick' | 'result'
 //              | 'choose' | 'choose_done' | 'choose_result'
+//              | 'react' (phase wait|go|tapped) | 'react_result'
 //     api = { root, clear(), send(action, data), me(), characters() }
 
 (function () {
@@ -227,6 +228,63 @@
           `<h3>${esc(data.statement)}</h3>` +
           (moose ? `<p class="muted">🫎 &times;${data.moose.multiplier}</p>` : '') +
           `<ul class="choose-tally">${rows}</ul>` +
+          '</div>' +
+          golfBoard(data.standings, api.me());
+        return;
+      }
+
+      if (view === 'react') {
+        if (data.phase === 'wait') {
+          root.innerHTML =
+            '<h2 class="react-wait-title">Vänta…</h2>' +
+            '<button id="react-btn" class="react-btn big-btn" disabled>TRYCK</button>';
+          return;
+        }
+        if (data.phase === 'go') {
+          root.innerHTML =
+            '<h2 class="react-go-title good">TRYCK NU!</h2>' +
+            '<button id="react-btn" class="react-btn go big-btn">TRYCK!</button>';
+          const b = root.querySelector('#react-btn');
+          b.addEventListener('click', () => {
+            api.send('tap', {});
+            b.disabled = true;
+            b.textContent = 'Skickat!';
+          });
+          return;
+        }
+        if (data.phase === 'tapped') {
+          root.innerHTML =
+            `<h2 class="good">${data.reactionMs} ms</h2>` +
+            '<p class="muted">Väntar på de andra…</p>' +
+            '<div class="spinner"></div>';
+          return;
+        }
+        return;
+      }
+
+      if (view === 'react_result') {
+        const moose = !!(data.moose && data.moose.active);
+        const rows = data.rows
+          .map((r) => {
+            const av = r.character ? AV.html(r.character, { size: 36 }) : emptyAvatar(36);
+            const time = r.reactionMs == null ? '—' : `${r.reactionMs} ms`;
+            return (
+              '<li class="react-row">' +
+              `<span class="rr-rank">${r.rank + 1}</span>` +
+              `<span class="cr-av">${av}</span>` +
+              `<span class="cr-name">${esc(r.name)}</span>` +
+              `<span class="rr-time">${time}</span>` +
+              `<span class="cr-pts">+${r.gained}</span>` +
+              '</li>'
+            );
+          })
+          .join('');
+        root.innerHTML =
+          `<div class="arena-result choose${moose ? ' moose' : ''}">` +
+          '<p class="choose-tag">Reaktionstest</p>' +
+          '<h3>Snabbast vinner</h3>' +
+          (moose ? `<p class="muted">🫎 &times;${data.moose.multiplier}</p>` : '') +
+          `<ul class="choose-tally react-tally">${rows}</ul>` +
           '</div>' +
           golfBoard(data.standings, api.me());
         return;

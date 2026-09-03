@@ -18,8 +18,9 @@
 const CONFIG = require('../config');
 const quizRound = require('./quiz');
 const chooseRound = require('./choose');
+const reactRound = require('./react');
 
-const ROUND_TYPES = [quizRound, chooseRound];
+const ROUND_TYPES = [quizRound, chooseRound, reactRound];
 
 function weightFor(id) {
   const w = CONFIG.ROUND_TYPE_WEIGHTS && CONFIG.ROUND_TYPE_WEIGHTS[id];

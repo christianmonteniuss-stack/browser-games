@@ -34,12 +34,20 @@ module.exports = {
   // Sekunder spelarna har på sig att rösta.
   CHOOSE_SECONDS: 20,
 
+  // ── Reaktionstestet ──
+  // Signalen kommer efter en slumpad fördröjning i [MIN, MAX] sekunder.
+  REACT_DELAY_MIN: 3,
+  REACT_DELAY_MAX: 8,
+  // Trycker man inte inom så här lång tid EFTER signalen räknas man som sist.
+  REACT_MAX_SECONDS: 5,
+
   // ── Rundtyp per runda ──
   // Relativa vikter för vilken rundtyp som slumpas när en runda startar.
   // Normaliseras (behöver inte summera till 1). Saknad nyckel / 0 => körs aldrig.
   ROUND_TYPE_WEIGHTS: {
-    quiz: 0.7,
-    choose: 0.3,
+    quiz: 0.6,
+    choose: 0.2,
+    react: 0.2,
   },
 };
 

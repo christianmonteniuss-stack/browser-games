@@ -4,7 +4,7 @@
 //   render(msg, api)
 //     msg = { modeId, view, data }
 //       view: 'room' | 'moose' | 'round' | 'pick' | 'result'
-//             | 'choose' | 'choose_result'
+//             | 'choose' | 'choose_result' | 'react' | 'react_result'
 //     api = { root, clear(), send(action, data), characters() }
 
 (function () {
@@ -21,6 +21,7 @@
   let countdownTimer = null;
   let lastSoundNonce = 0;
   let chooseLive = false; // a "Time to Choose" countdown is currently running
+  let reactLive = false; // a reaction test is in its 'go' phase
 
   function clearCountdown() {
     if (countdownTimer) {
@@ -86,8 +87,21 @@
         return;
       }
 
+      // Live tap count during a reaction test — text only, don't rebuild.
+      if (
+        view === 'react' &&
+        data.phase === 'go' &&
+        reactLive &&
+        root.querySelector('#react-progress')
+      ) {
+        root.querySelector('#react-progress').textContent =
+          `${data.tapped} / ${data.total} har tryckt`;
+        return;
+      }
+
       clearCountdown();
       chooseLive = false;
+      reactLive = false;
 
       if (view === 'moose') {
         const intensity = Math.max(1, data.intensity || 1);
@@ -230,6 +244,57 @@
           `<h2 class="choose-statement">${esc(data.statement)}</h2>` +
           (moose ? `<p class="result-sub">🫎 &times;${data.moose.multiplier}</p>` : '') +
           `<ul class="choose-tally">${rows}</ul>` +
+          '</div>' +
+          golfBoard(data.standings);
+        return;
+      }
+
+      if (view === 'react') {
+        if (data.phase === 'wait') {
+          root.innerHTML =
+            '<div class="react-hype">' +
+            '<div class="react-c blink">C</div>' +
+            '<p class="react-sub">Vänta på signalen…</p>' +
+            '</div>';
+          return;
+        }
+        // phase === 'go' — the "C" freezes: that is the signal
+        root.innerHTML =
+          '<div class="react-hype go">' +
+          '<div class="react-c go">C</div>' +
+          '<p class="react-go-text">NU!</p>' +
+          `<p id="react-progress" class="answer-count">${data.tapped} / ${data.total} har tryckt</p>` +
+          '</div>';
+        reactLive = true;
+        return;
+      }
+
+      if (view === 'react_result') {
+        const moose = !!(data.moose && data.moose.active);
+        const rows = data.rows
+          .map((r) => {
+            const av = r.character ? AV.html(r.character, { size: 44 }) : emptyAvatar(44);
+            const time =
+              r.reactionMs == null
+                ? '<span class="rt-slow">ingen tryckning</span>'
+                : `${r.reactionMs} ms`;
+            return (
+              '<li class="react-row">' +
+              `<span class="rr-rank">${r.rank + 1}</span>` +
+              `<span class="cr-av">${av}</span>` +
+              `<span class="cr-name">${esc(r.name)}</span>` +
+              `<span class="rr-time">${time}</span>` +
+              `<span class="cr-pts">+${r.gained}</span>` +
+              '</li>'
+            );
+          })
+          .join('');
+        root.innerHTML =
+          `<div class="arena-result choose${moose ? ' moose' : ''}">` +
+          '<p class="choose-tag">Reaktionstest</p>' +
+          '<h2 class="choose-statement">Snabbast vinner (får minst poäng)</h2>' +
+          (moose ? `<p class="result-sub">🫎 &times;${data.moose.multiplier}</p>` : '') +
+          `<ul class="choose-tally react-tally">${rows}</ul>` +
           '</div>' +
           golfBoard(data.standings);
         return;
