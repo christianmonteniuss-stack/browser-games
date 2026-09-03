@@ -1,37 +1,20 @@
 // ── GAME MODE: ARENA (the core game loop) ────────────────────────────────────
-// Between rounds the host shows "Rummet" (all characters side by side). The
-// host clicks "Nästa runda" to run one round:
+// Between rounds the host shows "Rummet". The host clicks "Nästa runda" to run
+// one round. Each round is one of the pluggable ROUND TYPES in
+// server/modes/arena/rounds/ (quiz, choose, ...), picked at random by weight
+// (config ROUND_TYPE_WEIGHTS).
 //
-//   1. Server picks ONE random connected character. Its avatar blinks in the
-//      room and a sound plays (host screen). roundNonce bumps so the client
-//      plays the sound exactly once.
-//   2. That player's phone shows a question (4 options); everyone else sees
-//      "X svarar…"; the host shows a countdown.
-//   3. Correct  -> the player points at another character, who gets points
-//      equal to the current round value. All screens: "Let's go, <name>!".
-//   4. Wrong (or timeout) -> the player who answered gets the round value
-//      themselves. All screens: "You suck, <name>!".
-//   5. After the animation the round value increases by the step and we return
-//      to the room.
+// This file owns everything a round type is NOT allowed to care about:
+//   - the shared round value (starts at ROUND_VALUE_START, +ROUND_VALUE_STEP
+//     after every completed round, any type)
+//   - the moose random event and its multiplier
+//   - the result animation timing and the return to "Rummet"
+//   - the golf leaderboard (lowest total wins -> _standings sorts ascending)
 //
-// Scoring is GOLF: lowest total wins. Getting points is bad. The leaderboard
-// (built here as `_standings()`) is sorted ascending.
-//
-// The mode talks to the outside world only through `ctx` (see
-// server/gameManager.js -> _ctx). Its own state is the phase machine below.
+// A round type only ever sees the `rc` object built by _rc() below.
 
 const CONFIG = require('./config');
-const QUESTIONS = require('./questions');
-
-function shuffled(arr) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const rounds = require('./rounds');
 
 function createArenaMode() {
   return {
@@ -44,19 +27,18 @@ function createArenaMode() {
     onStart(ctx) {
       this.ctx = ctx;
       this.roundValue = CONFIG.ROUND_VALUE_START;
-      this.questionQueue = shuffled(QUESTIONS);
       this.timers = [];
       this.roundNonce = 0;
-      this.phase = 'room'; // 'room' | 'moose' | 'question' | 'pick' | 'result'
-      this.chosen = null;
-      this.question = null;
-      this.answered = false;
+      this.phase = 'room'; // 'room' | 'moose' | 'round' | 'result'
+      this.round = null; // active round-type module
+      this.roundState = null; // its per-round scratch state
 
       // ── Älgen (slumphändelse ovanpå rundlogiken) ──
-      this.mooseVisits = 0; // antal gånger älgen dykt upp denna omgång
+      this.mooseVisits = 0; // gånger älgen dykt upp denna omgång
       this.mooseActive = false; // aktiv för den PÅGÅENDE rundan?
       this.mooseMultiplier = 1; // 1 = ingen älg
 
+      rounds.resetAll();
       this._toRoom();
     },
 
@@ -69,79 +51,66 @@ function createArenaMode() {
 
     onHostMessage(ctx, msg) {
       if (msg.action === 'next_round' && this.phase === 'room') {
-        // Roll for the moose before the round actually starts.
         this._maybeMoose(() => this._startRound());
       } else if (msg.action === 'exit' && this.phase === 'room') {
         ctx.endMode();
       }
     },
 
-    // ── player input ────────────────────────────────────────────────────
-
-    onPlayerMessage(ctx, player, msg) {
-      const isChosen = this.chosen && player.id === this.chosen.id;
-
-      if (this.phase === 'question' && isChosen && msg.action === 'answer') {
-        if (this.answered) return;
-        const choice = msg.data && msg.data.choice;
-        if (typeof choice !== 'number') return;
-        this.answered = true;
-        this._clearTimers();
-        this._resolveAnswer(choice);
-      } else if (this.phase === 'pick' && isChosen && msg.action === 'award') {
-        const targetId = msg.data && msg.data.targetId;
-        const target = this._readyOthers(this.chosen.id).find((p) => p.id === targetId);
-        if (!target) return;
-        this._clearTimers();
-        this._award(target);
-      }
-    },
-
-    onPlayerLeave(ctx, player) {
-      // If the active player drops mid-round, abort cleanly back to the room
-      // (no points, no round-value change).
-      if (
-        (this.phase === 'question' || this.phase === 'pick') &&
-        this.chosen &&
-        player.id === this.chosen.id
-      ) {
-        this._clearTimers();
-        this._toRoom(`${player.name} kopplade från — rundan avbröts.`);
-      }
-    },
-
-    onPlayerJoin(ctx, player) {
-      this._sendStateTo(player);
-    },
-
-    // Re-sync a host screen that (re)connected while a round is running.
+    // Redraw the current screen for a host that (re)connected mid-game.
     onHostJoin(ctx) {
       if (this.phase === 'room') {
         ctx.toHost('mode_state', { modeId: this.id, view: 'room', data: this._roomData() });
       } else if (this.phase === 'moose') {
         ctx.toHost('mode_state', { modeId: this.id, view: 'moose', data: this._mooseData() });
-      } else if (this.phase === 'question') {
-        ctx.toHost('mode_state', { modeId: this.id, view: 'round', data: this._roundHostData(false) });
-      } else if (this.phase === 'pick') {
-        ctx.toHost('mode_state', {
-          modeId: this.id,
-          view: 'pick',
-          data: {
-            chosenName: this.chosen.name,
-            roundValue: this.roundValue,
-            characters: this._roomCharacters(),
-          },
-        });
+      } else if (this.phase === 'round' && this.round) {
+        this.round.syncHost(this._rc());
       }
     },
 
-    // ── phase transitions ──────────────────────────────────────────────
+    // ── player input ────────────────────────────────────────────────────
+
+    onPlayerMessage(ctx, player, msg) {
+      if (this.phase === 'round' && this.round) {
+        this.round.onPlayerMessage(this._rc(), player, msg);
+      }
+    },
+
+    onPlayerLeave(ctx, player) {
+      if (this.phase === 'round' && this.round && this.round.onPlayerLeave) {
+        const abort = this.round.onPlayerLeave(this._rc(), player);
+        if (abort) {
+          this._clearTimers();
+          this._toRoom(`${player.name} kopplade från — rundan avbröts.`);
+        }
+      }
+    },
+
+    onPlayerJoin(ctx, player) {
+      if (!this.ctx) return;
+      if (this.phase === 'room' || this.phase === 'result') {
+        this.ctx.toPlayer(player.id, 'mode_state', {
+          modeId: this.id,
+          view: 'room',
+          data: { roundValue: this.roundValue, standings: this._standings(), you: player.id },
+        });
+      } else if (this.phase === 'moose') {
+        this.ctx.toPlayer(player.id, 'mode_state', {
+          modeId: this.id,
+          view: 'moose',
+          data: this._mooseData(),
+        });
+      } else if (this.phase === 'round' && this.round) {
+        this.round.syncPlayer(this._rc(), player);
+      }
+    },
+
+    // ── round lifecycle (core) ─────────────────────────────────────────
 
     _toRoom(notice) {
       this.phase = 'room';
-      this.chosen = null;
-      this.question = null;
-      this.answered = false;
+      this.round = null;
+      this.roundState = null;
       this.mooseActive = false; // the moose only affects the round it appeared for
       this.mooseMultiplier = 1;
 
@@ -150,7 +119,7 @@ function createArenaMode() {
         view: 'room',
         data: this._roomData(notice ? { notice } : null),
       });
-      for (const p of this._connectedPlayers()) {
+      for (const p of this.ctx.lobby.connectedPlayers()) {
         this.ctx.toPlayer(p.id, 'mode_state', {
           modeId: this.id,
           view: 'room',
@@ -160,130 +129,38 @@ function createArenaMode() {
     },
 
     _startRound() {
+      this._clearTimers();
       const ready = this.ctx.lobby.readyPlayers();
       if (ready.length < CONFIG.MIN_PLAYERS) {
         // Bail back to the room (also clears any moose that was rolled).
         this._toRoom(`Behöver minst ${CONFIG.MIN_PLAYERS} spelare med karaktär.`);
         return;
       }
-
-      this.phase = 'question';
-      this.answered = false;
+      this.phase = 'round';
       this.roundNonce += 1;
-      this.chosen = pickRandom(ready);
-
-      if (this.questionQueue.length === 0) this.questionQueue = shuffled(QUESTIONS);
-      this.question = this.questionQueue.shift();
-
-      const publicQuestion = { q: this.question.q, options: this.question.options };
-
-      this.ctx.toHost('mode_state', {
-        modeId: this.id,
-        view: 'round',
-        data: this._roundHostData(true),
-      });
-
-      for (const p of this._connectedPlayers()) {
-        if (p.id === this.chosen.id) {
-          this.ctx.toPlayer(p.id, 'mode_state', {
-            modeId: this.id,
-            view: 'answer',
-            data: {
-              roundValue: this.roundValue,
-              question: publicQuestion,
-              answerSeconds: CONFIG.ANSWER_SECONDS,
-            },
-          });
-        } else {
-          this.ctx.toPlayer(p.id, 'mode_state', {
-            modeId: this.id,
-            view: 'waiting',
-            data: { chosenName: this.chosen.name, roundValue: this.roundValue },
-          });
-        }
-      }
-
-      this._setTimer(() => {
-        if (this.phase === 'question' && !this.answered) {
-          this.answered = true;
-          this._resolveAnswer(null); // timeout counts as wrong
-        }
-      }, CONFIG.ANSWER_SECONDS * 1000);
+      this.roundState = {};
+      this.round = rounds.pickRoundType();
+      this.round.start(this._rc());
     },
 
-    _resolveAnswer(choice) {
-      const correct = choice === this.question.correct;
-
-      if (correct) {
-        this.phase = 'pick';
-        const others = this._readyOthers(this.chosen.id);
-
-        this.ctx.toHost('mode_state', {
-          modeId: this.id,
-          view: 'pick',
-          data: {
-            chosenName: this.chosen.name,
-            roundValue: this.roundValue,
-            characters: this._roomCharacters(),
-          },
-        });
-
-        for (const p of this._connectedPlayers()) {
-          if (p.id === this.chosen.id) {
-            this.ctx.toPlayer(p.id, 'mode_state', {
-              modeId: this.id,
-              view: 'pick',
-              data: {
-                roundValue: this.roundValue,
-                candidates: others.map((o) => ({
-                  id: o.id,
-                  name: o.name,
-                  characterId: o.characterId,
-                })),
-              },
-            });
-          } else {
-            this.ctx.toPlayer(p.id, 'mode_state', {
-              modeId: this.id,
-              view: 'waiting',
-              data: { chosenName: this.chosen.name, note: 'correct', roundValue: this.roundValue },
-            });
-          }
-        }
-
-        this._setTimer(() => {
-          if (this.phase !== 'pick') return;
-          const pool = this._readyOthers(this.chosen.id);
-          if (pool.length) this._award(pickRandom(pool));
-          else this._endRound();
-        }, CONFIG.PICK_SECONDS * 1000);
-      } else {
-        // Wrong / timeout: the player who answered takes the (bad) points.
-        this.ctx.addScore(this.chosen.id, this._points());
-        this._showResult('miss', this.chosen.name);
-      }
-    },
-
-    _award(target) {
-      this.ctx.addScore(target.id, this._points());
-      this._showResult('celebrate', target.name);
-    },
-
-    _showResult(kind, name) {
+    /** A round type calls rc.finish(extra) to end its round. */
+    _finishRound(extra) {
+      extra = extra || {};
+      this._clearTimers();
       this.phase = 'result';
       this.ctx.broadcast('mode_state', {
         modeId: this.id,
-        view: 'result',
-        data: {
-          kind,
-          name,
-          roundValue: this.roundValue,
-          pointsAwarded: this._points(),
-          moose: this.mooseActive
-            ? { active: true, multiplier: this.mooseMultiplier, visits: this.mooseVisits }
-            : { active: false },
-          standings: this._standings(),
-        },
+        view: extra.view || 'result',
+        data: Object.assign(
+          {
+            roundValue: this.roundValue,
+            moose: this.mooseActive
+              ? { active: true, multiplier: this.mooseMultiplier, visits: this.mooseVisits }
+              : { active: false },
+            standings: this._standings(),
+          },
+          extra.data || {}
+        ),
       });
       this._setTimer(() => this._endRound(), CONFIG.RESULT_SECONDS * 1000);
     },
@@ -294,9 +171,9 @@ function createArenaMode() {
     },
 
     // ── Älgen ─────────────────────────────────────────────────────────
-    // Rolled before every round (see onHostMessage). If she turns up, the
-    // whole round's payouts are multiplied and a "BOOOOSE MOOOOSE" overlay
-    // plays first. Effects get more intense with every visit this session.
+    // Rolled before every round. If she turns up, the whole round's payouts
+    // are multiplied and a "BOOOOSE MOOOOSE" overlay plays first. Effects get
+    // more intense with every visit this session.
 
     _maybeMoose(then) {
       if (Math.random() < CONFIG.MOOSE_CHANCE) {
@@ -319,11 +196,6 @@ function createArenaMode() {
       }
     },
 
-    /** Points at stake this round, moose multiplier included. */
-    _points() {
-      return this.roundValue * (this.mooseActive ? this.mooseMultiplier : 1);
-    },
-
     _mooseData() {
       return {
         visits: this.mooseVisits,
@@ -334,7 +206,63 @@ function createArenaMode() {
       };
     },
 
-    // ── data builders ──────────────────────────────────────────────────
+    // ── the round context handed to round types ───────────────────────
+
+    _rc() {
+      const self = this;
+      return {
+        ctx: this.ctx,
+        config: CONFIG,
+        state: this.roundState,
+
+        get roundValue() {
+          return self.roundValue;
+        },
+        get roundNonce() {
+          return self.roundNonce;
+        },
+        get moose() {
+          return {
+            active: self.mooseActive,
+            multiplier: self.mooseMultiplier,
+            visits: self.mooseVisits,
+          };
+        },
+
+        players: () => self.ctx.lobby.connectedPlayers(),
+        readyPlayers: () => self.ctx.lobby.readyPlayers(),
+        characters: () => self.ctx.lobby.characters,
+        roomCharacters: () => self._roomCharacters(),
+        standings: () => self._standings(),
+
+        // `units` = how many round-values are at stake (quiz: 1; choose: vote count).
+        points: (units) => self._points(units),
+        addScore: (playerId, units) => self.ctx.addScore(playerId, self._points(units)),
+
+        toHost: (view, data) =>
+          self.ctx.toHost('mode_state', { modeId: self.id, view, data }),
+        toPlayer: (id, view, data) =>
+          self.ctx.toPlayer(id, 'mode_state', { modeId: self.id, view, data }),
+        toAllPlayers: (view, data) => {
+          for (const p of self.ctx.lobby.connectedPlayers()) {
+            self.ctx.toPlayer(p.id, 'mode_state', { modeId: self.id, view, data });
+          }
+        },
+        broadcast: (view, data) =>
+          self.ctx.broadcast('mode_state', { modeId: self.id, view, data }),
+
+        setTimer: (fn, ms) => self._setTimer(fn, ms),
+        finish: (extra) => self._finishRound(extra),
+      };
+    },
+
+    // ── shared helpers ───────────────────────────────────────────────
+
+    /** `units` round-values, active moose multiplier included. */
+    _points(units) {
+      const u = units == null ? 1 : units;
+      return u * this.roundValue * (this.mooseActive ? this.mooseMultiplier : 1);
+    },
 
     /** Golf order: lowest score first. */
     _standings() {
@@ -371,68 +299,6 @@ function createArenaMode() {
         },
         extra || {}
       );
-    },
-
-    _roundHostData(playSound) {
-      return {
-        roundNonce: this.roundNonce,
-        roundValue: this.roundValue,
-        chosenId: this.chosen.id,
-        chosenName: this.chosen.name,
-        answerSeconds: CONFIG.ANSWER_SECONDS,
-        characters: this._roomCharacters(),
-        sound: !!playSound,
-      };
-    },
-
-    // ── helpers ───────────────────────────────────────────────────────
-
-    _connectedPlayers() {
-      return this.ctx.lobby.connectedPlayers();
-    },
-
-    _readyOthers(exceptId) {
-      return this.ctx.lobby.readyPlayers().filter((p) => p.id !== exceptId);
-    },
-
-    _sendStateTo(player) {
-      if (!this.ctx) return;
-      const V = (view, data) =>
-        this.ctx.toPlayer(player.id, 'mode_state', { modeId: this.id, view, data });
-      const isChosen = this.chosen && player.id === this.chosen.id;
-
-      if (this.phase === 'room' || this.phase === 'result') {
-        V('room', { roundValue: this.roundValue, standings: this._standings(), you: player.id });
-      } else if (this.phase === 'moose') {
-        V('moose', this._mooseData());
-      } else if (this.phase === 'question') {
-        if (isChosen) {
-          V('answer', {
-            roundValue: this.roundValue,
-            question: { q: this.question.q, options: this.question.options },
-            answerSeconds: CONFIG.ANSWER_SECONDS,
-          });
-        } else {
-          V('waiting', { chosenName: this.chosen ? this.chosen.name : '', roundValue: this.roundValue });
-        }
-      } else if (this.phase === 'pick') {
-        if (isChosen) {
-          V('pick', {
-            roundValue: this.roundValue,
-            candidates: this._readyOthers(this.chosen.id).map((o) => ({
-              id: o.id,
-              name: o.name,
-              characterId: o.characterId,
-            })),
-          });
-        } else {
-          V('waiting', {
-            chosenName: this.chosen ? this.chosen.name : '',
-            note: 'correct',
-            roundValue: this.roundValue,
-          });
-        }
-      }
     },
 
     _setTimer(fn, ms) {

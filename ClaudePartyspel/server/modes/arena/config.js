@@ -29,4 +29,20 @@ module.exports = {
   MOOSE_BASE_MULTIPLIER: 2,
   // Hur länge "BOOOOSE MOOOOSE"-overlayen visas innan rundan startar.
   MOOSE_INTRO_SECONDS: 3,
+
+  // ── "Time to Choose"-rundan ──
+  // Sekunder spelarna har på sig att rösta.
+  CHOOSE_SECONDS: 20,
+
+  // ── Rundtyp per runda ──
+  // Relativa vikter för vilken rundtyp som slumpas när en runda startar.
+  // Normaliseras (behöver inte summera till 1). Saknad nyckel / 0 => körs aldrig.
+  ROUND_TYPE_WEIGHTS: {
+    quiz: 0.7,
+    choose: 0.3,
+  },
 };
+
+
+
+

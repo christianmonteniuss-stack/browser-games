@@ -76,9 +76,15 @@ ClaudePartyspel/
 │       │   ├── index.js       Quiz-lägets logik (enkelt referensläge)
 │       │   └── questions.js    Quiz-innehåll (bara data)
 │       └── arena/
-│           ├── index.js       Huvudloopen (Rummet → älg? → runda → resultat)
-│           ├── config.js      Rundvärde, tider, MIN_PLAYERS, MOOSE_* (tunables)
-│           └── questions.js    Arena-frågor (bara data)
+│           ├── index.js       Kärnan: Rummet, rundvärde, älg, resultat, golf-tavla
+│           ├── config.js      Tider, MIN_PLAYERS, ROUND_TYPE_WEIGHTS, MOOSE_* (tunables)
+│           ├── util.js        shuffled / pickRandom
+│           ├── questions.js    Quiz-rundans frågor (bara data)
+│           ├── statements.js   "Time to Choose"-påståenden (bara data)
+│           └── rounds/
+│               ├── index.js    Rundtypsregister + viktad slump
+│               ├── quiz.js     Rundtyp: quiz
+│               └── choose.js   Rundtyp: Time to Choose
 └── public/
     ├── assets/sounds/select.wav  Platshållar-ljud när en spelare lottas (byt ut fritt)
     ├── assets/sounds/moose.wav   Platshållar-ljud för älgen (byt ut fritt)
@@ -161,7 +167,18 @@ spelläge ("Starta Arena") och styr den med **en enda knapp: "Nästa runda"**.
 **Rummet** (host-skärmen mellan rundor): alla spelares karaktärer i rad, med
 poäng. Här sitter "Nästa runda"- och "Avsluta"-knapparna.
 
-**En runda:**
+När host trycker "Nästa runda" slumpar servern **vilken rundtyp** som körs,
+enligt vikterna i `config.ROUND_TYPE_WEIGHTS`. Rundtyperna ligger var för sig
+i `server/modes/arena/rounds/` — arena-kärnan äger rundvärde, älg, resultat-
+timing och golf-tavlan; en rundtyp ser bara `rc`-objektet (se `_rc()` i
+`server/modes/arena/index.js`). Oavsett rundtyp: efter resultatet ökar
+rundvärdet med `ROUND_VALUE_STEP` och Rummet visas igen.
+
+**Rundvärde** börjar på `ROUND_VALUE_START`. Alla tunables (svars-/pick-/
+choose-/resultat-tider, `MIN_PLAYERS`, rundtypsvikter, älg-konstanter) ligger
+i `server/modes/arena/config.js`.
+
+### Rundtyp: Quiz (`rounds/quiz.js`)
 
 1. Servern lottar EN ansluten karaktär. Dess avatar blinkar i Rummet och ett
    ljud spelas (host). Ljudet: `public/assets/sounds/select.wav` — byt filen
@@ -172,11 +189,29 @@ poäng. Här sitter "Nästa runda"- och "Avsluta"-knapparna.
    Den får poäng lika med aktuellt **rundvärde**. Alla skärmar: "Let's go, X!".
 4. **Fel svar (eller tiden ut):** den som svarade får själv rundvärdet i poäng.
    Alla skärmar: "You suck, X!".
-5. Efter animationen ökar rundvärdet och Rummet visas igen.
 
-**Rundvärde** börjar på `ROUND_VALUE_START` och ökar med `ROUND_VALUE_STEP`
-efter varje runda. Alla tunables (även svars-/pick-/resultat-tider och
-`MIN_PLAYERS`) ligger i `server/modes/arena/config.js`.
+Frågor: `server/modes/arena/questions.js`, `{ q, options: [4], correct }`.
+
+### Rundtyp: Time to Choose (`rounds/choose.js`)
+
+1. Host **och** alla mobiler visar "Time to Choose" + ett påstående (t.ex.
+   "Vem är mest sannolik att somna först ikväll?"). Host visar en nedräkning
+   och hur många som röstat.
+2. Varje spelare röstar på sin mobil på **vilken ansluten karaktär som helst,
+   sig själv inkluderad** (självval alltid tillåtet). En röst per spelare,
+   sista räknas.
+3. När alla röstat, eller `CHOOSE_SECONDS` gått: varje karaktär får
+   **röster × rundvärde × ev. älg-multiplikator** poäng.
+4. Host-resultatet listar alla karaktärer med röstantal och poäng de fick.
+
+Påståenden: `server/modes/arena/statements.js`, `{ text }` — samma mönster
+som frågefilen. Lägg bara till fler.
+
+**Lägg till en ny rundtyp:** skapa `server/modes/arena/rounds/<id>.js` (samma
+form som quiz/choose — `id`, `start`, `onPlayerMessage`, `syncPlayer`,
+`syncHost`, valfri `reset`/`onPlayerLeave`), lägg in den i `ROUND_TYPES` i
+`rounds/index.js`, ge den en vikt i `config.ROUND_TYPE_WEIGHTS`, och lägg till
+`view`-grenar i `public/{host,player}/modes/arena.js`.
 
 ### Älgen (slumphändelse)
 
@@ -204,10 +239,6 @@ Ett tillägg ovanpå rundlogiken, inte en omskrivning. `onHostMessage` kör
 (`_standings()` i arena-läget) sorteras stigande, och `.leader` i toppen
 markeras grönt med ★. Den centrala poängtavlan i `Lobby` är oförändrad — det
 är arena-läget som sorterar om.
-
-**Frågor:** `server/modes/arena/questions.js`, en lista av
-`{ q, options: [4], correct: <index> }` (= fråga / alternativ / rättIndex).
-Lägg bara till fler — ingen spellogik rörs.
 
 **Per-läge CSS:** eftersom arena-läget har `css: true` i registret laddar
 host/mobil även `/(host|player)/modes/arena.css` automatiskt. (Quiz-läget har

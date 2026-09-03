@@ -2,7 +2,9 @@
 // Registers window.HostModes.arena. Called on every MODE_STATE for this mode.
 //
 //   render(msg, api)
-//     msg = { modeId, view, data }   view: 'room' | 'round' | 'pick' | 'result'
+//     msg = { modeId, view, data }
+//       view: 'room' | 'moose' | 'round' | 'pick' | 'result'
+//             | 'choose' | 'choose_result'
 //     api = { root, clear(), send(action, data), characters() }
 
 (function () {
@@ -18,6 +20,7 @@
 
   let countdownTimer = null;
   let lastSoundNonce = 0;
+  let chooseLive = false; // a "Time to Choose" countdown is currently running
 
   function clearCountdown() {
     if (countdownTimer) {
@@ -72,9 +75,19 @@
 
   window.HostModes.arena = {
     render(msg, api) {
-      clearCountdown();
       const { view, data } = msg;
       const root = api.root;
+
+      // Live vote count during "Time to Choose" — update the text only, leave
+      // the running countdown untouched.
+      if (view === 'choose' && chooseLive && root.querySelector('#choose-progress')) {
+        root.querySelector('#choose-progress').textContent =
+          `${data.voted} / ${data.voterCount} har röstat`;
+        return;
+      }
+
+      clearCountdown();
+      chooseLive = false;
 
       if (view === 'moose') {
         const intensity = Math.max(1, data.intensity || 1);
@@ -164,6 +177,61 @@
           `<p class="arena-turn"><strong>${esc(data.chosenName)}</strong> hade rätt och ` +
           `väljer vem som får ${data.roundValue} straffpoäng…</p>` +
           '</div></div>';
+        return;
+      }
+
+      if (view === 'choose') {
+        root.innerHTML =
+          '<div class="arena-view">' +
+          roomStrip(data.characters, null) +
+          '<div class="arena-mid">' +
+          '<p class="choose-tag">Time to Choose</p>' +
+          `<h2 class="choose-statement">${esc(data.statement)}</h2>` +
+          `<div id="countdown" class="countdown">${data.chooseSeconds}</div>` +
+          `<p id="choose-progress" class="answer-count">${data.voted} / ${data.voterCount} har röstat</p>` +
+          '</div></div>';
+
+        chooseLive = true;
+        let left = data.chooseSeconds;
+        const el = root.querySelector('#countdown');
+        countdownTimer = setInterval(() => {
+          left -= 1;
+          if (left <= 0) {
+            clearCountdown();
+            if (el) el.textContent = '0';
+            return;
+          }
+          if (el) {
+            el.textContent = String(left);
+            el.classList.toggle('urgent', left <= 5);
+          }
+        }, 1000);
+        return;
+      }
+
+      if (view === 'choose_result') {
+        const moose = !!(data.moose && data.moose.active);
+        const rows = data.rows
+          .map((r) => {
+            const av = r.character ? AV.html(r.character, { size: 48 }) : emptyAvatar(48);
+            return (
+              '<li class="choose-row">' +
+              `<span class="cr-av">${av}</span>` +
+              `<span class="cr-name">${esc(r.name)}</span>` +
+              `<span class="cr-votes">${r.votes} röster</span>` +
+              `<span class="cr-pts">+${r.gained}</span>` +
+              '</li>'
+            );
+          })
+          .join('');
+        root.innerHTML =
+          `<div class="arena-result choose${moose ? ' moose' : ''}">` +
+          '<p class="choose-tag">Time to Choose</p>' +
+          `<h2 class="choose-statement">${esc(data.statement)}</h2>` +
+          (moose ? `<p class="result-sub">🫎 &times;${data.moose.multiplier}</p>` : '') +
+          `<ul class="choose-tally">${rows}</ul>` +
+          '</div>' +
+          golfBoard(data.standings);
         return;
       }
 

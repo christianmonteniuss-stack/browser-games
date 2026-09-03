@@ -3,7 +3,8 @@
 //
 //   render(msg, api)
 //     msg = { modeId, view, data }
-//        view: 'room' | 'answer' | 'waiting' | 'pick' | 'result'
+//        view: 'room' | 'moose' | 'answer' | 'waiting' | 'pick' | 'result'
+//              | 'choose' | 'choose_done' | 'choose_result'
 //     api = { root, clear(), send(action, data), me(), characters() }
 
 (function () {
@@ -150,6 +151,84 @@
           });
           grid.appendChild(b);
         });
+        return;
+      }
+
+      if (view === 'choose') {
+        root.innerHTML =
+          '<p class="choose-tag">Time to Choose</p>' +
+          `<h2>${esc(data.statement)}</h2>` +
+          `<div id="cd" class="countdown small">${data.chooseSeconds}</div>` +
+          '<p class="muted">Välj den som passar bäst — du får välja dig själv:</p>' +
+          '<div class="pick-grid"></div>';
+
+        const grid = root.querySelector('.pick-grid');
+        const roster = api.characters() || [];
+        data.candidates.forEach((cand) => {
+          const ch = roster.find((c) => c.id === cand.characterId);
+          const mine = cand.id === api.me();
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'pick-tile';
+          b.innerHTML =
+            (ch ? AV.html(ch, { size: 64 }) : emptyAvatar(64)) +
+            `<span class="char-name">${esc(cand.name)}${mine ? ' (du)' : ''}</span>`;
+          b.addEventListener('click', () => {
+            api.send('choose', { targetId: cand.id });
+            grid.querySelectorAll('button').forEach((x) => (x.disabled = true));
+            b.classList.add('selected');
+          });
+          grid.appendChild(b);
+        });
+
+        let left = data.chooseSeconds;
+        const el = root.querySelector('#cd');
+        countdown = setInterval(() => {
+          left -= 1;
+          if (left <= 0) {
+            clearCountdown();
+            if (el) el.textContent = '0';
+            return;
+          }
+          if (el) {
+            el.textContent = String(left);
+            el.classList.toggle('urgent', left <= 5);
+          }
+        }, 1000);
+        return;
+      }
+
+      if (view === 'choose_done') {
+        root.innerHTML =
+          '<h2 class="good">Röst registrerad</h2>' +
+          '<p class="muted">Väntar på de andra…</p>' +
+          '<div class="spinner"></div>';
+        return;
+      }
+
+      if (view === 'choose_result') {
+        const moose = !!(data.moose && data.moose.active);
+        const rows = data.rows
+          .map((r) => {
+            const av = r.character ? AV.html(r.character, { size: 36 }) : emptyAvatar(36);
+            return (
+              '<li class="choose-row">' +
+              `<span class="cr-av">${av}</span>` +
+              `<span class="cr-name">${esc(r.name)}</span>` +
+              `<span class="cr-votes">${r.votes}</span>` +
+              `<span class="cr-pts">+${r.gained}</span>` +
+              '</li>'
+            );
+          })
+          .join('');
+        root.innerHTML =
+          `<div class="arena-result choose${moose ? ' moose' : ''}">` +
+          '<p class="choose-tag">Time to Choose</p>' +
+          `<h3>${esc(data.statement)}</h3>` +
+          (moose ? `<p class="muted">🫎 &times;${data.moose.multiplier}</p>` : '') +
+          `<ul class="choose-tally">${rows}</ul>` +
+          '</div>' +
+          golfBoard(data.standings, api.me());
         return;
       }
 

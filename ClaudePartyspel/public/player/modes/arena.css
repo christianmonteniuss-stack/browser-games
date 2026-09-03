@@ -123,3 +123,31 @@
   60% { transform: translate(-6px, -6px) rotate(-2deg); }
   80% { transform: translate(6px, 6px) rotate(2deg); }
 }
+
+/* ── "Time to Choose" ── */
+.choose-tag {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--accent);
+}
+.choose-tally {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+}
+.choose-row {
+  display: grid;
+  grid-template-columns: 40px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
+  padding: 7px 12px;
+  border-radius: 10px;
+}
+.choose-row .cr-votes { color: var(--muted); }
+.choose-row .cr-pts { font-weight: 800; color: var(--bad); }
+.arena-result.choose { min-height: auto; }
