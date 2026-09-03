@@ -76,11 +76,12 @@ ClaudePartyspel/
 │       │   ├── index.js       Quiz-lägets logik (enkelt referensläge)
 │       │   └── questions.js    Quiz-innehåll (bara data)
 │       └── arena/
-│           ├── index.js       Huvudloopen (Rummet → runda → resultat)
-│           ├── config.js      Rundvärde + tider + MIN_PLAYERS (tunables)
+│           ├── index.js       Huvudloopen (Rummet → älg? → runda → resultat)
+│           ├── config.js      Rundvärde, tider, MIN_PLAYERS, MOOSE_* (tunables)
 │           └── questions.js    Arena-frågor (bara data)
 └── public/
     ├── assets/sounds/select.wav  Platshållar-ljud när en spelare lottas (byt ut fritt)
+    ├── assets/sounds/moose.wav   Platshållar-ljud för älgen (byt ut fritt)
     ├── shared/events.js     Webbläsarkopia av meddelandetyperna (spegel av protocol.js)
     ├── shared/character.js  Enda stället som ritar en karaktär (emoji/färg-cirkel, eller bild om imageUrl finns)
     ├── shared/character.css Stilar för karaktärscirkeln + valrutnätet
@@ -176,6 +177,28 @@ poäng. Här sitter "Nästa runda"- och "Avsluta"-knapparna.
 **Rundvärde** börjar på `ROUND_VALUE_START` och ökar med `ROUND_VALUE_STEP`
 efter varje runda. Alla tunables (även svars-/pick-/resultat-tider och
 `MIN_PLAYERS`) ligger i `server/modes/arena/config.js`.
+
+### Älgen (slumphändelse)
+
+Ett tillägg ovanpå rundlogiken, inte en omskrivning. `onHostMessage` kör
+`_maybeMoose(() => this._startRound())` — älgen slås fram **innan** rundan.
+
+* **Chans:** `MOOSE_CHANCE` per runda (default `0.15`). Konstant i
+  `server/modes/arena/config.js`.
+* **Om älgen dyker upp:** fas `'moose'`, en `mode_state`-broadcast med
+  `view: 'moose'` → stor "BOOOOSE MOOOOSE"-overlay på host (`🫎`, skakning,
+  ljud `public/assets/sounds/moose.wav`) och en kort variant på mobilerna.
+  Efter `MOOSE_INTRO_SECONDS` startar själva rundan.
+* **Räknare:** `mooseVisits` (per omgång, på servern). **Multiplikator** =
+  `MOOSE_BASE_MULTIPLIER + (mooseVisits - 1)` → 2× första gången, 3× andra,
+  4× tredje …
+* **Effekt:** så länge älgen är aktiv (den rundan) går alla poäng genom
+  `_points()` = `roundValue × multiplier`. Nollställs i `_toRoom()`.
+* **Intensitet:** `intensity = mooseVisits` skickas till klienten, som gör
+  overlay + ljud större/snabbare/högre för varje besök (platshållar-effekter
+  i `arena.js` / `arena.css` — byt fritt).
+* `mode_state` `view: 'result'` bär nu även `pointsAwarded` och
+  `moose: { active, multiplier, visits }`.
 
 **Poäng = golf:** lägst total vinner. Att få poäng är dåligt. Leaderboarden
 (`_standings()` i arena-läget) sorteras stigande, och `.leader` i toppen

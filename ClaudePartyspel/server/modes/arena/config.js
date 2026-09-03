@@ -20,4 +20,13 @@ module.exports = {
 
   // A round needs at least this many connected players who have a character.
   MIN_PLAYERS: 2,
+
+  // ── Älgen (slumphändelse ovanpå rundlogiken) ──
+  // Chans per runda att älgen dyker upp innan rundan körs.
+  MOOSE_CHANCE: 0.15,
+  // Multiplikatorn för en älg-runda är MOOSE_BASE_MULTIPLIER + antal TIDIGARE
+  // älg-besök denna omgång: 2x första gången, 3x andra, 4x tredje ...
+  MOOSE_BASE_MULTIPLIER: 2,
+  // Hur länge "BOOOOSE MOOOOSE"-overlayen visas innan rundan startar.
+  MOOSE_INTRO_SECONDS: 3,
 };

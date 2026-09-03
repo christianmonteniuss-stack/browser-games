@@ -47,10 +47,16 @@ function createArenaMode() {
       this.questionQueue = shuffled(QUESTIONS);
       this.timers = [];
       this.roundNonce = 0;
-      this.phase = 'room'; // 'room' | 'question' | 'pick' | 'result'
+      this.phase = 'room'; // 'room' | 'moose' | 'question' | 'pick' | 'result'
       this.chosen = null;
       this.question = null;
       this.answered = false;
+
+      // ── Älgen (slumphändelse ovanpå rundlogiken) ──
+      this.mooseVisits = 0; // antal gånger älgen dykt upp denna omgång
+      this.mooseActive = false; // aktiv för den PÅGÅENDE rundan?
+      this.mooseMultiplier = 1; // 1 = ingen älg
+
       this._toRoom();
     },
 
@@ -62,8 +68,12 @@ function createArenaMode() {
     // ── host controls ───────────────────────────────────────────────────
 
     onHostMessage(ctx, msg) {
-      if (msg.action === 'next_round' && this.phase === 'room') this._startRound();
-      else if (msg.action === 'exit' && this.phase === 'room') ctx.endMode();
+      if (msg.action === 'next_round' && this.phase === 'room') {
+        // Roll for the moose before the round actually starts.
+        this._maybeMoose(() => this._startRound());
+      } else if (msg.action === 'exit' && this.phase === 'room') {
+        ctx.endMode();
+      }
     },
 
     // ── player input ────────────────────────────────────────────────────
@@ -108,6 +118,8 @@ function createArenaMode() {
     onHostJoin(ctx) {
       if (this.phase === 'room') {
         ctx.toHost('mode_state', { modeId: this.id, view: 'room', data: this._roomData() });
+      } else if (this.phase === 'moose') {
+        ctx.toHost('mode_state', { modeId: this.id, view: 'moose', data: this._mooseData() });
       } else if (this.phase === 'question') {
         ctx.toHost('mode_state', { modeId: this.id, view: 'round', data: this._roundHostData(false) });
       } else if (this.phase === 'pick') {
@@ -130,6 +142,8 @@ function createArenaMode() {
       this.chosen = null;
       this.question = null;
       this.answered = false;
+      this.mooseActive = false; // the moose only affects the round it appeared for
+      this.mooseMultiplier = 1;
 
       this.ctx.toHost('mode_state', {
         modeId: this.id,
@@ -148,13 +162,8 @@ function createArenaMode() {
     _startRound() {
       const ready = this.ctx.lobby.readyPlayers();
       if (ready.length < CONFIG.MIN_PLAYERS) {
-        this.ctx.toHost('mode_state', {
-          modeId: this.id,
-          view: 'room',
-          data: this._roomData({
-            notice: `Behöver minst ${CONFIG.MIN_PLAYERS} spelare med karaktär.`,
-          }),
-        });
+        // Bail back to the room (also clears any moose that was rolled).
+        this._toRoom(`Behöver minst ${CONFIG.MIN_PLAYERS} spelare med karaktär.`);
         return;
       }
 
@@ -250,13 +259,13 @@ function createArenaMode() {
         }, CONFIG.PICK_SECONDS * 1000);
       } else {
         // Wrong / timeout: the player who answered takes the (bad) points.
-        this.ctx.addScore(this.chosen.id, this.roundValue);
+        this.ctx.addScore(this.chosen.id, this._points());
         this._showResult('miss', this.chosen.name);
       }
     },
 
     _award(target) {
-      this.ctx.addScore(target.id, this.roundValue);
+      this.ctx.addScore(target.id, this._points());
       this._showResult('celebrate', target.name);
     },
 
@@ -265,7 +274,16 @@ function createArenaMode() {
       this.ctx.broadcast('mode_state', {
         modeId: this.id,
         view: 'result',
-        data: { kind, name, roundValue: this.roundValue, standings: this._standings() },
+        data: {
+          kind,
+          name,
+          roundValue: this.roundValue,
+          pointsAwarded: this._points(),
+          moose: this.mooseActive
+            ? { active: true, multiplier: this.mooseMultiplier, visits: this.mooseVisits }
+            : { active: false },
+          standings: this._standings(),
+        },
       });
       this._setTimer(() => this._endRound(), CONFIG.RESULT_SECONDS * 1000);
     },
@@ -273,6 +291,47 @@ function createArenaMode() {
     _endRound() {
       this.roundValue += CONFIG.ROUND_VALUE_STEP;
       this._toRoom();
+    },
+
+    // ── Älgen ─────────────────────────────────────────────────────────
+    // Rolled before every round (see onHostMessage). If she turns up, the
+    // whole round's payouts are multiplied and a "BOOOOSE MOOOOSE" overlay
+    // plays first. Effects get more intense with every visit this session.
+
+    _maybeMoose(then) {
+      if (Math.random() < CONFIG.MOOSE_CHANCE) {
+        this.mooseVisits += 1;
+        this.mooseActive = true;
+        this.mooseMultiplier = CONFIG.MOOSE_BASE_MULTIPLIER + (this.mooseVisits - 1);
+        this.phase = 'moose';
+        this.ctx.broadcast('mode_state', {
+          modeId: this.id,
+          view: 'moose',
+          data: this._mooseData(),
+        });
+        this._setTimer(() => {
+          if (this.phase === 'moose') then();
+        }, CONFIG.MOOSE_INTRO_SECONDS * 1000);
+      } else {
+        this.mooseActive = false;
+        this.mooseMultiplier = 1;
+        then();
+      }
+    },
+
+    /** Points at stake this round, moose multiplier included. */
+    _points() {
+      return this.roundValue * (this.mooseActive ? this.mooseMultiplier : 1);
+    },
+
+    _mooseData() {
+      return {
+        visits: this.mooseVisits,
+        multiplier: this.mooseMultiplier,
+        // Grows with every visit -> the client makes effects bigger/faster/louder.
+        intensity: this.mooseVisits,
+        roundValue: this.roundValue,
+      };
     },
 
     // ── data builders ──────────────────────────────────────────────────
@@ -308,6 +367,7 @@ function createArenaMode() {
           characters: this._roomCharacters(),
           canStart: this.ctx.lobby.readyPlayers().length >= CONFIG.MIN_PLAYERS,
           minPlayers: CONFIG.MIN_PLAYERS,
+          mooseVisits: this.mooseVisits,
         },
         extra || {}
       );
@@ -343,6 +403,8 @@ function createArenaMode() {
 
       if (this.phase === 'room' || this.phase === 'result') {
         V('room', { roundValue: this.roundValue, standings: this._standings(), you: player.id });
+      } else if (this.phase === 'moose') {
+        V('moose', this._mooseData());
       } else if (this.phase === 'question') {
         if (isChosen) {
           V('answer', {

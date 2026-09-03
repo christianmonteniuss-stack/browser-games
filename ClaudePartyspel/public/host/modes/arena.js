@@ -9,9 +9,9 @@
   'use strict';
   window.HostModes = window.HostModes || {};
 
-  // Placeholder sound. Swap the file at this path (keep the name), or just
-  // change this one line to point somewhere else.
+  // Placeholder sounds. Swap the files (keep the names), or repoint these.
   const SOUND_URL = '/assets/sounds/select.wav';
+  const MOOSE_SOUND_URL = '/assets/sounds/moose.wav';
 
   const esc = window.cpEscapeHtml || ((s) => String(s));
   const AV = window.CharacterAvatar;
@@ -75,6 +75,30 @@
       clearCountdown();
       const { view, data } = msg;
       const root = api.root;
+
+      if (view === 'moose') {
+        const intensity = Math.max(1, data.intensity || 1);
+        const shake = Math.max(0.06, 0.34 - (intensity - 1) * 0.06).toFixed(2);
+        const scale = Math.min(2.2, 1 + (intensity - 1) * 0.2).toFixed(2);
+        const vol = Math.min(1, 0.45 + (intensity - 1) * 0.18);
+        const rate = Math.min(1.7, 1 + (intensity - 1) * 0.12);
+        try {
+          const a = new Audio(MOOSE_SOUND_URL);
+          a.volume = vol;
+          a.playbackRate = rate;
+          a.play().catch(() => {});
+        } catch (e) {
+          /* ignore */
+        }
+        root.innerHTML =
+          `<div class="moose-overlay" style="--shake:${shake}s;--scale:${scale}">` +
+          '<div class="moose-emoji">🫎</div>' +
+          '<h1 class="moose-text">BOOOOSE MOOOOSE</h1>' +
+          `<p class="moose-sub">Älg-besök #${data.visits} &middot; ` +
+          `allt &times;${data.multiplier} den här rundan!</p>` +
+          '</div>';
+        return;
+      }
 
       if (view === 'room') {
         root.innerHTML =
@@ -146,12 +170,15 @@
       if (view === 'result') {
         const celebrate = data.kind === 'celebrate';
         const text = (celebrate ? "Let's go, " : 'You suck, ') + esc(data.name) + '!';
-        const sub = celebrate
-          ? `${esc(data.name)} får ${data.roundValue} straffpoäng`
-          : `${esc(data.name)} får ${data.roundValue} straffpoäng för fel svar`;
+        const pts = data.pointsAwarded != null ? data.pointsAwarded : data.roundValue;
+        const moose = !!(data.moose && data.moose.active);
+        const sub =
+          `${esc(data.name)} får ${pts} straffpoäng` +
+          (celebrate ? '' : ' för fel svar') +
+          (moose ? ` &nbsp;🫎 &times;${data.moose.multiplier}!` : '');
         root.innerHTML =
-          `<div class="arena-result ${celebrate ? 'celebrate' : 'miss'}">` +
-          `<div class="result-burst">${celebrate ? '🎉' : '💥'}</div>` +
+          `<div class="arena-result ${celebrate ? 'celebrate' : 'miss'}${moose ? ' moose' : ''}">` +
+          `<div class="result-burst">${celebrate ? '🎉' : '💥'}${moose ? '🫎' : ''}</div>` +
           `<h1 class="result-text">${text}</h1>` +
           `<p class="result-sub">${sub}</p>` +
           '</div>' +

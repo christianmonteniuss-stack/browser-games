@@ -13,6 +13,7 @@
   const esc = window.cpEscapeHtml || ((s) => String(s));
   const AV = window.CharacterAvatar;
   const LETTERS = ['A', 'B', 'C', 'D'];
+  const MOOSE_SOUND_URL = '/assets/sounds/moose.wav';
 
   let countdown = null;
   function clearCountdown() {
@@ -51,6 +52,27 @@
       clearCountdown();
       const { view, data } = msg;
       const root = api.root;
+
+      if (view === 'moose') {
+        const intensity = Math.max(1, data.intensity || 1);
+        const shake = Math.max(0.06, 0.34 - (intensity - 1) * 0.06).toFixed(2);
+        const scale = Math.min(1.8, 1 + (intensity - 1) * 0.15).toFixed(2);
+        const vol = Math.min(0.5, 0.15 + (intensity - 1) * 0.08);
+        try {
+          const a = new Audio(MOOSE_SOUND_URL);
+          a.volume = vol;
+          a.play().catch(() => {});
+        } catch (e) {
+          /* ignore */
+        }
+        root.innerHTML =
+          `<div class="moose-overlay small" style="--shake:${shake}s;--scale:${scale}">` +
+          '<div class="moose-emoji">🫎</div>' +
+          '<h2 class="moose-text">BOOOOSE MOOOOSE</h2>' +
+          `<p class="muted">&times;${data.multiplier} den här rundan</p>` +
+          '</div>';
+        return;
+      }
 
       if (view === 'room') {
         root.innerHTML =
@@ -134,10 +156,12 @@
       if (view === 'result') {
         const celebrate = data.kind === 'celebrate';
         const text = (celebrate ? "Let's go, " : 'You suck, ') + esc(data.name) + '!';
+        const moose = !!(data.moose && data.moose.active);
         root.innerHTML =
-          `<div class="arena-result ${celebrate ? 'celebrate' : 'miss'}">` +
-          `<div class="result-burst">${celebrate ? '🎉' : '💥'}</div>` +
+          `<div class="arena-result ${celebrate ? 'celebrate' : 'miss'}${moose ? ' moose' : ''}">` +
+          `<div class="result-burst">${celebrate ? '🎉' : '💥'}${moose ? '🫎' : ''}</div>` +
           `<h1 class="result-text">${text}</h1>` +
+          (moose ? `<p class="muted">🫎 &times;${data.moose.multiplier}</p>` : '') +
           '</div>' +
           golfBoard(data.standings, api.me());
         return;
