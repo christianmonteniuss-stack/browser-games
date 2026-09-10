@@ -3,7 +3,7 @@
 //
 //   render(msg, api)
 //     msg = { modeId, view, data }
-//        view: 'room' | 'moose' | 'answer' | 'waiting' | 'pick' | 'result'
+//        view: 'room' | 'moose' | 'answer' | 'waiting' | 'pick' | 'result' | 'final'
 //              | 'choose' | 'choose_done' | 'choose_result'
 //              | 'react' (phase wait|go|tapped) | 'react_result'
 //     api = { root, clear(), send(action, data), me(), characters() }
@@ -136,7 +136,7 @@
         if (window.SFX) window.SFX.play('correct');
         root.innerHTML =
           '<h2 class="good">Rätt!</h2>' +
-          '<p>Peka ut en syndabock:</p>' +
+          `<p>Peka ut vem som får <strong>${data.roundValue}</strong> straffpoäng:</p>` +
           '<div class="pick-grid"></div>';
         const grid = root.querySelector('.pick-grid');
         const roster = api.characters() || [];
@@ -230,9 +230,7 @@
           `<div class="arena-result choose${moose ? ' moose' : ''}">` +
           '<p class="choose-tag">Time to Choose</p>' +
           `<h3>${esc(data.statement)}</h3>` +
-          (moose
-            ? `<p class="muted">🫎 &times;${data.moose.multiplier} — nu räknas det!</p>`
-            : '<p class="muted">Spelas för skoj — bara älgen ger poäng 🫎</p>') +
+          (moose ? `<p class="muted">🫎 &times;${data.moose.multiplier}</p>` : '') +
           `<ul class="choose-tally">${rows}</ul>` +
           '</div>' +
           golfBoard(data.standings, api.me());
@@ -291,9 +289,7 @@
           `<div class="arena-result choose${moose ? ' moose' : ''}">` +
           '<p class="choose-tag">Reaktionstest</p>' +
           '<h3>Snabbast vinner</h3>' +
-          (moose
-            ? `<p class="muted">🫎 &times;${data.moose.multiplier} — nu räknas det!</p>`
-            : '<p class="muted">Spelas för skoj — bara älgen ger poäng 🫎</p>') +
+          (moose ? `<p class="muted">🫎 &times;${data.moose.multiplier}</p>` : '') +
           `<ul class="choose-tally react-tally">${rows}</ul>` +
           '</div>' +
           golfBoard(data.standings, api.me());
@@ -304,17 +300,50 @@
         const celebrate = data.kind === 'celebrate';
         const text = (celebrate ? "Let's go, " : 'You suck, ') + esc(data.name) + '!';
         const moose = !!(data.moose && data.moose.active);
+        const iScored = data.scoredId && data.scoredId === api.me();
+        const pts = data.pointsAwarded != null ? data.pointsAwarded : data.roundValue;
         root.innerHTML =
+          (iScored
+            ? `<div class="you-scored">Du får <strong>+${pts}</strong> straffpoäng` +
+              (moose ? ` 🫎&times;${data.moose.multiplier}` : '') +
+              '</div>'
+            : '') +
           `<div class="arena-result ${celebrate ? 'celebrate' : 'miss'}${moose ? ' moose' : ''}">` +
           `<div class="result-burst">${celebrate ? '🎉' : '💥'}${moose ? '🫎' : ''}</div>` +
           `<h1 class="result-text">${text}</h1>` +
-          (moose
-            ? `<p class="muted">🫎 &times;${data.moose.multiplier}</p>`
-            : '<p class="muted">Ingen insats — vänta på älgen 🫎</p>') +
+          (moose ? `<p class="muted">🫎 &times;${data.moose.multiplier}</p>` : '') +
           '</div>' +
           golfBoard(data.standings, api.me());
-        if (window.SFX) window.SFX.play(celebrate ? 'win' : 'lose');
-        if (celebrate && window.Confetti) window.Confetti.burst({ count: 70, y: 0.3 });
+        if (window.SFX) window.SFX.play(iScored ? 'lose' : celebrate ? 'win' : 'lose');
+        if (celebrate && !iScored && window.Confetti) {
+          window.Confetti.burst({ count: 70, y: 0.3 });
+        }
+        return;
+      }
+
+      if (view === 'final') {
+        const me = api.me();
+        const w = data.winner;
+        const l = data.loser;
+        const iWon = w && w.playerId === me;
+        const iLost = l && l.playerId === me;
+        const mine = (data.standings || []).find((s) => s.id === me);
+        const place = (data.standings || []).findIndex((s) => s.id === me) + 1;
+        root.innerHTML =
+          '<div class="arena-result">' +
+          '<p class="choose-tag">Slutresultat</p>' +
+          (iWon
+            ? '<h1 class="result-text good">🏆 Du vann!</h1><p class="you-scored">GULD + 10 stödbög-klunkar</p>'
+            : iLost
+              ? '<h1 class="result-text">Du fick flest straffpoäng…</h1><p class="you-scored">10 utdelningsklunkar 🍺</p>'
+              : `<h1 class="result-text">${w ? esc(w.name) + ' vann' : 'Slut'}</h1>` +
+                (place > 0
+                  ? `<p class="muted">Din plats: ${place} av ${data.standings.length} (${mine ? mine.score : 0} p)</p>`
+                  : '')) +
+          '</div>' +
+          golfBoard(data.standings, me);
+        if (window.SFX) window.SFX.play(iWon ? 'win' : 'fanfare');
+        if (iWon && window.Confetti) window.Confetti.burst({ count: 120, y: 0.3 });
         return;
       }
     },

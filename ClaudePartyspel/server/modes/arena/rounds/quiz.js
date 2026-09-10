@@ -75,7 +75,12 @@ module.exports = {
       rc.addScore(target.id, 1);
       rc.finish({
         view: 'result',
-        data: { kind: 'celebrate', name: target.name, pointsAwarded: rc.points(1) },
+        data: {
+          kind: 'celebrate',
+          name: target.name,
+          scoredId: target.id,
+          pointsAwarded: rc.points(1),
+        },
       });
     }
   },
@@ -114,12 +119,17 @@ module.exports = {
           rc.addScore(t.id, 1);
           rc.finish({
             view: 'result',
-            data: { kind: 'celebrate', name: t.name, pointsAwarded: rc.points(1) },
+            data: {
+              kind: 'celebrate',
+              name: t.name,
+              scoredId: t.id,
+              pointsAwarded: rc.points(1),
+            },
           });
         } else {
           rc.finish({
             view: 'result',
-            data: { kind: 'celebrate', name: s.chosen.name, pointsAwarded: 0 },
+            data: { kind: 'celebrate', name: s.chosen.name, scoredId: null, pointsAwarded: 0 },
           });
         }
       }, rc.config.PICK_SECONDS * 1000);
@@ -127,7 +137,12 @@ module.exports = {
       rc.addScore(s.chosen.id, 1);
       rc.finish({
         view: 'result',
-        data: { kind: 'miss', name: s.chosen.name, pointsAwarded: rc.points(1) },
+        data: {
+          kind: 'miss',
+          name: s.chosen.name,
+          scoredId: s.chosen.id,
+          pointsAwarded: rc.points(1),
+        },
       });
     }
   },

@@ -35,10 +35,12 @@ Terminalen skriver ut något i stil med:
    till den stora skärmen.
 2. Alla kompisar skannar QR-koden (eller skriver in `http://<din-ip>:3000/`).
    De måste vara på **samma WiFi** som datorn.
-3. Skriv namn → du dyker upp i spelarlistan på host-skärmen.
-4. Host trycker **"Starta Quiz"**. Frågan visas samtidigt på storskärmen och
-   alla mobiler. Alla svarar på sin mobil, servern räknar poäng, och en
-   resultattavla visas efter varje fråga.
+3. Skriv namn → välj karaktär → du dyker upp i spelarlistan på host-skärmen.
+4. Host trycker **"Starta Arena"** och sedan **"Nästa runda"** för varje runda.
+   Rundan är en av: en spelare svarar på en fråga, "Time to Choose"
+   (alla röstar på vem påståendet passar), eller ett reaktionstest. Ibland
+   dyker BOOZE MOOSE upp och multiplicerar rundans poäng. Host avslutar med
+   **"Avsluta & kora vinnare"** — då visas slutställningen.
 
 Byt port med `PORT=4000 npm start` om 3000 är upptagen.
 
@@ -75,38 +77,36 @@ ClaudePartyspel/
 │   ├── gameManager.js    KÄRNAN: routar meddelanden, kör ETT spelläge, bygger `ctx`
 │   └── modes/
 │       ├── index.js      Registret över alla spellägen  ← lägg till din nya lek här
-│       ├── quiz/
-│       │   ├── index.js       Quiz-lägets logik (enkelt referensläge)
-│       │   └── questions.js    Quiz-innehåll (bara data)
-│       └── arena/
-│           ├── index.js       Kärnan: Rummet, rundvärde, älg, resultat, golf-tavla
-│           ├── config.js      Tider, MIN_PLAYERS, ROUND_TYPE_WEIGHTS, MOOSE_* (tunables)
+│       └── arena/        (enda spelläget)
+│           ├── index.js       Kärnan: Rummet, rundvärde, älg, resultat, slutskärm, golf-tavla
+│           ├── config.js      Tider, MIN_PLAYERS, ROUND_VALUE_START, ROUND_TYPE_WEIGHTS, MOOSE_* (tunables)
 │           ├── util.js        shuffled / pickRandom
-│           ├── questions.js    Quiz-rundans frågor (bara data)
-│           ├── statements.js   "Time to Choose"-påståenden (bara data)
+│           ├── questions.js    Frågerundans frågor (bara data)
+│           ├── statements.js   "Time to Choose"-påståenden (bara data, 18+)
 │           └── rounds/
 │               ├── index.js    Rundtypsregister + viktad slump
-│               ├── quiz.js     Rundtyp: quiz
+│               ├── quiz.js     Rundtyp: en spelare svarar på en fråga
 │               ├── choose.js   Rundtyp: Time to Choose
 │               └── react.js    Rundtyp: reaktionstest
 └── public/
     ├── assets/sounds/select.wav  Platshållar-ljud när en spelare lottas (byt ut fritt)
     ├── assets/sounds/moose.wav   Platshållar-ljud för älgen (byt ut fritt)
+    ├── assets/music/lobby.mp3    Loopas på host-skärmen i lobbyn (byt ut fritt)
     ├── shared/events.js     Webbläsarkopia av meddelandetyperna (spegel av protocol.js)
     ├── shared/character.js  Enda stället som ritar en karaktär (emoji/färg-cirkel, eller bild om imageUrl finns)
     ├── shared/character.css Stilar för karaktärscirkeln + valrutnätet
-    ├── shared/sfx.js        Ljudmotor (WebAudio-synt, inga ljudfiler): win/lose/tick/signal m.m.
+    ├── shared/sfx.js        Ljudmotor (WebAudio-synt, inga ljudfiler): win/lose/tick/signal + say()
     ├── shared/confetti.js   Canvas-konfetti (window.Confetti.burst) på vinst/slut
     ├── host/
     │   ├── index.html    Host-skärmen
     │   ├── host.css
-    │   ├── host.js       Host-kärnan (lobby-UI, karaktärsöversikt, laddar renderare + CSS, WebSocket)
-    │   └── modes/        quiz.js  ·  arena.js + arena.css (host-renderare per läge)
+    │   ├── host.js       Host-kärnan (lobby-UI, lobbymusik, karaktärsöversikt, laddar renderare + CSS, WebSocket)
+    │   └── modes/        arena.js + arena.css (host-renderare)
     └── player/
         ├── index.html    Spelar-vyn (mobil)
         ├── player.css
         ├── player.js     Spelar-kärnan (namn/join → karaktärsval → lobby, reconnect, WebSocket)
-        └── modes/        quiz.js  ·  arena.js + arena.css (spelar-renderare per läge)
+        └── modes/        arena.js + arena.css (spelar-renderare)
 ```
 
 ### Karaktärer
@@ -136,12 +136,13 @@ inte vidare förrän en ledig karaktär är vald.
                                 ├──►  server/index.js  ──►  GameManager
  Host  (host.js)   ──WebSocket──┘                             │
                                                               ▼
-                                                     aktivt spelläge (t.ex. quiz)
+                                                     aktivt spelläge (Arena)
                                                      pratar bara via `ctx`
 ```
 
 * **GameManager** äger lobbyn, socket-routing och kör som mest **ett** spelläge
-  i taget. Den vet ingenting om quiz specifikt.
+  i taget. Den vet ingenting om Arena specifikt — arkitekturen tål fler lägen,
+  men just nu finns bara Arena i registret.
 * Ett **spelläge** är en modul som får ett `ctx`-objekt — det är hela ytan den
   får röra. Den hanterar sin egen interna state (aktuell fråga, vem har svarat)
   och bestämmer vad som ritas.
@@ -173,45 +174,49 @@ spelläge ("Starta Arena") och styr den med **en enda knapp: "Nästa runda"**.
 **Rummet** (host-skärmen mellan rundor): alla spelares karaktärer i rad, med
 poäng. Här sitter "Nästa runda"- och "Avsluta"-knapparna.
 
-> **Poäng delas bara ut på älg-rundor.** Alla rundtyper spelas som vanligt,
-> men `rc.addScore()` ger **0** om inte BOOZE MOOSE är aktiv för rundan (se
-> `_points()` i `arena/index.js`). När älgen är med blir utdelningen
-> `enheter × rundvärde × älg-multiplikator`. `MOOSE_CHANCE` i `config.js` är
-> höjd så att en omgång hinner bli avgjord.
+> **Rundvärde (straffpoäng som står på spel), per rundnummer `n`:**
+> rundor 1–5 → **3**, rundor 6–15 → **4**, sedan **+1 var tionde runda**
+> (16–25 → 5, 26–35 → 6, …). Se `_roundValueFor()` i `arena/index.js`,
+> startvärdet i `ROUND_VALUE_START`. **BOOZE MOOSE** multiplicerar värdet
+> för sin runda (×2 första besöket, ×3 andra, …).
 >
-> **Poängen nollställs när ett spel avslutas** (åter till lobbyn) — gäller
-> både Arena och Quiz, sköts centralt i `GameManager._endActiveMode()`.
+> **Poängen nollställs när spelet avslutas** (åter till lobbyn) — sköts
+> centralt i `GameManager._endActiveMode()`.
+>
+> **Slutskärm:** host trycker "Avsluta & kora vinnare" i Rummet → fas
+> `'final'` (`_toFinal` / `_finalData`) visar vinnaren (lägst poäng) och
+> förloraren (flest poäng) på alla skärmar, plus hela golf-tavlan. Host
+> trycker "Tillbaka till lobbyn" för att gå till lobbyn.
 
 När host trycker "Nästa runda" slumpar servern **vilken rundtyp** som körs,
 enligt vikterna i `config.ROUND_TYPE_WEIGHTS`. Rundtyperna ligger var för sig
 i `server/modes/arena/rounds/` — arena-kärnan äger rundvärde, älg, resultat-
-timing och golf-tavlan; en rundtyp ser bara `rc`-objektet (se `_rc()` i
-`server/modes/arena/index.js`). Oavsett rundtyp: efter resultatet ökar
-rundvärdet med `ROUND_VALUE_STEP` och Rummet visas igen.
+timing, slutskärm och golf-tavlan; en rundtyp ser bara `rc`-objektet (se
+`_rc()` i `server/modes/arena/index.js`).
 
-**Rundvärde** börjar på `ROUND_VALUE_START`. Alla tunables (svars-/pick-/
-choose-/resultat-tider, `MIN_PLAYERS`, rundtypsvikter, älg-konstanter) ligger
-i `server/modes/arena/config.js`.
+Alla tunables (svars-/pick-/choose-/resultat-tider, `MIN_PLAYERS`,
+`ROUND_VALUE_START`, rundtypsvikter, älg-konstanter) ligger i
+`server/modes/arena/config.js`.
 
-### Rundtyp: Quiz (`rounds/quiz.js`)
+### Rundtyp: Fråga (`rounds/quiz.js`)
 
 1. Servern lottar EN ansluten karaktär. Dess avatar blinkar i Rummet och ett
    ljud spelas (host). Ljudet: `public/assets/sounds/select.wav` — byt filen
    (behåll namnet) eller ändra `SOUND_URL` överst i `public/host/modes/arena.js`.
 2. Den utvalda spelarens mobil visar en fråga med 4 alternativ. Övriga mobiler
    visar "X svarar…". Host visar en nedräkning.
-3. **Rätt svar:** spelaren pekar sedan ut valfri annan karaktär på sin mobil
-   ("syndabocken"). Alla skärmar: "Let's go, X!".
-4. **Fel svar (eller tiden ut):** den som svarade åker dit själv.
-   Alla skärmar: "You suck, X!".
-
-Straffpoäng landar bara om älgen är med rundan (annars 0 — se rutan ovan).
+3. **Rätt svar:** spelaren pekar sedan ut valfri annan karaktär på sin mobil.
+   Den utpekade får rundvärdet i straffpoäng och ser **på sin egen mobil**
+   tydligt hur många (`scoredId` + `you-scored`-bannern). Alla skärmar:
+   "Let's go, X!".
+4. **Fel svar (eller tiden ut):** den som svarade får själv rundvärdet i
+   straffpoäng och ser det på sin mobil. Alla skärmar: "You suck, X!".
 
 Frågor: `server/modes/arena/questions.js`, `{ q, options: [4], correct }`.
 Listan shufflas och cyklas. Mest riktig allmänbildning (naturvetenskap,
 historia, geografi, kultur, sport) med en kortare svans fåniga
-dryckesfrågor sist. Samma upplägg i `server/modes/quiz/questions.js`.
-Ett par svar (t.ex. Sveriges regerande kung) tål att ses över med åren.
+dryckesfrågor sist. Ett par svar (t.ex. Sveriges regerande kung) tål att
+ses över med åren.
 
 ### Rundtyp: Time to Choose (`rounds/choose.js`)
 
@@ -270,23 +275,22 @@ Ett tillägg ovanpå rundlogiken, inte en omskrivning. `onHostMessage` kör
 * **Räknare:** `mooseVisits` (per omgång, på servern). **Multiplikator** =
   `MOOSE_BASE_MULTIPLIER + (mooseVisits - 1)` → 2× första gången, 3× andra,
   4× tredje …
-* **Effekt:** `_points()` ger poäng **bara** när älgen är aktiv den rundan —
-  `enheter × roundValue × multiplier`. Mooseless rundor ger 0. Nollställs i
-  `_toRoom()`.
+* **Effekt:** så länge älgen är aktiv (den rundan) räknas
+  `_points() = enheter × roundValue × multiplier`. Nollställs i `_toRoom()`.
 * **Intensitet:** `intensity = mooseVisits` skickas till klienten, som gör
-  overlay + ljud större/snabbare/högre för varje besök (platshållar-effekter
-  i `arena.js` / `arena.css` — byt fritt).
-* `mode_state` `view: 'result'` bär nu även `pointsAwarded` och
+  overlay + ljud större/snabbare/högre för varje besök. Host säger dessutom
+  "boooooze moooose" via talsyntes (`SFX.say`).
+* `mode_state` `view: 'result'` bär även `pointsAwarded`, `scoredId` (spelaren
+  som fick straffpoängen — får en tydlig banner på sin mobil) och
   `moose: { active, multiplier, visits }`.
 
-**Poäng = golf:** lägst total vinner. Att få poäng är dåligt. Leaderboarden
+**Poäng = golf:** lägst total vinner (guld + "10 stödbög-klunkar"); flest
+poäng förlorar ("10 utdelningsklunkar"). Att få poäng är dåligt. Leaderboarden
 (`_standings()` i arena-läget) sorteras stigande, och `.leader` i toppen
-markeras grönt med ★. Den centrala poängtavlan i `Lobby` är oförändrad — det
-är arena-läget som sorterar om.
+markeras grönt med ★.
 
 **Per-läge CSS:** eftersom arena-läget har `css: true` i registret laddar
-host/mobil även `/(host|player)/modes/arena.css` automatiskt. (Quiz-läget har
-ingen egen CSS-fil; dess stilar ligger kvar i `host.css`/`player.css`.)
+host/mobil även `/(host|player)/modes/arena.css` automatiskt.
 
 **Reconnect:** `onHostJoin(ctx)` ritar om host-skärmen om host laddas om mitt
 i en runda; `onPlayerJoin(ctx, player)` re-synkar en mobil.
@@ -343,7 +347,7 @@ module.exports = createMyMode;
 | `ctx.endMode()` | Avsluta lägets — tillbaka till lobbyn |
 
 `type` är i praktiken alltid `'mode_state'`. Lägg gärna spelinnehåll (frågor,
-kort, ord) i en egen `*.js`-datafil bredvid, som `quiz/questions.js`.
+kort, ord) i en egen `*.js`-datafil bredvid, som `arena/questions.js`.
 
 ### 2. Registrera läget — `server/modes/index.js`
 
@@ -351,7 +355,7 @@ kort, ord) i en egen `*.js`-datafil bredvid, som `quiz/questions.js`.
 const createMyMode = require('./mymode');
 // ...
 const REGISTRY = [
-  { id: 'quiz',   name: 'Quiz',    minPlayers: 1, factory: createQuizMode },
+  { id: 'arena',  name: 'Arena',   minPlayers: 2, css: true, factory: createArenaMode },
   { id: 'mymode', name: 'Min lek', minPlayers: 2, factory: createMyMode },
 ];
 ```
@@ -411,8 +415,6 @@ host-skärmen.
 
 * All state lever i minnet. Startar du om servern nollställs lobbyn och
   mobilerna får skriva in namn igen.
-* Ett spelläge åt gången.
-* Ingen tidsgräns per fråga i quizet (host klickar "Visa svar" / "Nästa
-  fråga"). Auto-avslöjar när alla anslutna har svarat.
-* Poäng är platt 100 p för rätt svar — snabbhetsbonus är en enkel utökning i
-  `server/modes/quiz/index.js` (`_reveal`).
+* Bara ett spelläge (Arena). Arkitekturen tål fler — se "Lägga till en lek".
+* Ljud kräver att host klickat minst en gång (webbläsarnas autoplay-spärr).
+* `statements.js` är en 18+-lista — byt tillbaka för blandat sällskap.

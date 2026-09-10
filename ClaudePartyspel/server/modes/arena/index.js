@@ -5,10 +5,11 @@
 // (config ROUND_TYPE_WEIGHTS).
 //
 // This file owns everything a round type is NOT allowed to care about:
-//   - the shared round value (starts at ROUND_VALUE_START, +ROUND_VALUE_STEP
-//     after every completed round, any type)
+//   - the shared round value (_roundValueFor: 3 for rounds 1–5, 4 for 6–15,
+//     then +1 every 10 rounds)
 //   - the moose random event and its multiplier
 //   - the result animation timing and the return to "Rummet"
+//   - the end screen (_toFinal): winner = lowest score, loser = highest
 //   - the golf leaderboard (lowest total wins -> _standings sorts ascending)
 //
 // A round type only ever sees the `rc` object built by _rc() below.
@@ -27,10 +28,11 @@ function createArenaMode() {
     onStart(ctx) {
       this.ctx = ctx;
       ctx.resetScores(); // every Arena game starts from a clean golf board
-      this.roundValue = CONFIG.ROUND_VALUE_START;
+      this.roundCount = 0; // completed + current rounds this game
+      this.roundValue = this._roundValueFor(1);
       this.timers = [];
       this.roundNonce = 0;
-      this.phase = 'room'; // 'room' | 'moose' | 'round' | 'result'
+      this.phase = 'room'; // 'room' | 'moose' | 'round' | 'result' | 'final'
       this.round = null; // active round-type module
       this.roundState = null; // its per-round scratch state
 
@@ -53,7 +55,9 @@ function createArenaMode() {
     onHostMessage(ctx, msg) {
       if (msg.action === 'next_round' && this.phase === 'room') {
         this._maybeMoose(() => this._startRound());
-      } else if (msg.action === 'exit' && this.phase === 'room') {
+      } else if (msg.action === 'end_game' && this.phase === 'room') {
+        this._toFinal();
+      } else if (msg.action === 'exit' && (this.phase === 'room' || this.phase === 'final')) {
         ctx.endMode();
       }
     },
@@ -64,6 +68,8 @@ function createArenaMode() {
         ctx.toHost('mode_state', { modeId: this.id, view: 'room', data: this._roomData() });
       } else if (this.phase === 'moose') {
         ctx.toHost('mode_state', { modeId: this.id, view: 'moose', data: this._mooseData() });
+      } else if (this.phase === 'final') {
+        ctx.toHost('mode_state', { modeId: this.id, view: 'final', data: this._finalData() });
       } else if (this.phase === 'round' && this.round) {
         this.round.syncHost(this._rc());
       }
@@ -89,11 +95,17 @@ function createArenaMode() {
 
     onPlayerJoin(ctx, player) {
       if (!this.ctx) return;
-      if (this.phase === 'room' || this.phase === 'result') {
+      if (this.phase === 'final') {
+        this.ctx.toPlayer(player.id, 'mode_state', {
+          modeId: this.id,
+          view: 'final',
+          data: Object.assign({ you: player.id }, this._finalData()),
+        });
+      } else if (this.phase === 'room' || this.phase === 'result') {
         this.ctx.toPlayer(player.id, 'mode_state', {
           modeId: this.id,
           view: 'room',
-          data: { roundValue: this.roundValue, standings: this._standings(), you: player.id },
+          data: { roundValue: this._nextRoundValue(), standings: this._standings(), you: player.id },
         });
       } else if (this.phase === 'moose') {
         this.ctx.toPlayer(player.id, 'mode_state', {
@@ -124,7 +136,7 @@ function createArenaMode() {
         this.ctx.toPlayer(p.id, 'mode_state', {
           modeId: this.id,
           view: 'room',
-          data: { roundValue: this.roundValue, standings: this._standings(), you: p.id },
+          data: { roundValue: this._nextRoundValue(), standings: this._standings(), you: p.id },
         });
       }
     },
@@ -139,6 +151,8 @@ function createArenaMode() {
       }
       this.phase = 'round';
       this.roundNonce += 1;
+      this.roundCount += 1;
+      this.roundValue = this._roundValueFor(this.roundCount);
       this.roundState = {};
       this.round = rounds.pickRoundType();
       this.round.start(this._rc());
@@ -167,8 +181,38 @@ function createArenaMode() {
     },
 
     _endRound() {
-      this.roundValue += CONFIG.ROUND_VALUE_STEP;
       this._toRoom();
+    },
+
+    // ── slutskärm ────────────────────────────────────────────────────────
+    // Host trycker "Avsluta" i Rummet -> vi visar vinnare/förlorare istället
+    // för att gå rakt till lobbyn. Host trycker sedan "Tillbaka till lobbyn".
+
+    _toFinal() {
+      this._clearTimers();
+      this.phase = 'final';
+      this.ctx.broadcast('mode_state', {
+        modeId: this.id,
+        view: 'final',
+        data: this._finalData(),
+      });
+    },
+
+    _finalData() {
+      const table = this._roomCharacters(); // already golf-sorted (lowest first)
+      const winner = table[0] || null;
+      const loser = table.length > 1 ? table[table.length - 1] : null;
+      return {
+        standings: this._standings(),
+        table,
+        winner: winner
+          ? { playerId: winner.playerId, name: winner.name, score: winner.score, character: winner.character }
+          : null,
+        loser:
+          loser && (!winner || loser.playerId !== winner.playerId)
+            ? { playerId: loser.playerId, name: loser.name, score: loser.score, character: loser.character }
+            : null,
+      };
     },
 
     // ── Älgen ─────────────────────────────────────────────────────────
@@ -268,9 +312,26 @@ function createArenaMode() {
      * IS active the payout is units × round value × her (growing) multiplier.
      */
     _points(units) {
-      if (!this.mooseActive) return 0;
       const u = units == null ? 1 : units;
-      return u * this.roundValue * this.mooseMultiplier;
+      return u * this.roundValue * (this.mooseActive ? this.mooseMultiplier : 1);
+    },
+
+    /**
+     * Points at stake in round number `n` (1-indexed):
+     *   rounds 1–5   -> 3
+     *   rounds 6–15  -> 4
+     *   then +1 every 10 rounds (16–25 -> 5, 26–35 -> 6, …)
+     * The BOOZE MOOSE multiplies this on top (see _points / mooseMultiplier).
+     */
+    _roundValueFor(n) {
+      const base = CONFIG.ROUND_VALUE_START;
+      if (n <= 5) return base;
+      return base + 1 + Math.floor((n - 6) / 10);
+    },
+
+    /** What the next round will be worth — shown in the Room between rounds. */
+    _nextRoundValue() {
+      return this._roundValueFor((this.roundCount || 0) + 1);
     },
 
     /** Golf order: lowest score first. */
@@ -299,7 +360,7 @@ function createArenaMode() {
     _roomData(extra) {
       return Object.assign(
         {
-          roundValue: this.roundValue,
+          roundValue: this._nextRoundValue(),
           standings: this._standings(),
           characters: this._roomCharacters(),
           canStart: this.ctx.lobby.readyPlayers().length >= CONFIG.MIN_PLAYERS,

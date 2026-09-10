@@ -3,7 +3,7 @@
 //
 //   render(msg, api)
 //     msg = { modeId, view, data }
-//       view: 'room' | 'moose' | 'round' | 'pick' | 'result'
+//       view: 'room' | 'moose' | 'round' | 'pick' | 'result' | 'final'
 //             | 'choose' | 'choose_result' | 'react' | 'react_result'
 //     api = { root, clear(), send(action, data), characters() }
 
@@ -144,12 +144,12 @@
           (data.canStart
             ? ''
             : `<p class="muted">Minst ${data.minPlayers} spelare med karaktär behövs.</p>`) +
-          '<button id="arena-exit" class="ghost-btn">Avsluta</button>' +
+          '<button id="arena-exit" class="ghost-btn">Avsluta &amp; kora vinnare</button>' +
           '</div>' +
           golfBoard(data.standings) +
           '</div>';
         root.querySelector('#next-round').addEventListener('click', () => api.send('next_round'));
-        root.querySelector('#arena-exit').addEventListener('click', () => api.send('exit'));
+        root.querySelector('#arena-exit').addEventListener('click', () => api.send('end_game'));
         return;
       }
 
@@ -195,7 +195,7 @@
           roomStrip(data.characters, null) +
           '<div class="arena-mid">' +
           `<p class="arena-turn"><strong>${esc(data.chosenName)}</strong> hade rätt och ` +
-          `pekar ut en syndabock…</p>` +
+          `väljer vem som får ${data.roundValue} straffpoäng…</p>` +
           '</div></div>';
         return;
       }
@@ -248,9 +248,7 @@
           `<div class="arena-result choose${moose ? ' moose' : ''}">` +
           '<p class="choose-tag">Time to Choose</p>' +
           `<h2 class="choose-statement">${esc(data.statement)}</h2>` +
-          (moose
-            ? `<p class="result-sub">🫎 &times;${data.moose.multiplier} — nu räknas det!</p>`
-            : '<p class="result-sub">Spelas för skoj — bara älgen delar ut poäng 🫎</p>') +
+          (moose ? `<p class="result-sub">🫎 &times;${data.moose.multiplier}!</p>` : '') +
           `<ul class="choose-tally">${rows}</ul>` +
           '</div>' +
           golfBoard(data.standings);
@@ -321,9 +319,7 @@
           `<div class="arena-result choose${moose ? ' moose' : ''}">` +
           '<p class="choose-tag">Reaktionstest</p>' +
           '<h2 class="choose-statement">Snabbast vinner (får minst poäng)</h2>' +
-          (moose
-            ? `<p class="result-sub">🫎 &times;${data.moose.multiplier} — nu räknas det!</p>`
-            : '<p class="result-sub">Spelas för skoj — bara älgen delar ut poäng 🫎</p>') +
+          (moose ? `<p class="result-sub">🫎 &times;${data.moose.multiplier}!</p>` : '') +
           `<ul class="choose-tally react-tally">${rows}</ul>` +
           '</div>' +
           golfBoard(data.standings);
@@ -333,11 +329,12 @@
       if (view === 'result') {
         const celebrate = data.kind === 'celebrate';
         const text = (celebrate ? "Let's go, " : 'You suck, ') + esc(data.name) + '!';
-        const pts = data.pointsAwarded != null ? data.pointsAwarded : 0;
+        const pts = data.pointsAwarded != null ? data.pointsAwarded : data.roundValue;
         const moose = !!(data.moose && data.moose.active);
-        const sub = moose
-          ? `${esc(data.name)} får ${pts} straffpoäng &nbsp;🫎 &times;${data.moose.multiplier}!`
-          : 'Ingen insats den här rundan — vänta på älgen! 🫎';
+        const sub =
+          `${esc(data.name)} får ${pts} straffpoäng` +
+          (celebrate ? '' : ' för fel svar') +
+          (moose ? ` &nbsp;🫎 &times;${data.moose.multiplier}!` : '');
         root.innerHTML =
           `<div class="arena-result ${celebrate ? 'celebrate' : 'miss'}${moose ? ' moose' : ''}">` +
           `<div class="result-burst">${celebrate ? '🎉' : '💥'}${moose ? '🫎' : ''}</div>` +
@@ -349,6 +346,36 @@
         if (celebrate && window.Confetti) {
           window.Confetti.burst({ count: moose ? 220 : 150 });
         }
+        return;
+      }
+
+      if (view === 'final') {
+        const w = data.winner;
+        const l = data.loser;
+        const av = (c, size) => (c ? AV.html(c, { size }) : emptyAvatar(size));
+        root.innerHTML =
+          '<div class="arena-final">' +
+          '<p class="choose-tag">Slutresultat</p>' +
+          (w
+            ? '<div class="final-winner">' +
+              av(w.character, 96) +
+              `<h1 class="result-text">🏆 ${esc(w.name)} vinner!</h1>` +
+              `<p class="final-sub">${w.score} straffpoäng &middot; GULD + 10 stödbög-klunkar</p>` +
+              '</div>'
+            : '') +
+          (l
+            ? '<div class="final-loser">' +
+              av(l.character, 64) +
+              `<h2>${esc(l.name)} — flest straffpoäng (${l.score})</h2>` +
+              '<p class="final-sub">10 utdelningsklunkar 🍺</p>' +
+              '</div>'
+            : '') +
+          golfBoard(data.standings) +
+          '<button id="final-exit" class="mode-btn">Tillbaka till lobbyn</button>' +
+          '</div>';
+        root.querySelector('#final-exit').addEventListener('click', () => api.send('exit'));
+        if (window.SFX) window.SFX.play('fanfare');
+        if (window.Confetti) window.Confetti.burst({ count: 240, y: 0.25 });
         return;
       }
     },

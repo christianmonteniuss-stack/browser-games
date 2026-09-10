@@ -209,3 +209,18 @@
   background: linear-gradient(135deg, var(--accent-4), var(--accent-3));
   color: #06231a;
 }
+
+/* big "you got points" banner on the answerer's / picked player's phone */
+.you-scored {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 900;
+  padding: 14px 12px;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  color: #241056;
+  box-shadow: 0 0 24px rgba(255, 93, 162, 0.4);
+  animation: burst 0.5s ease-out both;
+}
+.you-scored strong { font-size: 26px; }

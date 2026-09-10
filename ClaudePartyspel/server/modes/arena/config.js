@@ -2,10 +2,11 @@
 // Tunables for the core game loop. Safe to tweak — no game logic lives here.
 
 module.exports = {
-  // Round value = the points at stake in a round. It starts here...
-  ROUND_VALUE_START: 1,
-  // ...and grows by this much after every completed round (any round type).
-  ROUND_VALUE_STEP: 1,
+  // Round value = the points (straffpoäng) at stake in a round. The actual
+  // progression lives in arena/index.js _roundValueFor():
+  //   rounds 1–5 -> this value, rounds 6–15 -> +1, then +1 every 10 rounds.
+  // The BOOZE MOOSE multiplies whatever it currently is.
+  ROUND_VALUE_START: 3,
 
   // Seconds the chosen player has to answer (the host shows this countdown).
   // Running out counts as a wrong answer.
@@ -22,10 +23,9 @@ module.exports = {
   MIN_PLAYERS: 2,
 
   // ── Älgen (slumphändelse ovanpå rundlogiken) ──
-  // Chans per runda att älgen dyker upp innan rundan körs. Älg-rundorna är
-  // numera de ENDA som ger poäng (se arena/index.js _points), så den här ligger
-  // högt nog att en omgång hinner bli avgjord.
-  MOOSE_CHANCE: 0.3,
+  // Chans per runda att älgen dyker upp innan rundan körs. Alla rundor ger
+  // poäng; älgen är en bonushändelse som multiplicerar rundans värde.
+  MOOSE_CHANCE: 0.15,
   // Multiplikatorn för en älg-runda är MOOSE_BASE_MULTIPLIER + antal TIDIGARE
   // älg-besök denna omgång: 2x första gången, 3x andra, 4x tredje ...
   MOOSE_BASE_MULTIPLIER: 2,
