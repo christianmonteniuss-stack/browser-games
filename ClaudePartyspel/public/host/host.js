@@ -25,11 +25,30 @@
     activeMode: null,
   };
 
+  // ── lobby background music ───────────────────────────────────────────────
+  // Loops on the host screen while we're in the lobby; pauses during a game.
+  // Can't start until the first user gesture (browser autoplay policy) — see
+  // unlockAudio() below.
+
+  const lobbyMusic = new Audio('/assets/music/lobby.mp3');
+  lobbyMusic.loop = true;
+  lobbyMusic.volume = 0.32;
+  let musicAllowed = false;
+
+  function playLobbyMusic() {
+    if (musicAllowed) lobbyMusic.play().catch(() => {});
+  }
+  function stopLobbyMusic() {
+    lobbyMusic.pause();
+  }
+
   // ── screen switching ──────────────────────────────────────────────────────
 
   function showScreen(which) {
     $('screen-lobby').hidden = which !== 'lobby';
     $('screen-game').hidden = which !== 'game';
+    if (which === 'lobby') playLobbyMusic();
+    else stopLobbyMusic();
   }
 
   // ── the api handed to mode renderers ─────────────────────────────────────
@@ -191,6 +210,8 @@
   // (almost always "Starta …") unlocks the sound engine for the whole session.
   function unlockAudio() {
     if (window.SFX) window.SFX.unlock();
+    musicAllowed = true;
+    if (!$('screen-lobby').hidden) playLobbyMusic();
     window.removeEventListener('pointerdown', unlockAudio);
     window.removeEventListener('keydown', unlockAudio);
   }
