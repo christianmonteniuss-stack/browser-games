@@ -32,7 +32,7 @@
 
   const lobbyMusic = new Audio('/assets/music/lobby.mp3');
   lobbyMusic.loop = true;
-  lobbyMusic.volume = 0.32;
+  lobbyMusic.volume = 1.0; // max the browser allows — turn up the computer's own volume for louder
   let musicAllowed = false;
 
   function playLobbyMusic() {
