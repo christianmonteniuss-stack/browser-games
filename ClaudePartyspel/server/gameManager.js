@@ -190,6 +190,16 @@ class GameManager {
     const player = this._playerBySocket(socket);
     if (!player) return;
 
+    // Character picking is a lobby-only thing. Once a game is running, phones
+    // that connect stay spectators until it ends.
+    if (this.activeMode) {
+      send(socket, S2C.ERROR, {
+        code: 'game_in_progress',
+        message: 'Spelet är igång — vänta tills det är klart.',
+      });
+      return;
+    }
+
     const result = this.lobby.chooseCharacter(player.id, characterId);
     if (!result.ok) {
       send(socket, S2C.ERROR, {
@@ -203,10 +213,6 @@ class GameManager {
     // Either way, push fresh lobby state so every screen re-renders which
     // characters are taken, in real time.
     this._broadcastLobby();
-
-    // If a game is already running, hand this now-ready player the current
-    // screen (they may have been stuck on character select).
-    if (result.ok && this.activeMode) this._resyncPlayer(player);
   }
 
   // ── THE GAME-MODE INTERFACE ───────────────────────────────────────────────

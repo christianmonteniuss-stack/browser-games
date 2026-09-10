@@ -303,6 +303,13 @@ host/mobil även `/(host|player)/modes/arena.css` automatiskt.
 **Reconnect:** `onHostJoin(ctx)` ritar om host-skärmen om host laddas om mitt
 i en runda; `onPlayerJoin(ctx, player)` re-synkar en mobil.
 
+**Medan ett spel pågår** lämnar mobilerna lobbyn helt: `render()` i
+`player.js` tvingar `screen-game` så snart `state.currentMode` är satt (det
+sätts även från `lobby_state.activeMode`, så en mobil som ansluter mitt i ett
+spel hamnar direkt på spelskärmen). Karaktärsval är avstängt server-side
+under spel (`_onChooseCharacter` svarar `error: 'game_in_progress'`) — den
+som joinar mitt i tittar på tills omgången är slut.
+
 ---
 
 ## Lägg till ett nytt spelmoment

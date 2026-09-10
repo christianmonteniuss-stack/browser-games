@@ -40,15 +40,20 @@
       showScreen('screen-join');
       return;
     }
+    // While a game is running the phone lives ENTIRELY in the game screen —
+    // no lobby, no character picker, even for someone who joined mid-game.
+    if (state.currentMode) {
+      showScreen('screen-game');
+      if (!$('game-root').innerHTML.trim()) {
+        $('game-root').innerHTML = '<p class="muted">Spelet är igång…</p>';
+      }
+      return;
+    }
     if (!state.characterId) {
       // Can't enter the lobby "for real" until a free character is picked.
       showScreen('screen-character');
       renderCharacterGrid();
       return;
-    }
-    if (state.currentMode && window.PartyModes[state.currentMode]) {
-      showScreen('screen-game');
-      return; // the mode renderer draws on each MODE_STATE message
     }
     showScreen('screen-lobby');
     $('lobby-greeting').textContent = 'Hej ' + state.name + '!';
@@ -108,11 +113,14 @@
 
       case S2C.LOBBY_STATE: {
         state.players = payload.players || [];
+        // The lobby broadcast is authoritative for "is a game running" too, so
+        // a phone that connected mid-game goes straight to the game screen.
+        state.currentMode = payload.activeMode || null;
         const me = state.players.find((p) => p.id === state.playerId);
         if (me) state.characterId = me.characterId || null;
         renderLobbyPlayers(state.players);
         renderLobbyStandings(state.players);
-        if (!state.characterId) renderCharacterGrid();
+        if (!state.currentMode && !state.characterId) renderCharacterGrid();
         render();
         break;
       }
@@ -129,19 +137,12 @@
 
       case S2C.MODE_STATE: {
         state.currentMode = payload.modeId;
-        // Don't skip character select — once a character is picked the server
-        // re-syncs us to the live game screen.
-        if (!state.characterId) {
-          render();
-          break;
-        }
         showScreen('screen-game');
         const mode = window.PartyModes[payload.modeId];
         if (mode && typeof mode.render === 'function') {
           mode.render(payload, modeApi());
         } else {
-          $('game-root').innerHTML =
-            '<p class="muted">Laddar lek…</p>';
+          $('game-root').innerHTML = '<p class="muted">Laddar lek…</p>';
         }
         break;
       }
