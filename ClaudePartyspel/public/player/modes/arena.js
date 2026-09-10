@@ -25,6 +25,75 @@
     }
   }
 
+  // ── the "bounce room" for picking a target after a correct answer ──────────
+  // Nameless character figures drift around and bounce off the walls; you tap
+  // one to hand it the straffpoäng. Your own figure is in there too.
+  let bounceRAF = null;
+  function stopBounce() {
+    if (bounceRAF) {
+      cancelAnimationFrame(bounceRAF);
+      bounceRAF = null;
+    }
+  }
+  function startBounce(room, candidates, roster, onPick) {
+    stopBounce();
+    const SIZE = 58;
+    const figs = candidates.map((c) => {
+      const ch = roster.find((r) => r.id === c.characterId);
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'bounce-fig';
+      el.innerHTML = ch ? AV.html(ch, { size: SIZE }) : emptyAvatar(SIZE);
+      el.addEventListener('click', () => {
+        if (room.dataset.done) return;
+        room.dataset.done = '1';
+        stopBounce();
+        room.querySelectorAll('.bounce-fig').forEach((b) => (b.disabled = true));
+        el.classList.add('selected');
+        if (navigator.vibrate) navigator.vibrate(30);
+        onPick(c.id);
+      });
+      room.appendChild(el);
+      const w = Math.max(1, (room.clientWidth || 320) - SIZE);
+      const h = Math.max(1, (room.clientHeight || 320) - SIZE);
+      return {
+        el,
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (0.9 + Math.random() * 2.1) * (Math.random() < 0.5 ? -1 : 1),
+        vy: (0.9 + Math.random() * 2.1) * (Math.random() < 0.5 ? -1 : 1),
+      };
+    });
+    let last = performance.now();
+    function frame(now) {
+      const dt = Math.min(32, now - last) / 16;
+      last = now;
+      const maxX = Math.max(1, (room.clientWidth || 320) - SIZE);
+      const maxY = Math.max(1, (room.clientHeight || 320) - SIZE);
+      for (const s of figs) {
+        s.x += s.vx * dt;
+        s.y += s.vy * dt;
+        if (s.x <= 0) {
+          s.x = 0;
+          s.vx = Math.abs(s.vx);
+        } else if (s.x >= maxX) {
+          s.x = maxX;
+          s.vx = -Math.abs(s.vx);
+        }
+        if (s.y <= 0) {
+          s.y = 0;
+          s.vy = Math.abs(s.vy);
+        } else if (s.y >= maxY) {
+          s.y = maxY;
+          s.vy = -Math.abs(s.vy);
+        }
+        s.el.style.transform = `translate(${s.x}px, ${s.y}px)`;
+      }
+      bounceRAF = requestAnimationFrame(frame);
+    }
+    bounceRAF = requestAnimationFrame(frame);
+  }
+
   function emptyAvatar(size) {
     return (
       `<span class="char-avatar char-avatar-empty" ` +
@@ -52,6 +121,7 @@
   window.PartyModes.arena = {
     render(msg, api) {
       clearCountdown();
+      stopBounce();
       if (window.SFX) window.SFX.stopLoop();
       const { view, data } = msg;
       const root = api.root;
@@ -136,26 +206,14 @@
         if (window.SFX) window.SFX.play('correct');
         root.innerHTML =
           '<h2 class="good">Rätt!</h2>' +
-          `<p>Peka ut vem som får <strong>${data.roundValue}</strong> straffpoäng:</p>` +
-          '<div class="pick-grid"></div>';
-        const grid = root.querySelector('.pick-grid');
+          `<p>Klicka på en figur — den får <strong>${data.roundValue}</strong> straffpoäng:</p>` +
+          '<p class="muted">Inga namn. Din egen figur är också med — se upp var du klickar!</p>' +
+          '<div class="bounce-room" id="bounce-room"></div>';
+        const room = root.querySelector('#bounce-room');
         const roster = api.characters() || [];
-
-        data.candidates.forEach((cand) => {
-          const ch = roster.find((c) => c.id === cand.characterId);
-          const b = document.createElement('button');
-          b.type = 'button';
-          b.className = 'pick-tile';
-          b.innerHTML =
-            (ch ? AV.html(ch, { size: 64 }) : emptyAvatar(64)) +
-            `<span class="char-name">${esc(cand.name)}</span>`;
-          b.addEventListener('click', () => {
-            api.send('award', { targetId: cand.id });
-            grid.querySelectorAll('button').forEach((x) => (x.disabled = true));
-            b.classList.add('selected');
-          });
-          grid.appendChild(b);
-        });
+        startBounce(room, data.candidates || [], roster, (id) =>
+          api.send('award', { targetId: id })
+        );
         return;
       }
 

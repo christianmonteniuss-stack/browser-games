@@ -70,7 +70,8 @@ module.exports = {
       this._resolve(rc, choice);
     } else if (s.sub === 'pick' && isChosen && msg.action === 'award') {
       const targetId = msg.data && msg.data.targetId;
-      const target = this._others(rc).find((p) => p.id === targetId);
+      // The bounce room includes the answerer themselves — self-pick allowed.
+      const target = rc.readyPlayers().find((p) => p.id === targetId);
       if (!target) return;
       rc.addScore(target.id, 1);
       rc.finish({
@@ -91,7 +92,7 @@ module.exports = {
 
     if (correct) {
       s.sub = 'pick';
-      const others = this._others(rc);
+      s.pickCandidates = this._pickCandidates(rc); // shuffled, NO names, incl. self
       rc.toHost('pick', {
         chosenName: s.chosen.name,
         roundValue: rc.roundValue,
@@ -101,7 +102,7 @@ module.exports = {
         if (p.id === s.chosen.id) {
           rc.toPlayer(p.id, 'pick', {
             roundValue: rc.roundValue,
-            candidates: others.map((o) => ({ id: o.id, name: o.name, characterId: o.characterId })),
+            candidates: s.pickCandidates,
           });
         } else {
           rc.toPlayer(p.id, 'waiting', {
@@ -152,6 +153,18 @@ module.exports = {
     return rc.readyPlayers().filter((p) => chosen && p.id !== chosen.id);
   },
 
+  /**
+   * The pick pool sent to the answerer's phone: EVERY ready player (the
+   * answerer included, so they can fat-finger themselves), shuffled, and
+   * WITHOUT names — the phone shows nameless bouncing figures only.
+   */
+  _pickCandidates(rc) {
+    return shuffled(rc.readyPlayers()).map((p) => ({
+      id: p.id,
+      characterId: p.characterId,
+    }));
+  },
+
   syncPlayer(rc, player) {
     const s = rc.state;
     const isChosen = s.chosen && player.id === s.chosen.id;
@@ -172,11 +185,7 @@ module.exports = {
       if (isChosen) {
         rc.toPlayer(player.id, 'pick', {
           roundValue: rc.roundValue,
-          candidates: this._others(rc).map((o) => ({
-            id: o.id,
-            name: o.name,
-            characterId: o.characterId,
-          })),
+          candidates: s.pickCandidates || this._pickCandidates(rc),
         });
       } else {
         rc.toPlayer(player.id, 'waiting', {

@@ -205,10 +205,14 @@ Alla tunables (svars-/pick-/choose-/resultat-tider, `MIN_PLAYERS`,
    (behåll namnet) eller ändra `SOUND_URL` överst i `public/host/modes/arena.js`.
 2. Den utvalda spelarens mobil visar en fråga med 4 alternativ. Övriga mobiler
    visar "X svarar…". Host visar en nedräkning.
-3. **Rätt svar:** spelaren pekar sedan ut valfri annan karaktär på sin mobil.
-   Den utpekade får rundvärdet i straffpoäng och ser **på sin egen mobil**
-   tydligt hur många (`scoredId` + `you-scored`-bannern). Alla skärmar:
-   "Let's go, X!".
+3. **Rätt svar:** spelarens mobil visar ett **"bounce room"** — alla figurer
+   (den som svarade **inräknad**) studsar runt utan namn. Man klickar på en
+   figur; den får rundvärdet i straffpoäng. Eftersom den egna figuren är med
+   går det att råka peka ut sig själv. Servern skickar `candidates` **utan
+   namn**, i slumpad ordning (`_pickCandidates`), och `award` godtar även
+   den egna spelaren. Den utpekade ser **på sin egen mobil** tydligt hur
+   många poäng (`scoredId` + `you-scored`-bannern). Alla skärmar: "Let's go,
+   X!". (Klickar ingen inom `PICK_SECONDS` lottas en **annan** spelare.)
 4. **Fel svar (eller tiden ut):** den som svarade får själv rundvärdet i
    straffpoäng och ser det på sin mobil. Alla skärmar: "You suck, X!".
 
