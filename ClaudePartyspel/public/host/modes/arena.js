@@ -118,7 +118,11 @@
         } catch (e) {
           /* ignore */
         }
-        if (window.SFX) window.SFX.play('moose');
+        if (window.SFX) {
+          window.SFX.play('moose');
+          // Announcer voice, just after the stomp lands.
+          setTimeout(() => window.SFX.say('boooooze moooose'), 260);
+        }
         root.innerHTML =
           `<div class="moose-overlay" style="--shake:${shake}s;--scale:${scale}">` +
           '<div class="moose-emoji">🫎</div>' +

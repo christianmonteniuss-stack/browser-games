@@ -178,5 +178,51 @@
         loopTimer = null;
       }
     },
+
+    // Speak a phrase out loud via the browser's speech synthesis (used for the
+    // "boooooze moooose" announcer). No-op where speech synthesis is missing.
+    say: function (text, opts) {
+      opts = opts || {};
+      if (
+        typeof window === 'undefined' ||
+        !window.speechSynthesis ||
+        !window.SpeechSynthesisUtterance
+      ) {
+        return;
+      }
+      try {
+        window.speechSynthesis.cancel();
+        const u = new window.SpeechSynthesisUtterance(String(text));
+        u.rate = opts.rate == null ? 0.6 : opts.rate;
+        u.pitch = opts.pitch == null ? 0.7 : opts.pitch;
+        u.volume = opts.volume == null ? 1 : opts.volume;
+        const voices = cachedVoices.length
+          ? cachedVoices
+          : window.speechSynthesis.getVoices() || [];
+        const en = voices.find((v) => /^en(-|$)/i.test(v.lang || ''));
+        if (en) u.voice = en;
+        window.speechSynthesis.speak(u);
+      } catch (e) {
+        /* ignore */
+      }
+    },
   };
+
+  // Voice list loads asynchronously in some browsers — cache it when ready.
+  let cachedVoices = [];
+  function loadVoices() {
+    try {
+      cachedVoices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    } catch (e) {
+      cachedVoices = [];
+    }
+  }
+  if (typeof window !== 'undefined' && window.speechSynthesis) {
+    loadVoices();
+    try {
+      window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    } catch (e) {
+      /* ignore */
+    }
+  }
 })();
