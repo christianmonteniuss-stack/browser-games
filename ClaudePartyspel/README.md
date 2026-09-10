@@ -208,9 +208,10 @@ i `server/modes/arena/config.js`.
 Straffpoäng landar bara om älgen är med rundan (annars 0 — se rutan ovan).
 
 Frågor: `server/modes/arena/questions.js`, `{ q, options: [4], correct }`.
-Listan shufflas och cyklas. Blandning av allmänbildning, popkultur och
-fåniga dryckesfrågor — någon enstaka fråga är lätt dagsaktuell (t.ex.
-Eurovision-vinnare) och tål att fräschas upp med jämna mellanrum.
+Listan shufflas och cyklas. Mest riktig allmänbildning (naturvetenskap,
+historia, geografi, kultur, sport) med en kortare svans fåniga
+dryckesfrågor sist. Samma upplägg i `server/modes/quiz/questions.js`.
+Ett par svar (t.ex. Sveriges regerande kung) tål att ses över med åren.
 
 ### Rundtyp: Time to Choose (`rounds/choose.js`)
 

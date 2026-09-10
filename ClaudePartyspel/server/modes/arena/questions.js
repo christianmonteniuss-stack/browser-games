@@ -9,51 +9,70 @@
 // Arena-quizrundan shufflar listan och cyklar igenom den, shufflar om när den
 // tar slut. Ingen spellogik här.
 //
-// Blandning: allmänbildning, popkultur och fåniga dryckesfrågor. Håll dem
-// korta — bara en spelare i taget läser frågan på sin mobil.
+// Mestadels riktig allmänbildning; en kortare svans fåniga dryckesfrågor sist.
 
 module.exports = [
-  // ── Allmänbildning ──
-  { q: 'Vad heter Danmarks huvudstad?', options: ['Odense', 'Köpenhamn', 'Aarhus', 'Aalborg'], correct: 1 },
-  { q: 'Hur många grader är en rät vinkel?', options: ['45', '90', '180', '360'], correct: 1 },
-  { q: 'Vilket organ renar blodet och bildar urin?', options: ['Levern', 'Njurarna', 'Lungorna', 'Mjälten'], correct: 1 },
-  { q: 'Vad heter världens största varma öken?', options: ['Sahara', 'Gobi', 'Kalahari', 'Atacama'], correct: 0 },
-  { q: 'Hur många planeter har vårt solsystem (efter 2006)?', options: ['7', '8', '9', '10'], correct: 1 },
-  { q: 'Vilket år startade andra världskriget?', options: ['1914', '1929', '1939', '1945'], correct: 2 },
-  { q: 'Vad kallas övergången när vatten blir vattenånga?', options: ['Kondensation', 'Avdunstning', 'Smältning', 'Sublimering'], correct: 1 },
-  { q: 'Vilket är det största nu levande djuret?', options: ['Afrikansk elefant', 'Blåval', 'Kaskelot', 'Giraff'], correct: 1 },
-  { q: 'Hur många tänder har en vuxen människa normalt?', options: ['26', '28', '32', '36'], correct: 2 },
-  { q: 'Vad heter Norges huvudstad?', options: ['Bergen', 'Oslo', 'Trondheim', 'Stavanger'], correct: 1 },
-  { q: 'Hur många sidor har en kub?', options: ['4', '6', '8', '12'], correct: 1 },
-  { q: 'Vilket språk talar man i Brasilien?', options: ['Spanska', 'Portugisiska', 'Franska', 'Italienska'], correct: 1 },
-  { q: 'Vad är H₂O mer känt som?', options: ['Salt', 'Socker', 'Vatten', 'Syre'], correct: 2 },
-  { q: 'Hur många ben har en insekt?', options: ['4', '6', '8', '10'], correct: 1 },
+  // ── Naturvetenskap & kropp ──
+  { q: 'Hur många kromosomer har en mänsklig cell?', options: ['23', '44', '46', '48'], correct: 2 },
+  { q: 'Ungefär hur snabbt går ljuset?', options: ['3 000 km/s', '30 000 km/s', '300 000 km/s', '3 000 000 km/s'], correct: 2 },
+  { q: 'Vilket blodkärl för syrerikt blod ut från hjärtat?', options: ['Aortan', 'Lungartären', 'Nedre hålvenen', 'Portådern'], correct: 0 },
+  { q: 'Hur många hjärtan har en bläckfisk?', options: ['1', '2', '3', '4'], correct: 2 },
+  { q: 'Vilket är det snabbaste landlevande djuret?', options: ['Lejon', 'Gepard', 'Antilop', 'Struts'], correct: 1 },
+  { q: 'Vilket grundämne har den kemiska symbolen "O"?', options: ['Guld', 'Syre', 'Osmium', 'Kväve'], correct: 1 },
+  { q: 'Vilket organ producerar insulin?', options: ['Levern', 'Bukspottkörteln', 'Mjälten', 'Njuren'], correct: 1 },
+  { q: 'Vilken gas är vanligast i jordens atmosfär?', options: ['Syre', 'Kväve', 'Koldioxid', 'Argon'], correct: 1 },
+  { q: 'Hur många sekunder går det på ett dygn?', options: ['3 600', '43 200', '86 400', '100 000'], correct: 2 },
+  { q: 'Hur många hörn har en kub?', options: ['4', '6', '8', '12'], correct: 2 },
+  { q: 'Vilken planet har de mest framträdande ringarna?', options: ['Jupiter', 'Saturnus', 'Uranus', 'Neptunus'], correct: 1 },
+  { q: 'I vilken kroppsdel sitter kroppens minsta ben (hörselbenen)?', options: ['Näsan', 'Örat', 'Knäet', 'Handen'], correct: 1 },
+  { q: 'Hur många ben har människans hand inklusive handleden?', options: ['19', '22', '27', '31'], correct: 2 },
+  { q: 'Vad mäter pH-skalan?', options: ['Temperatur', 'Surhet', 'Vikt', 'Ljusstyrka'], correct: 1 },
+  { q: 'Vad kallas en läkare som utför operationer?', options: ['Kirurg', 'Anestesiolog', 'Radiolog', 'Patolog'], correct: 0 },
+  { q: 'Ungefär hur lång tid tar det för maten att gå från magsäck till tunntarm?', options: ['30 min', '60 min', '120 min', '240 min'], correct: 2 },
+  { q: 'Vilken gas tar växterna upp vid fotosyntesen?', options: ['Syre', 'Koldioxid', 'Kväve', 'Vätgas'], correct: 1 },
+  { q: 'Vilket är det största nu levande landdjuret?', options: ['Flodhäst', 'Noshörning', 'Afrikansk elefant', 'Giraff'], correct: 2 },
 
-  // ── Popkultur ──
-  { q: 'Vem spelar Iron Man i Marvel-filmerna?', options: ['Chris Evans', 'Robert Downey Jr', 'Mark Ruffalo', 'Chris Hemsworth'], correct: 1 },
-  { q: 'Vilken app är känd för korta videor och dansutmaningar?', options: ['LinkedIn', 'TikTok', 'Spotify', 'Pinterest'], correct: 1 },
-  { q: 'Vilken möbeljätte kommer från Sverige?', options: ['Mio', 'IKEA', 'Jysk', 'EM Home'], correct: 1 },
-  { q: 'Vilken färg har fisken Nemo i "Hitta Nemo"?', options: ['Blå', 'Orange', 'Gul', 'Röd'], correct: 1 },
-  { q: 'Vilket land kommer bandet ABBA ifrån?', options: ['Norge', 'Danmark', 'Sverige', 'Finland'], correct: 2 },
-  { q: 'I vilket spel bygger man med block och möter "creepers"?', options: ['Fortnite', 'Roblox', 'Minecraft', 'Terraria'], correct: 2 },
-  { q: 'Vad heter den gröna huvudpersonen i "Shrek"?', options: ['Shrek', 'Fiona', 'Åsnan', 'Lord Farquaad'], correct: 0 },
-  { q: 'Vilken svensk fotbollsspelare kallas ofta "Ibra"?', options: ['Henrik Larsson', 'Zlatan Ibrahimović', 'Emil Forsberg', 'Victor Lindelöf'], correct: 1 },
-  { q: 'Vad heter rymdskeppet i "Star Trek"?', options: ['Millennium Falcon', 'USS Enterprise', 'Serenity', 'Nostromo'], correct: 1 },
-  { q: 'Vilket företag äger sökmotorn med samma namn som talet 10¹⁰⁰?', options: ['Meta', 'Google', 'Amazon', 'Microsoft'], correct: 1 },
-  { q: 'Vem sjunger originalet "Dancing Queen"?', options: ['ABBA', 'Roxette', 'Ace of Base', 'A-teens'], correct: 0 },
-  { q: 'Vad heter superhjälten som är Peter Parker?', options: ['Batman', 'Spider-Man', 'Superman', 'Daredevil'], correct: 1 },
+  // ── Historia ──
+  { q: 'Vilket år upptäckte Columbus Amerika?', options: ['1392', '1450', '1492', '1512'], correct: 2 },
+  { q: 'Vem uppfann den kommersiellt gångbara glödlampan?', options: ['Nikola Tesla', 'Thomas Edison', 'Alexander Graham Bell', 'James Watt'], correct: 1 },
+  { q: 'Vad kallas perioden i Europa efter Romarrikets fall?', options: ['Antiken', 'Medeltiden', 'Renässansen', 'Upplysningen'], correct: 1 },
+  { q: 'Vem skrev "Brott och straff"?', options: ['Leo Tolstoj', 'Fjodor Dostojevskij', 'Nikolaj Gogol', 'Maxim Gorkij'], correct: 1 },
+  { q: 'Vilket land byggde fartyget Titanic?', options: ['USA', 'Storbritannien', 'Tyskland', 'Frankrike'], correct: 1 },
+  { q: 'Vilket rike styrdes av en farao?', options: ['Persien', 'Egypten', 'Babylonien', 'Grekland'], correct: 1 },
+  { q: 'Vilket år bröt första världskriget ut?', options: ['1912', '1914', '1916', '1918'], correct: 1 },
+
+  // ── Geografi ──
+  { q: 'Vilket är världens högsta berg över havet?', options: ['K2', 'Mount Everest', 'Kilimanjaro', 'Mont Blanc'], correct: 1 },
+  { q: 'Vilket hav är störst?', options: ['Atlanten', 'Indiska oceanen', 'Stilla havet', 'Norra ishavet'], correct: 2 },
+  { q: 'Vilken flod anses traditionellt vara världens längsta?', options: ['Amazonfloden', 'Nilen', 'Yangtze', 'Mississippi'], correct: 1 },
+  { q: 'Vad heter Australiens huvudstad?', options: ['Sydney', 'Melbourne', 'Canberra', 'Perth'], correct: 2 },
+  { q: 'Vad heter Kanadas huvudstad?', options: ['Toronto', 'Ottawa', 'Vancouver', 'Montréal'], correct: 1 },
+  { q: 'Vilken flod rinner genom Paris?', options: ['Themsen', 'Seine', 'Rhen', 'Donau'], correct: 1 },
+  { q: 'I vilket land ligger huvudstaden Nairobi?', options: ['Nigeria', 'Kenya', 'Tanzania', 'Etiopien'], correct: 1 },
+  { q: 'Hur många tidszoner har fastlands-USA?', options: ['3', '4', '5', '6'], correct: 1 },
+  { q: 'Vilket är världens minsta självständiga land?', options: ['Monaco', 'San Marino', 'Vatikanstaten', 'Nauru'], correct: 2 },
+  { q: 'Vad heter Greklands huvudstad?', options: ['Thessaloniki', 'Aten', 'Sparta', 'Korinth'], correct: 1 },
+  { q: 'Hur många länder gränsar till Sverige på land?', options: ['1', '2', '3', '4'], correct: 1 },
+  { q: 'Vilket land har yen som valuta?', options: ['Kina', 'Japan', 'Sydkorea', 'Thailand'], correct: 1 },
+
+  // ── Kultur & sport ──
+  { q: 'Hur många spelare har ett fotbollslag på planen?', options: ['9', '10', '11', '12'], correct: 2 },
+  { q: 'Hur många poäng ger en "touchdown" i amerikansk fotboll?', options: ['3', '6', '7', '8'], correct: 1 },
+  { q: 'Hur många ringar finns på den olympiska flaggan?', options: ['3', '4', '5', '6'], correct: 2 },
+  { q: 'Hur många tangenter har ett vanligt piano?', options: ['66', '76', '88', '96'], correct: 2 },
+  { q: 'Hur många strängar har en vanlig akustisk gitarr?', options: ['4', '5', '6', '12'], correct: 2 },
+  { q: 'Vem komponerade "Ödessymfonin" (symfoni nr 5)?', options: ['Mozart', 'Beethoven', 'Bach', 'Chopin'], correct: 1 },
+  { q: 'Vilket land arrangerade sommar-OS 2016?', options: ['Storbritannien', 'Brasilien', 'Japan', 'Kina'], correct: 1 },
+  { q: 'Vad heter Sveriges regerande kung?', options: ['Carl XVI Gustaf', 'Gustaf VI Adolf', 'Carl XV', 'Oscar II'], correct: 0 },
 
   // ── Fåniga & dryck ──
   { q: 'Vad rymmer "en stor stark" på krogen oftast?', options: ['33 cl', '40 cl', '50 cl', '75 cl'], correct: 1 },
-  { q: 'Vilket land dricker traditionellt mest te per person?', options: ['Italien', 'Turkiet', 'Spanien', 'Brasilien'], correct: 1 },
-  { q: 'Vilken dryck görs av jästa druvor?', options: ['Öl', 'Vin', 'Cider', 'Mjöd'], correct: 1 },
   { q: '"Systemet" är ett vardagligt namn för vad?', options: ['Tunnelbanan', 'Systembolaget', 'Skatteverket', 'Försäkringskassan'], correct: 1 },
   { q: 'Hur säger man "skål" på japanska?', options: ['Prost', 'Salute', 'Kanpai', 'Cheers'], correct: 2 },
-  { q: 'Vilken frukt läggs oftast i en Gin & Tonic?', options: ['Citron eller lime', 'Äpple', 'Vindruva', 'Jordgubbe'], correct: 0 },
-  { q: 'Vad kallas en alkoholfri drink på restaurang?', options: ['Mocktail', 'Highball', 'Sour', 'Shrub'], correct: 0 },
-  { q: 'Vilken snapsvisa börjar "Helan går"?', options: ['En midsommarnattsdröm', 'Helan går', 'Kalle P', 'Änglamark'], correct: 1 },
   { q: 'Vad blandas i en "Screwdriver"?', options: ['Vodka och apelsinjuice', 'Rom och cola', 'Gin och tonic', 'Whisky och ingefärsöl'], correct: 0 },
-  { q: 'Ungefär hur många kalorier har ett glas (33 cl) lager-öl?', options: ['ca 50', 'ca 150', 'ca 350', 'ca 600'], correct: 1 },
-  { q: 'Vad heter drycken av jäst honung och vatten?', options: ['Mjöd', 'Cider', 'Portvin', 'Sake'], correct: 0 },
-  { q: 'Hur många cl är en "fyra" (klassisk drinkmängd sprit)?', options: ['2 cl', '4 cl', '6 cl', '8 cl'], correct: 1 },
+  { q: 'Vilken frukt läggs oftast i en Gin & Tonic?', options: ['Citron eller lime', 'Äpple', 'Vindruva', 'Jordgubbe'], correct: 0 },
+  { q: 'Vilken dryck görs av jäst honung och vatten?', options: ['Mjöd', 'Cider', 'Portvin', 'Sake'], correct: 0 },
+  { q: 'Vilken dryck förknippas mest med tyska Oktoberfest?', options: ['Vin', 'Öl', 'Cider', 'Whisky'], correct: 1 },
+  { q: 'Hur mycket rymmer en svensk "helflaska" sprit?', options: ['0,5 liter', '0,7 liter', '1 liter', '1,5 liter'], correct: 1 },
+  { q: '"Bakis" är slang för vad?', options: ['Hungrig', 'Bakfull', 'Trött efter jobbet', 'Förkyld'], correct: 1 },
 ];
