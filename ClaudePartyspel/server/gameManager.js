@@ -231,6 +231,9 @@ class GameManager {
     const ended = this.activeMode;
     if (ended.onEnd) ended.onEnd(this._ctx());
     this.activeMode = null;
+    // Every finished game hands the lobby back with a clean slate — the next
+    // game (any mode) always starts from zero and no stale scores linger.
+    this.lobby.resetScores();
     this._broadcast(S2C.MODE_ENDED, { modeId: ended.id });
     this._broadcastLobby();
   }

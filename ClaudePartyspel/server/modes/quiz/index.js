@@ -18,6 +18,16 @@ const QUESTIONS = require('./questions');
 const QUESTIONS_PER_ROUND = 8;
 const POINTS_CORRECT = 100;
 
+/** Fisher–Yates copy — so every game serves a fresh, random set of questions. */
+function shuffled(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function createQuizMode() {
   return {
     // ── identity (also declared in server/modes/index.js) ──
@@ -31,7 +41,7 @@ function createQuizMode() {
     onStart(ctx) {
       this.ctx = ctx;
       ctx.resetScores();
-      this.questions = QUESTIONS.slice(0, QUESTIONS_PER_ROUND);
+      this.questions = shuffled(QUESTIONS).slice(0, QUESTIONS_PER_ROUND);
       this.index = 0;
       this.phase = 'idle'; // 'question' | 'revealed' | 'done'
       this.answers = new Map(); // playerId -> chosen option index (this question)

@@ -189,3 +189,23 @@
 .react-row .rr-rank { color: var(--muted); font-weight: 800; }
 .react-row .rr-time { color: var(--muted); font-variant-numeric: tabular-nums; }
 .react-row .cr-pts { font-weight: 800; color: var(--bad); }
+
+/* ── party pop (arena / player) ──────────────────────────────────────────── */
+
+.arena-result.celebrate {
+  background: radial-gradient(circle at 50% 40%, rgba(163, 230, 53, 0.32), transparent 70%);
+}
+.arena-result.miss {
+  background: radial-gradient(circle at 50% 40%, rgba(251, 113, 133, 0.32), transparent 70%);
+}
+.result-text { font-weight: 900; }
+.moose-text {
+  color: var(--accent-3);
+  text-shadow: 0 2px 0 #6b3e12, 0 0 20px var(--accent-2);
+}
+.golf-list li.leader { border-color: var(--good); }
+.pick-tile.selected { border-color: var(--accent); }
+.react-btn.go {
+  background: linear-gradient(135deg, var(--accent-4), var(--accent-3));
+  color: #06231a;
+}

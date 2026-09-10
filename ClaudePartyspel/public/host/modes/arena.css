@@ -262,3 +262,43 @@
   80%  { left: 44%; top: 28%; }
   100% { left: 6%;  top: 10%; }
 }
+
+/* ── party pop (arena / host) ─────────────────────────────────────────────── */
+
+.arena-result.celebrate {
+  background: radial-gradient(circle at 50% 40%, rgba(163, 230, 53, 0.3), transparent 70%);
+}
+.arena-result.miss {
+  background: radial-gradient(circle at 50% 40%, rgba(251, 113, 133, 0.3), transparent 70%);
+}
+.result-text { font-weight: 900; text-shadow: 0 4px 0 rgba(0, 0, 0, 0.28); }
+
+.golf-list li.leader {
+  border-color: var(--accent);
+  background: linear-gradient(90deg, rgba(255, 210, 63, 0.22), var(--panel));
+}
+.golf-list li.leader .pos::before { color: var(--accent); }
+
+.moose-text {
+  color: var(--accent-3);
+  text-shadow: 0 3px 0 #6b3e12, 0 0 28px var(--accent-2);
+}
+.moose-overlay { filter: saturate(1.35); }
+
+/* Reaction test: the strobe slows a touch, and the big "C" pulses on every
+   metronome beat (JS toggles .beat / .flash from SFX.startLoop). */
+.react-hype.pulsing { animation-duration: 0.4s; }
+.react-c { transition: transform 0.09s ease, filter 0.09s ease; }
+.react-c.beat { transform: scale(1.32); filter: drop-shadow(0 0 34px var(--accent)); }
+.react-hype.flash::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: var(--flash, 0.1);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .react-hype, .react-c, .moose-overlay { animation: none !important; }
+}

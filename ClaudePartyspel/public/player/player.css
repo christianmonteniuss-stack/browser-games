@@ -3,23 +3,37 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #12131a;
-  --panel: #1e2029;
-  --panel-2: #2c2f3a;
-  --fg: #f2f3f7;
-  --muted: #9aa0b0;
-  --accent: #5b8cff;
-  --good: #3ecf8e;
-  --bad: #ff5c6c;
+  --bg: #1b1145;
+  --bg-2: #3b1a78;
+  --panel: #2a1c5e;
+  --panel-2: #3f2d82;
+  --fg: #fdfdff;
+  --muted: #c3b3ef;
+  --accent: #ffd23f;   /* yellow — primary buttons */
+  --accent-2: #ff5da2; /* hot pink */
+  --accent-3: #3ddad7; /* turquoise */
+  --accent-4: #a3e635; /* lime */
+  --good: #34d399;
+  --bad: #fb7185;
 }
 
 html, body { height: 100%; }
 
 body {
-  background: var(--bg);
+  background: linear-gradient(160deg, #1b1145, #3b1a78 50%, #5b2a9d 80%, #241056);
+  background-attachment: fixed;
+  background-size: 200% 200%;
+  animation: party-bg 22s ease-in-out infinite;
   color: var(--fg);
   font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
+}
+@keyframes party-bg {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body { animation: none; }
 }
 
 #app {
@@ -53,15 +67,20 @@ input[type="text"] {
   width: 100%;
   padding: 18px;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 900;
   border: 0;
-  border-radius: 12px;
-  background: var(--accent);
-  color: #fff;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent-3), var(--accent));
+  color: #241056;
   cursor: pointer;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.3), 0 0 22px rgba(255, 210, 63, 0.3);
+  transition: transform 0.08s ease, box-shadow 0.16s ease;
 }
-.big-btn:active { transform: translateY(1px); }
-.big-btn:disabled { opacity: .45; }
+.big-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+}
+.big-btn:disabled { opacity: .45; box-shadow: none; }
 
 /* ── quiz ── */
 
@@ -126,4 +145,39 @@ input[type="text"] {
   padding: 10px;
   font-size: 14px;
   font-weight: 600;
+}
+
+/* ── party pop ── phone-side vivid overrides ──────────────────────────────── */
+
+h1 { font-weight: 900; color: var(--accent); }
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  h1 {
+    background: linear-gradient(90deg, var(--accent-3), var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+.quiz-q h2 { font-weight: 900; transform: rotate(-1deg); }
+
+.quiz-option { border-color: rgba(255, 255, 255, 0.12); }
+.quiz-option .letter {
+  background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+  color: #241056;
+}
+.quiz-option.picked {
+  border-color: var(--accent);
+  background: rgba(255, 210, 63, 0.16);
+}
+
+.standings li.me { border: 2px solid var(--accent); }
+.lobby-people li .me { color: var(--accent); }
+
+/* button that pulses while you wait for the reaction-test signal */
+.pulsing { animation: player-pulse 0.9s ease-in-out infinite; }
+@keyframes player-pulse {
+  50% { transform: scale(0.97); filter: brightness(1.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulsing { animation: none; }
 }

@@ -187,6 +187,16 @@
     sendMsg(C2S.HOST_ACTION, { action: 'reset_scores' })
   );
 
+  // Browsers block audio until the first gesture — the host's first click
+  // (almost always "Starta …") unlocks the sound engine for the whole session.
+  function unlockAudio() {
+    if (window.SFX) window.SFX.unlock();
+    window.removeEventListener('pointerdown', unlockAudio);
+    window.removeEventListener('keydown', unlockAudio);
+  }
+  window.addEventListener('pointerdown', unlockAudio);
+  window.addEventListener('keydown', unlockAudio);
+
   // ── websocket with auto-reconnect ──────────────────────────────────────
 
   function connect() {

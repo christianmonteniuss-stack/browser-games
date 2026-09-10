@@ -20,6 +20,9 @@ npm install      # en gång, kräver internet just den gången (hämtar 'ws' + '
 npm start
 ```
 
+Kör du [Bun](https://bun.sh/) i stället funkar `bun server/index.js` lika bra
+(beroendena är redan installerade i repo:t).
+
 Terminalen skriver ut något i stil med:
 
 ```
@@ -92,6 +95,8 @@ ClaudePartyspel/
     ├── shared/events.js     Webbläsarkopia av meddelandetyperna (spegel av protocol.js)
     ├── shared/character.js  Enda stället som ritar en karaktär (emoji/färg-cirkel, eller bild om imageUrl finns)
     ├── shared/character.css Stilar för karaktärscirkeln + valrutnätet
+    ├── shared/sfx.js        Ljudmotor (WebAudio-synt, inga ljudfiler): win/lose/tick/signal m.m.
+    ├── shared/confetti.js   Canvas-konfetti (window.Confetti.burst) på vinst/slut
     ├── host/
     │   ├── index.html    Host-skärmen
     │   ├── host.css
@@ -168,6 +173,15 @@ spelläge ("Starta Arena") och styr den med **en enda knapp: "Nästa runda"**.
 **Rummet** (host-skärmen mellan rundor): alla spelares karaktärer i rad, med
 poäng. Här sitter "Nästa runda"- och "Avsluta"-knapparna.
 
+> **Poäng delas bara ut på älg-rundor.** Alla rundtyper spelas som vanligt,
+> men `rc.addScore()` ger **0** om inte BOOZE MOOSE är aktiv för rundan (se
+> `_points()` i `arena/index.js`). När älgen är med blir utdelningen
+> `enheter × rundvärde × älg-multiplikator`. `MOOSE_CHANCE` i `config.js` är
+> höjd så att en omgång hinner bli avgjord.
+>
+> **Poängen nollställs när ett spel avslutas** (åter till lobbyn) — gäller
+> både Arena och Quiz, sköts centralt i `GameManager._endActiveMode()`.
+
 När host trycker "Nästa runda" slumpar servern **vilken rundtyp** som körs,
 enligt vikterna i `config.ROUND_TYPE_WEIGHTS`. Rundtyperna ligger var för sig
 i `server/modes/arena/rounds/` — arena-kärnan äger rundvärde, älg, resultat-
@@ -186,12 +200,17 @@ i `server/modes/arena/config.js`.
    (behåll namnet) eller ändra `SOUND_URL` överst i `public/host/modes/arena.js`.
 2. Den utvalda spelarens mobil visar en fråga med 4 alternativ. Övriga mobiler
    visar "X svarar…". Host visar en nedräkning.
-3. **Rätt svar:** spelaren pekar sedan ut valfri annan karaktär på sin mobil.
-   Den får poäng lika med aktuellt **rundvärde**. Alla skärmar: "Let's go, X!".
-4. **Fel svar (eller tiden ut):** den som svarade får själv rundvärdet i poäng.
+3. **Rätt svar:** spelaren pekar sedan ut valfri annan karaktär på sin mobil
+   ("syndabocken"). Alla skärmar: "Let's go, X!".
+4. **Fel svar (eller tiden ut):** den som svarade åker dit själv.
    Alla skärmar: "You suck, X!".
 
+Straffpoäng landar bara om älgen är med rundan (annars 0 — se rutan ovan).
+
 Frågor: `server/modes/arena/questions.js`, `{ q, options: [4], correct }`.
+Listan shufflas och cyklas. Blandning av allmänbildning, popkultur och
+fåniga dryckesfrågor — någon enstaka fråga är lätt dagsaktuell (t.ex.
+Eurovision-vinnare) och tål att fräschas upp med jämna mellanrum.
 
 ### Rundtyp: Time to Choose (`rounds/choose.js`)
 
@@ -210,13 +229,16 @@ som frågefilen. Lägg bara till fler.
 
 ### Rundtyp: Reaktionstest (`rounds/react.js`)
 
-1. Host visar ett stort "C" som **rör sig och blinkar** medan bakgrunden
-   strobar i olika färger (rent för hajp). Alla mobiler visar en stor knapp +
-   "Vänta…" (knappen är inaktiv).
+1. Host visar ett stort "C" som **rör sig** medan bakgrunden strobar i
+   partyfärger. En **metronom** (WebAudio, `SFX.startLoop` i
+   `public/shared/sfx.js`) tickar i takt med att C:et pulsar — tempo och
+   tonhöjd stiger ju längre väntan blir, så det byggs upp en stress. Alla
+   mobiler visar en stor knapp + "Vänta…" (knappen är inaktiv och pulsar).
 2. Efter en slumpad fördröjning i `[REACT_DELAY_MIN, REACT_DELAY_MAX]` sekunder
-   **fryser C:et** — det är signalen. Mobilerna byter till "TRYCK NU!" och
-   knappen aktiveras. Servern startar tidtagning **från när den skickade
-   signalen** (mätt serverside, `Date.now() - signalAt`).
+   **fryser C:et** — det är signalen. Metronomen tystnar, ett kort "GO"-ljud
+   spelas och mobilerna byter till "TRYCK NU!" (+ vibration) och knappen
+   aktiveras. Servern startar tidtagning **från när den skickade signalen**
+   (mätt serverside, `Date.now() - signalAt`).
 3. Servern samlar in reaktionstiderna och sorterar snabbast → långsammast.
    Trycker man inte inom `REACT_MAX_SECONDS` efter signalen räknas man som
    sist. Tryck **före** signalen ignoreras (knappen är inaktiv i klienten).
@@ -238,7 +260,7 @@ form som quiz/choose — `id`, `start`, `onPlayerMessage`, `syncPlayer`,
 Ett tillägg ovanpå rundlogiken, inte en omskrivning. `onHostMessage` kör
 `_maybeMoose(() => this._startRound())` — älgen slås fram **innan** rundan.
 
-* **Chans:** `MOOSE_CHANCE` per runda (default `0.15`). Konstant i
+* **Chans:** `MOOSE_CHANCE` per runda (default `0.3`). Konstant i
   `server/modes/arena/config.js`.
 * **Om älgen dyker upp:** fas `'moose'`, en `mode_state`-broadcast med
   `view: 'moose'` → stor "BOOOOSE MOOOOSE"-overlay på host (`🫎`, skakning,
@@ -247,8 +269,9 @@ Ett tillägg ovanpå rundlogiken, inte en omskrivning. `onHostMessage` kör
 * **Räknare:** `mooseVisits` (per omgång, på servern). **Multiplikator** =
   `MOOSE_BASE_MULTIPLIER + (mooseVisits - 1)` → 2× första gången, 3× andra,
   4× tredje …
-* **Effekt:** så länge älgen är aktiv (den rundan) går alla poäng genom
-  `_points()` = `roundValue × multiplier`. Nollställs i `_toRoom()`.
+* **Effekt:** `_points()` ger poäng **bara** när älgen är aktiv den rundan —
+  `enheter × roundValue × multiplier`. Mooseless rundor ger 0. Nollställs i
+  `_toRoom()`.
 * **Intensitet:** `intensity = mooseVisits` skickas till klienten, som gör
   overlay + ljud större/snabbare/högre för varje besök (platshållar-effekter
   i `arena.js` / `arena.css` — byt fritt).

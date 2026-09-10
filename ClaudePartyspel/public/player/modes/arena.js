@@ -52,6 +52,7 @@
   window.PartyModes.arena = {
     render(msg, api) {
       clearCountdown();
+      if (window.SFX) window.SFX.stopLoop();
       const { view, data } = msg;
       const root = api.root;
 
@@ -67,6 +68,8 @@
         } catch (e) {
           /* ignore */
         }
+        if (window.SFX) window.SFX.play('moose');
+        if (navigator.vibrate) navigator.vibrate([90, 40, 140]);
         root.innerHTML =
           `<div class="moose-overlay small" style="--shake:${shake}s;--scale:${scale}">` +
           '<div class="moose-emoji">🫎</div>' +
@@ -130,9 +133,10 @@
       }
 
       if (view === 'pick') {
+        if (window.SFX) window.SFX.play('correct');
         root.innerHTML =
           '<h2 class="good">Rätt!</h2>' +
-          `<p>Peka ut vem som får <strong>${data.roundValue}</strong> straffpoäng:</p>` +
+          '<p>Peka ut en syndabock:</p>' +
           '<div class="pick-grid"></div>';
         const grid = root.querySelector('.pick-grid');
         const roster = api.characters() || [];
@@ -226,7 +230,9 @@
           `<div class="arena-result choose${moose ? ' moose' : ''}">` +
           '<p class="choose-tag">Time to Choose</p>' +
           `<h3>${esc(data.statement)}</h3>` +
-          (moose ? `<p class="muted">🫎 &times;${data.moose.multiplier}</p>` : '') +
+          (moose
+            ? `<p class="muted">🫎 &times;${data.moose.multiplier} — nu räknas det!</p>`
+            : '<p class="muted">Spelas för skoj — bara älgen ger poäng 🫎</p>') +
           `<ul class="choose-tally">${rows}</ul>` +
           '</div>' +
           golfBoard(data.standings, api.me());
@@ -237,10 +243,12 @@
         if (data.phase === 'wait') {
           root.innerHTML =
             '<h2 class="react-wait-title">Vänta…</h2>' +
-            '<button id="react-btn" class="react-btn big-btn" disabled>TRYCK</button>';
+            '<button id="react-btn" class="react-btn big-btn pulsing" disabled>TRYCK</button>';
           return;
         }
         if (data.phase === 'go') {
+          if (window.SFX) window.SFX.play('signal');
+          if (navigator.vibrate) navigator.vibrate(180);
           root.innerHTML =
             '<h2 class="react-go-title good">TRYCK NU!</h2>' +
             '<button id="react-btn" class="react-btn go big-btn">TRYCK!</button>';
@@ -283,7 +291,9 @@
           `<div class="arena-result choose${moose ? ' moose' : ''}">` +
           '<p class="choose-tag">Reaktionstest</p>' +
           '<h3>Snabbast vinner</h3>' +
-          (moose ? `<p class="muted">🫎 &times;${data.moose.multiplier}</p>` : '') +
+          (moose
+            ? `<p class="muted">🫎 &times;${data.moose.multiplier} — nu räknas det!</p>`
+            : '<p class="muted">Spelas för skoj — bara älgen ger poäng 🫎</p>') +
           `<ul class="choose-tally react-tally">${rows}</ul>` +
           '</div>' +
           golfBoard(data.standings, api.me());
@@ -298,9 +308,13 @@
           `<div class="arena-result ${celebrate ? 'celebrate' : 'miss'}${moose ? ' moose' : ''}">` +
           `<div class="result-burst">${celebrate ? '🎉' : '💥'}${moose ? '🫎' : ''}</div>` +
           `<h1 class="result-text">${text}</h1>` +
-          (moose ? `<p class="muted">🫎 &times;${data.moose.multiplier}</p>` : '') +
+          (moose
+            ? `<p class="muted">🫎 &times;${data.moose.multiplier}</p>`
+            : '<p class="muted">Ingen insats — vänta på älgen 🫎</p>') +
           '</div>' +
           golfBoard(data.standings, api.me());
+        if (window.SFX) window.SFX.play(celebrate ? 'win' : 'lose');
+        if (celebrate && window.Confetti) window.Confetti.burst({ count: 70, y: 0.3 });
         return;
       }
     },

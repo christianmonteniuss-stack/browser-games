@@ -81,6 +81,7 @@
         localStorage.setItem('cp_playerId', state.playerId);
         localStorage.setItem('cp_name', state.name);
         hideJoinError();
+        if (window.SFX) window.SFX.play('join');
         render();
         break;
 
@@ -246,6 +247,16 @@
     state.name = name;
     sendMsg(C2S.JOIN, { name });
   });
+
+  // Unlock the sound engine on the first tap anywhere (browsers block audio
+  // until a user gesture). Runs once, then removes itself.
+  function unlockAudio() {
+    if (window.SFX) window.SFX.unlock();
+    window.removeEventListener('pointerdown', unlockAudio);
+    window.removeEventListener('keydown', unlockAudio);
+  }
+  window.addEventListener('pointerdown', unlockAudio);
+  window.addEventListener('keydown', unlockAudio);
 
   function showJoinError(msg) {
     const n = $('join-error');

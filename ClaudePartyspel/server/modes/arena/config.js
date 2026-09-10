@@ -22,8 +22,10 @@ module.exports = {
   MIN_PLAYERS: 2,
 
   // ── Älgen (slumphändelse ovanpå rundlogiken) ──
-  // Chans per runda att älgen dyker upp innan rundan körs.
-  MOOSE_CHANCE: 0.15,
+  // Chans per runda att älgen dyker upp innan rundan körs. Älg-rundorna är
+  // numera de ENDA som ger poäng (se arena/index.js _points), så den här ligger
+  // högt nog att en omgång hinner bli avgjord.
+  MOOSE_CHANCE: 0.3,
   // Multiplikatorn för en älg-runda är MOOSE_BASE_MULTIPLIER + antal TIDIGARE
   // älg-besök denna omgång: 2x första gången, 3x andra, 4x tredje ...
   MOOSE_BASE_MULTIPLIER: 2,

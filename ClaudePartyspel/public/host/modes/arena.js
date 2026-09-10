@@ -102,6 +102,7 @@
       clearCountdown();
       chooseLive = false;
       reactLive = false;
+      if (window.SFX) window.SFX.stopLoop(); // kill any reaction-test metronome
 
       if (view === 'moose') {
         const intensity = Math.max(1, data.intensity || 1);
@@ -117,6 +118,7 @@
         } catch (e) {
           /* ignore */
         }
+        if (window.SFX) window.SFX.play('moose');
         root.innerHTML =
           `<div class="moose-overlay" style="--shake:${shake}s;--scale:${scale}">` +
           '<div class="moose-emoji">🫎</div>' +
@@ -189,7 +191,7 @@
           roomStrip(data.characters, null) +
           '<div class="arena-mid">' +
           `<p class="arena-turn"><strong>${esc(data.chosenName)}</strong> hade rätt och ` +
-          `väljer vem som får ${data.roundValue} straffpoäng…</p>` +
+          `pekar ut en syndabock…</p>` +
           '</div></div>';
         return;
       }
@@ -242,7 +244,9 @@
           `<div class="arena-result choose${moose ? ' moose' : ''}">` +
           '<p class="choose-tag">Time to Choose</p>' +
           `<h2 class="choose-statement">${esc(data.statement)}</h2>` +
-          (moose ? `<p class="result-sub">🫎 &times;${data.moose.multiplier}</p>` : '') +
+          (moose
+            ? `<p class="result-sub">🫎 &times;${data.moose.multiplier} — nu räknas det!</p>`
+            : '<p class="result-sub">Spelas för skoj — bara älgen delar ut poäng 🫎</p>') +
           `<ul class="choose-tally">${rows}</ul>` +
           '</div>' +
           golfBoard(data.standings);
@@ -252,13 +256,33 @@
       if (view === 'react') {
         if (data.phase === 'wait') {
           root.innerHTML =
-            '<div class="react-hype">' +
-            '<div class="react-c blink">C</div>' +
+            '<div class="react-hype pulsing">' +
+            '<div class="react-c">C</div>' +
             '<p class="react-sub">Vänta på signalen…</p>' +
             '</div>';
+          const cEl = root.querySelector('.react-c');
+          const hype = root.querySelector('.react-hype');
+          if (window.SFX) {
+            window.SFX.startLoop((p) => {
+              window.SFX.tick(p);
+              if (cEl) {
+                cEl.classList.add('beat');
+                setTimeout(() => cEl.classList.remove('beat'), 90);
+              }
+              if (hype) {
+                hype.style.setProperty('--flash', (0.05 + p * 0.28).toFixed(2));
+                hype.classList.add('flash');
+                setTimeout(() => hype.classList.remove('flash'), 80);
+              }
+            });
+          }
           return;
         }
         // phase === 'go' — the "C" freezes: that is the signal
+        if (window.SFX) {
+          window.SFX.stopLoop();
+          window.SFX.play('signal');
+        }
         root.innerHTML =
           '<div class="react-hype go">' +
           '<div class="react-c go">C</div>' +
@@ -293,7 +317,9 @@
           `<div class="arena-result choose${moose ? ' moose' : ''}">` +
           '<p class="choose-tag">Reaktionstest</p>' +
           '<h2 class="choose-statement">Snabbast vinner (får minst poäng)</h2>' +
-          (moose ? `<p class="result-sub">🫎 &times;${data.moose.multiplier}</p>` : '') +
+          (moose
+            ? `<p class="result-sub">🫎 &times;${data.moose.multiplier} — nu räknas det!</p>`
+            : '<p class="result-sub">Spelas för skoj — bara älgen delar ut poäng 🫎</p>') +
           `<ul class="choose-tally react-tally">${rows}</ul>` +
           '</div>' +
           golfBoard(data.standings);
@@ -303,12 +329,11 @@
       if (view === 'result') {
         const celebrate = data.kind === 'celebrate';
         const text = (celebrate ? "Let's go, " : 'You suck, ') + esc(data.name) + '!';
-        const pts = data.pointsAwarded != null ? data.pointsAwarded : data.roundValue;
+        const pts = data.pointsAwarded != null ? data.pointsAwarded : 0;
         const moose = !!(data.moose && data.moose.active);
-        const sub =
-          `${esc(data.name)} får ${pts} straffpoäng` +
-          (celebrate ? '' : ' för fel svar') +
-          (moose ? ` &nbsp;🫎 &times;${data.moose.multiplier}!` : '');
+        const sub = moose
+          ? `${esc(data.name)} får ${pts} straffpoäng &nbsp;🫎 &times;${data.moose.multiplier}!`
+          : 'Ingen insats den här rundan — vänta på älgen! 🫎';
         root.innerHTML =
           `<div class="arena-result ${celebrate ? 'celebrate' : 'miss'}${moose ? ' moose' : ''}">` +
           `<div class="result-burst">${celebrate ? '🎉' : '💥'}${moose ? '🫎' : ''}</div>` +
@@ -316,6 +341,10 @@
           `<p class="result-sub">${sub}</p>` +
           '</div>' +
           golfBoard(data.standings);
+        if (window.SFX) window.SFX.play(celebrate ? 'win' : 'lose');
+        if (celebrate && window.Confetti) {
+          window.Confetti.burst({ count: moose ? 220 : 150 });
+        }
         return;
       }
     },

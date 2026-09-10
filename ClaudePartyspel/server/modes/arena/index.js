@@ -26,6 +26,7 @@ function createArenaMode() {
 
     onStart(ctx) {
       this.ctx = ctx;
+      ctx.resetScores(); // every Arena game starts from a clean golf board
       this.roundValue = CONFIG.ROUND_VALUE_START;
       this.timers = [];
       this.roundNonce = 0;
@@ -258,10 +259,18 @@ function createArenaMode() {
 
     // ── shared helpers ───────────────────────────────────────────────
 
-    /** `units` round-values, active moose multiplier included. */
+    /**
+     * Points a round pays out for `units` round-values.
+     *
+     * Arena ONLY ever moves the golf board when the BOOZE MOOSE is in play for
+     * the round. Every mooseless round is played purely for the bit — the
+     * mechanics resolve as normal but nobody's score changes. When the moose
+     * IS active the payout is units × round value × her (growing) multiplier.
+     */
     _points(units) {
+      if (!this.mooseActive) return 0;
       const u = units == null ? 1 : units;
-      return u * this.roundValue * (this.mooseActive ? this.mooseMultiplier : 1);
+      return u * this.roundValue * this.mooseMultiplier;
     },
 
     /** Golf order: lowest score first. */

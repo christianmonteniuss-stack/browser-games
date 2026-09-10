@@ -77,6 +77,8 @@
     api.root
       .querySelector('#next-btn')
       .addEventListener('click', () => api.send('next'));
+
+    if (window.SFX) window.SFX.play('reveal');
   }
 
   function renderFinal(api, data) {
@@ -107,5 +109,8 @@
     api.root
       .querySelector('#exit-btn')
       .addEventListener('click', () => api.send('exit'));
+
+    if (window.SFX) window.SFX.play('fanfare');
+    if (window.Confetti) window.Confetti.burst({ count: 220, y: 0.28 });
   }
 })();

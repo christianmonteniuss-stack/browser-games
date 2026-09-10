@@ -77,6 +77,11 @@
       `<p>Rätt svar: <strong>${esc(correctText)}</strong></p>` +
       rankLine +
       `<p class="quiz-wait">Väntar på nästa fråga…</p>`;
+
+    if (window.SFX) {
+      if (!mine) window.SFX.play('reveal');
+      else window.SFX.play(mine.correct ? 'correct' : 'wrong');
+    }
   }
 
   function renderFinal(api, data) {
@@ -91,5 +96,9 @@
         : '') +
       `<p>${me ? me.score : 0} poäng</p>` +
       `<p class="quiz-wait">Väntar i lobbyn…</p>`;
+
+    const won = rank === 1 && data.standings.length > 1;
+    if (window.SFX) window.SFX.play(won ? 'win' : rank > 0 ? 'reveal' : 'lose');
+    if (won && window.Confetti) window.Confetti.burst({ count: 90, y: 0.3 });
   }
 })();
