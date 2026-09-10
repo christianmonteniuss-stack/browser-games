@@ -13,13 +13,15 @@
 const { shuffled } = require('../util');
 const STATEMENTS = require('../statements');
 
+// Deal straight through a persistent shuffled deck (see rounds/quiz.js) so a
+// statement doesn't recur until the whole list has been used, games included.
 let queue = shuffled(STATEMENTS);
 
 module.exports = {
   id: 'choose',
 
   reset() {
-    queue = shuffled(STATEMENTS);
+    if (queue.length === 0) queue = shuffled(STATEMENTS);
   },
 
   start(rc) {

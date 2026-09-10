@@ -128,9 +128,11 @@
 
       if (view === 'moose') {
         const intensity = Math.max(1, data.intensity || 1);
-        const shake = Math.max(0.06, 0.34 - (intensity - 1) * 0.06).toFixed(2);
-        const scale = Math.min(1.8, 1 + (intensity - 1) * 0.15).toFixed(2);
-        const vol = Math.min(0.5, 0.15 + (intensity - 1) * 0.08);
+        const shake = Math.max(0.04, 0.32 - (intensity - 1) * 0.07).toFixed(3);
+        const scale = Math.min(2.0, 1 + (intensity - 1) * 0.18).toFixed(2);
+        const lights = Math.max(0.08, 0.34 - (intensity - 1) * 0.06).toFixed(3);
+        const lightsOpacity = Math.min(0.7, 0.3 + (intensity - 1) * 0.12).toFixed(2);
+        const vol = Math.min(0.6, 0.2 + (intensity - 1) * 0.1);
         try {
           const a = new Audio(MOOSE_SOUND_URL);
           a.volume = vol;
@@ -138,22 +140,35 @@
         } catch (e) {
           /* ignore */
         }
-        if (window.SFX) window.SFX.play('moose');
-        if (navigator.vibrate) navigator.vibrate([90, 40, 140]);
+        if (window.SFX) {
+          const stomps = Math.min(4, intensity);
+          for (let i = 0; i < stomps; i++) {
+            setTimeout(() => window.SFX.play('moose'), i * 220);
+          }
+        }
+        if (navigator.vibrate) {
+          const pat = [];
+          for (let i = 0; i < Math.min(5, 1 + intensity); i++) pat.push(90, 40);
+          navigator.vibrate(pat);
+        }
         root.innerHTML =
-          `<div class="moose-overlay small" style="--shake:${shake}s;--scale:${scale}">` +
+          `<div class="moose-overlay small" style="--shake:${shake}s;--scale:${scale};` +
+          `--lights:${lights}s;--lights-opacity:${lightsOpacity}">` +
+          '<div class="moose-lights"></div>' +
           '<div class="moose-emoji">🫎</div>' +
           '<h2 class="moose-text">BOOOOSE MOOOOSE</h2>' +
-          `<p class="muted">&times;${data.multiplier} den här rundan</p>` +
+          `<p class="muted">&times;${data.multiplier} resten av spelet</p>` +
           '</div>';
         return;
       }
 
       if (view === 'room') {
+        const mult = data.mooseMultiplier || 1;
         root.innerHTML =
           '<h2>Rummet</h2>' +
-          `<p class="muted">Runda-värde: <strong>${data.roundValue}</strong>. ` +
-          'Vänta på att värden startar nästa runda…</p>' +
+          `<p class="muted">Runda-värde: <strong>${data.roundValue}</strong>` +
+          (mult > 1 ? ` &middot; 🫎 &times;${mult} resten av spelet` : '') +
+          '. Vänta på att värden startar nästa runda…</p>' +
           golfBoard(data.standings, data.you || api.me());
         return;
       }
@@ -270,7 +285,7 @@
       }
 
       if (view === 'choose_result') {
-        const moose = !!(data.moose && data.moose.active);
+        const moose = !!(data.moose && data.moose.multiplier > 1);
         const rows = data.rows
           .map((r) => {
             const av = r.character ? AV.html(r.character, { size: 36 }) : emptyAvatar(36);
@@ -327,7 +342,7 @@
       }
 
       if (view === 'react_result') {
-        const moose = !!(data.moose && data.moose.active);
+        const moose = !!(data.moose && data.moose.multiplier > 1);
         const rows = data.rows
           .map((r) => {
             const av = r.character ? AV.html(r.character, { size: 36 }) : emptyAvatar(36);
@@ -357,7 +372,7 @@
       if (view === 'result') {
         const celebrate = data.kind === 'celebrate';
         const text = (celebrate ? "Let's go, " : 'You suck, ') + esc(data.name) + '!';
-        const moose = !!(data.moose && data.moose.active);
+        const moose = !!(data.moose && data.moose.multiplier > 1);
         const iScored = data.scoredId && data.scoredId === api.me();
         const pts = data.pointsAwarded != null ? data.pointsAwarded : data.roundValue;
         root.innerHTML =

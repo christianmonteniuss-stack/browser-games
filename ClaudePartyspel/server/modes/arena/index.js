@@ -35,11 +35,12 @@ function createArenaMode() {
       this.phase = 'room'; // 'room' | 'moose' | 'round' | 'result' | 'final'
       this.round = null; // active round-type module
       this.roundState = null; // its per-round scratch state
+      this.lastRoundTypeId = null; // to avoid the same special round twice in a row
 
       // ── Älgen (slumphändelse ovanpå rundlogiken) ──
       this.mooseVisits = 0; // gånger älgen dykt upp denna omgång
-      this.mooseActive = false; // aktiv för den PÅGÅENDE rundan?
-      this.mooseMultiplier = 1; // 1 = ingen älg
+      this.mooseActive = false; // dök älgen upp för DENNA runda (extra tjo)?
+      this.mooseMultiplier = 1; // PERSISTENT: 1 → 2 efter första besöket, 3 efter andra …
 
       rounds.resetAll();
       this._toRoom();
@@ -105,7 +106,12 @@ function createArenaMode() {
         this.ctx.toPlayer(player.id, 'mode_state', {
           modeId: this.id,
           view: 'room',
-          data: { roundValue: this._nextRoundValue(), standings: this._standings(), you: player.id },
+          data: {
+            roundValue: this._nextRoundValue(),
+            standings: this._standings(),
+            mooseMultiplier: this.mooseMultiplier,
+            you: player.id,
+          },
         });
       } else if (this.phase === 'moose') {
         this.ctx.toPlayer(player.id, 'mode_state', {
@@ -124,8 +130,9 @@ function createArenaMode() {
       this.phase = 'room';
       this.round = null;
       this.roundState = null;
-      this.mooseActive = false; // the moose only affects the round it appeared for
-      this.mooseMultiplier = 1;
+      this.mooseActive = false; // the "he just showed up" flourish clears...
+      // ...but this.mooseMultiplier stays: once the moose has visited, every
+      // round is ×2 (then ×3 after the next visit, …) for the rest of the game.
 
       this.ctx.toHost('mode_state', {
         modeId: this.id,
@@ -136,7 +143,12 @@ function createArenaMode() {
         this.ctx.toPlayer(p.id, 'mode_state', {
           modeId: this.id,
           view: 'room',
-          data: { roundValue: this._nextRoundValue(), standings: this._standings(), you: p.id },
+          data: {
+            roundValue: this._nextRoundValue(),
+            standings: this._standings(),
+            mooseMultiplier: this.mooseMultiplier,
+            you: p.id,
+          },
         });
       }
     },
@@ -154,7 +166,8 @@ function createArenaMode() {
       this.roundCount += 1;
       this.roundValue = this._roundValueFor(this.roundCount);
       this.roundState = {};
-      this.round = rounds.pickRoundType();
+      this.round = rounds.pickRoundType(this.lastRoundTypeId);
+      this.lastRoundTypeId = this.round.id;
       this.round.start(this._rc());
     },
 
@@ -169,9 +182,13 @@ function createArenaMode() {
         data: Object.assign(
           {
             roundValue: this.roundValue,
-            moose: this.mooseActive
-              ? { active: true, multiplier: this.mooseMultiplier, visits: this.mooseVisits }
-              : { active: false },
+            // `active` = the moose appeared THIS round; `multiplier` is the
+            // persistent factor (> 1 once he has ever visited).
+            moose: {
+              active: this.mooseActive,
+              multiplier: this.mooseMultiplier,
+              visits: this.mooseVisits,
+            },
             standings: this._standings(),
           },
           extra.data || {}
@@ -224,6 +241,8 @@ function createArenaMode() {
       if (Math.random() < CONFIG.MOOSE_CHANCE) {
         this.mooseVisits += 1;
         this.mooseActive = true;
+        // 2 on the first visit, 3 on the second, 4 on the third … and it STAYS
+        // that high for every following round until the next visit bumps it.
         this.mooseMultiplier = CONFIG.MOOSE_BASE_MULTIPLIER + (this.mooseVisits - 1);
         this.phase = 'moose';
         this.ctx.broadcast('mode_state', {
@@ -236,7 +255,7 @@ function createArenaMode() {
         }, CONFIG.MOOSE_INTRO_SECONDS * 1000);
       } else {
         this.mooseActive = false;
-        this.mooseMultiplier = 1;
+        // this.mooseMultiplier is left as-is — it persists from earlier visits.
         then();
       }
     },
@@ -304,16 +323,14 @@ function createArenaMode() {
     // ── shared helpers ───────────────────────────────────────────────
 
     /**
-     * Points a round pays out for `units` round-values.
-     *
-     * Arena ONLY ever moves the golf board when the BOOZE MOOSE is in play for
-     * the round. Every mooseless round is played purely for the bit — the
-     * mechanics resolve as normal but nobody's score changes. When the moose
-     * IS active the payout is units × round value × her (growing) multiplier.
+     * Points a round pays out for `units` round-values:
+     *   units × round value × the PERSISTENT moose multiplier.
+     * The multiplier is 1 until the BOOZE MOOSE first visits, then 2, then 3 …
+     * and stays there for the rest of the game.
      */
     _points(units) {
       const u = units == null ? 1 : units;
-      return u * this.roundValue * (this.mooseActive ? this.mooseMultiplier : 1);
+      return u * this.roundValue * this.mooseMultiplier;
     },
 
     /**
@@ -366,6 +383,7 @@ function createArenaMode() {
           canStart: this.ctx.lobby.readyPlayers().length >= CONFIG.MIN_PLAYERS,
           minPlayers: CONFIG.MIN_PLAYERS,
           mooseVisits: this.mooseVisits,
+          mooseMultiplier: this.mooseMultiplier,
         },
         extra || {}
       );

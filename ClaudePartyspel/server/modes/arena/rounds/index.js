@@ -27,9 +27,18 @@ function weightFor(id) {
   return typeof w === 'number' && w > 0 ? w : 0;
 }
 
-/** Weighted-random pick of a round type. Falls back to quiz if all weights are 0. */
-function pickRoundType() {
-  const weighted = ROUND_TYPES.map((t) => ({ t, w: weightFor(t.id) }));
+/**
+ * Weighted-random pick of a round type. Falls back to quiz if all weights are 0.
+ * `lastId` (the round type that just ran) is barred from repeating UNLESS it is
+ * quiz — the quiz round is the staple and may run back-to-back, but you never
+ * get choose→choose or react→react.
+ */
+function pickRoundType(lastId) {
+  const weighted = ROUND_TYPES.map((t) => {
+    let w = weightFor(t.id);
+    if (lastId && t.id === lastId && t.id !== 'quiz') w = 0;
+    return { t, w };
+  });
   const total = weighted.reduce((sum, x) => sum + x.w, 0);
   if (total <= 0) return quizRound;
 

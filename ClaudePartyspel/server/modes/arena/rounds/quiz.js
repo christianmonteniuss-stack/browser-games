@@ -9,14 +9,25 @@
 const { shuffled, pickRandom } = require('../util');
 const QUESTIONS = require('../questions');
 
+// One shuffled "deck" that persists for the whole server session — we deal
+// straight through it and only reshuffle once every question has been used, so
+// a question cannot recur (not even across games) until the bank is exhausted.
 let queue = shuffled(QUESTIONS);
+let lastAsked = null;
+
+function refillDeck() {
+  const next = shuffled(QUESTIONS);
+  // Don't let the reshuffle open with the question we just asked.
+  if (next.length > 1 && lastAsked && next[0] === lastAsked) next.push(next.shift());
+  return next;
+}
 
 module.exports = {
   id: 'quiz',
 
-  /** Re-shuffle the question queue (called at game start). */
+  /** Keep dealing through the deck across games; only refill when it runs dry. */
   reset() {
-    queue = shuffled(QUESTIONS);
+    if (queue.length === 0) queue = refillDeck();
   },
 
   start(rc) {
@@ -24,8 +35,9 @@ module.exports = {
     s.chosen = pickRandom(rc.readyPlayers());
     s.sub = 'question';
     s.answered = false;
-    if (queue.length === 0) queue = shuffled(QUESTIONS);
+    if (queue.length === 0) queue = refillDeck();
     s.question = queue.shift();
+    lastAsked = s.question;
 
     const pub = { q: s.question.q, options: s.question.options };
 

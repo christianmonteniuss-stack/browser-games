@@ -182,7 +182,8 @@ poäng. Här sitter "Nästa runda"- och "Avsluta"-knapparna.
 > rundor 1–5 → **3**, rundor 6–15 → **4**, sedan **+1 var tionde runda**
 > (16–25 → 5, 26–35 → 6, …). Se `_roundValueFor()` i `arena/index.js`,
 > startvärdet i `ROUND_VALUE_START`. **BOOZE MOOSE** multiplicerar värdet
-> för sin runda (×2 första besöket, ×3 andra, …).
+> **resten av spelet** — ×2 efter första besöket, ×3 efter andra, … (den
+> ökar bara, nollställs aldrig förrän nästa spel).
 >
 > **Poängen nollställs när spelet avslutas** (åter till lobbyn) — sköts
 > centralt i `GameManager._endActiveMode()`.
@@ -263,6 +264,19 @@ som frågefilen. Lägg bara till fler.
 Inget innehåll att fylla på (helt slumpstyrt); tunables i `config.js`:
 `REACT_DELAY_MIN` / `REACT_DELAY_MAX` / `REACT_MAX_SECONDS`.
 
+### Vilken rundtyp körs?
+
+`rounds.pickRoundType(lastId)` (i `rounds/index.js`) gör ett viktat slumpval
+enligt `config.ROUND_TYPE_WEIGHTS` (default `quiz 0.52 / choose 0.28 /
+react 0.20`) — **men** `choose` och `react` körs aldrig två gånger i rad
+(quiz får upprepas). I praktiken: frågor dominerar, "välj ut någon" ~var
+4:e runda, reaktionstest ~var 5:e.
+
+**Innehåll upprepas inte:** `quiz.js` och `choose.js` delar ut rakt igenom
+en blandad kortlek som lever kvar hela serverstarten och blandas om först
+när den tar slut — så samma fråga/påstående kan inte komma igen (inte ens
+mellan spel) förrän hela banken använts.
+
 **Lägg till en ny rundtyp:** skapa `server/modes/arena/rounds/<id>.js` (samma
 form som quiz/choose — `id`, `start`, `onPlayerMessage`, `syncPlayer`,
 `syncHost`, valfri `reset`/`onPlayerLeave`), lägg in den i `ROUND_TYPES` i
@@ -274,20 +288,23 @@ form som quiz/choose — `id`, `start`, `onPlayerMessage`, `syncPlayer`,
 Ett tillägg ovanpå rundlogiken, inte en omskrivning. `onHostMessage` kör
 `_maybeMoose(() => this._startRound())` — älgen slås fram **innan** rundan.
 
-* **Chans:** `MOOSE_CHANCE` per runda (default `0.3`). Konstant i
+* **Chans:** `MOOSE_CHANCE` per runda (default `0.15`). Konstant i
   `server/modes/arena/config.js`.
 * **Om älgen dyker upp:** fas `'moose'`, en `mode_state`-broadcast med
   `view: 'moose'` → stor "BOOOOSE MOOOOSE"-overlay på host (`🫎`, skakning,
-  ljud `public/assets/sounds/moose.wav`) och en kort variant på mobilerna.
+  **röda blinkljus**, `moose.wav` + flera överlappande synt-stampar, och
+  talsyntesen "boooooze moooose") och en kortare variant på mobilerna.
   Efter `MOOSE_INTRO_SECONDS` startar själva rundan.
 * **Räknare:** `mooseVisits` (per omgång, på servern). **Multiplikator** =
-  `MOOSE_BASE_MULTIPLIER + (mooseVisits - 1)` → 2× första gången, 3× andra,
-  4× tredje …
-* **Effekt:** så länge älgen är aktiv (den rundan) räknas
-  `_points() = enheter × roundValue × multiplier`. Nollställs i `_toRoom()`.
-* **Intensitet:** `intensity = mooseVisits` skickas till klienten, som gör
-  overlay + ljud större/snabbare/högre för varje besök. Host säger dessutom
-  "boooooze moooose" via talsyntes (`SFX.say`).
+  `MOOSE_BASE_MULTIPLIER + (mooseVisits - 1)` → 2× efter första besöket, 3×
+  efter andra, 4× efter tredje …
+* **Effekt (PERSISTENT):** multiplikatorn ligger kvar **resten av spelet** —
+  `_points() = enheter × roundValue × mooseMultiplier` på *varje* runda, inte
+  bara älg-rundan. `_toRoom()` nollställer bara "han är här"-flaggan
+  (`mooseActive`), inte `mooseMultiplier`.
+* **Intensitet:** `intensity = mooseVisits` skickas till klienten som skruvar
+  upp skakning, storlek, blinkljusens takt/styrka och antal ljudstampar för
+  varje nytt besök.
 * `mode_state` `view: 'result'` bär även `pointsAwarded`, `scoredId` (spelaren
   som fick straffpoängen — får en tydlig banner på sin mobil) och
   `moose: { active, multiplier, visits }`.

@@ -132,6 +132,8 @@
 
 /* ── Älgen ── kort variant på mobilen */
 .moose-overlay {
+  position: relative;
+  overflow: hidden;
   min-height: 220px;
   display: flex;
   flex-direction: column;
@@ -140,6 +142,23 @@
   gap: 8px;
   text-align: center;
   animation: moose-shake var(--shake, 0.3s) linear infinite;
+}
+.moose-lights {
+  position: absolute;
+  inset: -25%;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+  opacity: var(--lights-opacity, 0.35);
+  animation: moose-lights var(--lights, 0.3s) steps(1, end) infinite;
+}
+.moose-overlay > :not(.moose-lights) { position: relative; z-index: 1; }
+@keyframes moose-lights {
+  0% { background: radial-gradient(circle at 12% 26%, rgba(255, 20, 40, 0.95), transparent 46%); }
+  50% { background: radial-gradient(circle at 88% 74%, rgba(255, 20, 40, 0.95), transparent 46%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .moose-lights { animation: none; }
 }
 .moose-emoji {
   font-size: calc(96px * var(--scale, 1));

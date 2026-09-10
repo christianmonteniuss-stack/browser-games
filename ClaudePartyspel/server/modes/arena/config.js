@@ -46,9 +46,11 @@ module.exports = {
   // ── Rundtyp per runda ──
   // Relativa vikter för vilken rundtyp som slumpas när en runda startar.
   // Normaliseras (behöver inte summera till 1). Saknad nyckel / 0 => körs aldrig.
+  // Frågor ska dominera; "välj ut någon" ~var 3–4:e runda; reaktion ~var 5:e.
+  // (choose/react körs aldrig två gånger i rad — se rounds/index.js.)
   ROUND_TYPE_WEIGHTS: {
-    quiz: 0.6,
-    choose: 0.2,
+    quiz: 0.52,
+    choose: 0.28,
     react: 0.2,
   },
 };

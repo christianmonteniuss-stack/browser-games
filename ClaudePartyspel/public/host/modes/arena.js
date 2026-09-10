@@ -106,10 +106,14 @@
 
       if (view === 'moose') {
         const intensity = Math.max(1, data.intensity || 1);
-        const shake = Math.max(0.06, 0.34 - (intensity - 1) * 0.06).toFixed(2);
-        const scale = Math.min(2.2, 1 + (intensity - 1) * 0.2).toFixed(2);
-        const vol = Math.min(1, 0.45 + (intensity - 1) * 0.18);
-        const rate = Math.min(1.7, 1 + (intensity - 1) * 0.12);
+        // Everything ramps up with every visit: shake faster, moose bigger,
+        // red lights faster & brighter, and more overlapping stomps.
+        const shake = Math.max(0.035, 0.3 - (intensity - 1) * 0.07).toFixed(3);
+        const scale = Math.min(2.8, 1 + (intensity - 1) * 0.28).toFixed(2);
+        const lights = Math.max(0.07, 0.34 - (intensity - 1) * 0.06).toFixed(3);
+        const lightsOpacity = Math.min(0.85, 0.34 + (intensity - 1) * 0.13).toFixed(2);
+        const vol = Math.min(1, 0.5 + (intensity - 1) * 0.18);
+        const rate = Math.min(1.9, 1 + (intensity - 1) * 0.1);
         try {
           const a = new Audio(MOOSE_SOUND_URL);
           a.volume = vol;
@@ -119,26 +123,33 @@
           /* ignore */
         }
         if (window.SFX) {
-          window.SFX.play('moose');
-          // Announcer voice, just after the stomp lands.
-          setTimeout(() => window.SFX.say('boooooze moooose'), 260);
+          const stomps = Math.min(6, 1 + intensity); // 2, 3, 4 … overlapping hits
+          for (let i = 0; i < stomps; i++) {
+            setTimeout(() => window.SFX.play('moose'), i * 240);
+          }
+          setTimeout(() => window.SFX.say('boooooze moooose'), 200 + stomps * 130);
         }
         root.innerHTML =
-          `<div class="moose-overlay" style="--shake:${shake}s;--scale:${scale}">` +
+          `<div class="moose-overlay" style="--shake:${shake}s;--scale:${scale};` +
+          `--lights:${lights}s;--lights-opacity:${lightsOpacity}">` +
+          '<div class="moose-lights"></div>' +
           '<div class="moose-emoji">🫎</div>' +
           '<h1 class="moose-text">BOOOOSE MOOOOSE</h1>' +
           `<p class="moose-sub">Älg-besök #${data.visits} &middot; ` +
-          `allt &times;${data.multiplier} den här rundan!</p>` +
+          `allt &times;${data.multiplier} resten av spelet!</p>` +
           '</div>';
         return;
       }
 
       if (view === 'room') {
+        const mult = data.mooseMultiplier || 1;
         root.innerHTML =
           '<div class="arena-view">' +
           roomStrip(data.characters, null) +
           '<div class="arena-mid">' +
-          `<p class="round-value">Runda-värde: <strong>${data.roundValue}</strong></p>` +
+          `<p class="round-value">Runda-värde: <strong>${data.roundValue}</strong>` +
+          (mult > 1 ? ` <span class="moose-mult">🫎 &times;${mult}</span>` : '') +
+          '</p>' +
           (data.notice ? `<p class="arena-notice">${esc(data.notice)}</p>` : '') +
           `<button id="next-round" class="mode-btn"${data.canStart ? '' : ' disabled'}>Nästa runda</button>` +
           (data.canStart
@@ -230,7 +241,7 @@
       }
 
       if (view === 'choose_result') {
-        const moose = !!(data.moose && data.moose.active);
+        const moose = !!(data.moose && data.moose.multiplier > 1);
         const rows = data.rows
           .map((r) => {
             const av = r.character ? AV.html(r.character, { size: 48 }) : emptyAvatar(48);
@@ -296,7 +307,7 @@
       }
 
       if (view === 'react_result') {
-        const moose = !!(data.moose && data.moose.active);
+        const moose = !!(data.moose && data.moose.multiplier > 1);
         const rows = data.rows
           .map((r) => {
             const av = r.character ? AV.html(r.character, { size: 44 }) : emptyAvatar(44);
@@ -330,7 +341,7 @@
         const celebrate = data.kind === 'celebrate';
         const text = (celebrate ? "Let's go, " : 'You suck, ') + esc(data.name) + '!';
         const pts = data.pointsAwarded != null ? data.pointsAwarded : data.roundValue;
-        const moose = !!(data.moose && data.moose.active);
+        const moose = !!(data.moose && data.moose.multiplier > 1);
         const sub =
           `${esc(data.name)} får ${pts} straffpoäng` +
           (celebrate ? '' : ' för fel svar') +
