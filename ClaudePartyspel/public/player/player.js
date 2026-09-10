@@ -86,12 +86,17 @@
         break;
 
       case S2C.ERROR:
-        if (payload.code === 'unknown_session') {
+        if (payload.code === 'unknown_session' || payload.code === 'kicked') {
           localStorage.removeItem('cp_playerId');
           state.playerId = null;
           state.characterId = null;
           state.currentMode = null;
-          showJoinError(payload.message || 'Något gick fel.');
+          showJoinError(
+            payload.message ||
+              (payload.code === 'kicked'
+                ? 'Du har blivit utsparkad.'
+                : 'Något gick fel.')
+          );
         } else if (
           payload.code === 'character_taken' ||
           payload.code === 'unknown_character'

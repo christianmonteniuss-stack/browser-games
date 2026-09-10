@@ -123,6 +123,10 @@ inte vidare förrän en ledig karaktär är vald.
   realtid.
 * En karaktär hålls av spelaren så länge den finns i lobbyn (överlever
   reconnect). Startas servern om nollställs allt.
+* **Kicka spelare:** varje spelare i host-listan har en `×`-knapp (bara i
+  lobbyn). Den skickar `host_action` `{ action: 'kick', data: { playerId } }`
+  → `GameManager._kickPlayer()` tar bort spelaren, frigör karaktären och
+  skickar `error: 'kicked'` till mobilen (som då hamnar på namn-skärmen igen).
 * **Byta till bilder senare:** sätt `imageUrl` på en karaktär i
   `characters.js`. `public/shared/character.js` väljer då `<img>` istället för
   emoji/färg-cirkeln — ingen annan kod behöver ändras.

@@ -140,9 +140,40 @@ class GameManager {
       this._broadcastLobby();
       return;
     }
+    // `kick` removes a player from the lobby (host-only, lobby-only).
+    if (
+      payload &&
+      payload.action === 'kick' &&
+      !this.activeMode &&
+      payload.data &&
+      payload.data.playerId
+    ) {
+      this._kickPlayer(payload.data.playerId);
+      return;
+    }
     if (this.activeMode && this.activeMode.onHostMessage) {
       this.activeMode.onHostMessage(this._ctx(), payload || {});
     }
+  }
+
+  /** Drop a player: tell their phone, close the socket, free their character. */
+  _kickPlayer(playerId) {
+    const player = this.lobby.getPlayer(playerId);
+    if (!player) return;
+    const sock = player.socket;
+    this.lobby.removePlayer(playerId); // also frees the character (no owner left)
+    if (sock) {
+      send(sock, S2C.ERROR, {
+        code: 'kicked',
+        message: 'Du har blivit utsparkad av värden.',
+      });
+      try {
+        sock.close();
+      } catch (e) {
+        /* ignore */
+      }
+    }
+    this._broadcastLobby();
   }
 
   _onPlayerAction(socket, payload) {

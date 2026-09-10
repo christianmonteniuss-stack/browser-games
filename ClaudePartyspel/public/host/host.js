@@ -120,12 +120,27 @@
         const cls =
           (p.connected ? '' : 'gone ') + (p.characterId ? '' : 'choosing');
         const tail = p.characterId ? '' : '<span class="muted">väljer…</span>';
+        const kick =
+          `<button class="kick-btn" data-id="${escapeHtml(p.id)}" ` +
+          `data-name="${escapeHtml(p.name)}" title="Kicka ${escapeHtml(p.name)}" ` +
+          `aria-label="Kicka ${escapeHtml(p.name)}">&times;</button>`;
         return (
           `<li class="${cls.trim()}">${avatar}` +
-          `<span>${escapeHtml(p.name)}</span>${tail}</li>`
+          `<span>${escapeHtml(p.name)}</span>${tail}${kick}</li>`
         );
       })
       .join('');
+
+    $('player-list')
+      .querySelectorAll('.kick-btn')
+      .forEach((b) => {
+        b.addEventListener('click', () => {
+          const name = b.dataset.name || 'spelaren';
+          if (window.confirm('Kicka ' + name + ' från lobbyn?')) {
+            sendMsg(C2S.HOST_ACTION, { action: 'kick', data: { playerId: b.dataset.id } });
+          }
+        });
+      });
   }
 
   function renderCharRoster(players) {
