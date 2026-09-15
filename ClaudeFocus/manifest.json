@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "ClaudeFocus",
+  "version": "1.0.0",
+  "description": "Block distracting sites. Turning blocking off requires solving math problems. Tracks every attempt to visit a blocked site.",
+  "permissions": ["storage", "webNavigation", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

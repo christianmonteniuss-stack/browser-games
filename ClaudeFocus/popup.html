@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>ClaudeFocus</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { width: 300px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ClaudeFocus</h1>
+    <span id="statusBadge" class="badge">…</span>
+  </header>
+
+  <section id="summary">
+    <div class="row"><span>Blocked sites</span><strong id="siteCount">0</strong></div>
+    <div class="row"><span>Attempts today</span><strong id="attemptsToday">0</strong></div>
+  </section>
+
+  <div id="actions">
+    <button id="toggleBtn" class="primary">…</button>
+    <button id="optionsBtn" class="secondary">Manage list &amp; stats</button>
+  </div>
+
+  <script src="common.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

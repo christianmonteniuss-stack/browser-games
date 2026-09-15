@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>ClaudeFocus — Settings</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { max-width: 680px; margin: 40px auto; padding: 0 16px 40px; }
+    h1 { font-size: 20px; }
+    h2 { font-size: 14px; color: #b6b8c2; text-transform: uppercase; letter-spacing: .04em;
+      margin: 28px 0 10px; }
+    section { background: #1c1f27; border-radius: 10px; padding: 16px; }
+    .addRow { display: flex; gap: 8px; margin-bottom: 12px; }
+    .addRow input { flex: 1; }
+    .addRow button { width: auto; padding: 8px 14px; margin: 0; }
+    ul#blocklist { list-style: none; padding: 0; margin: 0; }
+    ul#blocklist li { display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid #262a35; font-size: 13px; }
+    ul#blocklist li button { width: auto; padding: 4px 10px; margin: 0; font-size: 12px; }
+    .diffGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .field label { display: block; font-size: 12px; color: #8a8d99; margin-bottom: 4px; }
+    .field input { width: 100%; }
+    .ops label { font-size: 13px; margin-right: 14px; color: #d4d6e0; }
+    #statusRow { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  </style>
+</head>
+<body>
+  <h1>ClaudeFocus — Settings</h1>
+
+  <div id="statusRow">
+    <span class="badge" id="statusBadge">…</span>
+    <button id="toggleBtn" class="secondary" style="width:auto; margin:0; padding:8px 14px;">…</button>
+  </div>
+
+  <h2>Blocklist</h2>
+  <section>
+    <div class="addRow">
+      <input type="text" id="newEntry" placeholder="e.g. youtube.com or reddit.com/r/funny" />
+      <button id="addBtn" class="primary">Add</button>
+    </div>
+    <ul id="blocklist"></ul>
+  </section>
+
+  <h2>Math difficulty</h2>
+  <section>
+    <div class="diffGrid">
+      <div class="field">
+        <label>Problems to solve to unlock</label>
+        <input type="number" id="problemCount" min="1" max="20" />
+      </div>
+      <div class="field">
+        <label>Max number (for + / −)</label>
+        <input type="number" id="maxNumber" min="1" max="9999" />
+      </div>
+      <div class="field">
+        <label>Max factor (for ×)</label>
+        <input type="number" id="multiplyMax" min="2" max="999" />
+      </div>
+    </div>
+    <div class="ops">
+      <label><input type="checkbox" id="opPlus" /> Addition</label>
+      <label><input type="checkbox" id="opMinus" /> Subtraction</label>
+      <label><input type="checkbox" id="opMul" /> Multiplication</label>
+    </div>
+    <button id="saveDifficultyBtn" class="primary" style="width:auto; padding:8px 14px;">Save difficulty</button>
+  </section>
+
+  <h2>Attempt stats</h2>
+  <section>
+    <table>
+      <thead><tr><th>Site</th><th>Attempts</th><th>Last attempt</th></tr></thead>
+      <tbody id="statsBody"></tbody>
+    </table>
+    <p id="noStats" style="color:#8a8d99; font-size:13px;">No attempts recorded yet.</p>
+    <button id="resetStatsBtn" class="danger" style="width:auto; padding:8px 14px; margin-top:12px;">Reset stats</button>
+  </section>
+
+  <script src="common.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
