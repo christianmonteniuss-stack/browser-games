@@ -9,7 +9,7 @@ A collection of self-contained browser apps and games, each delivered as a **sin
 **Apps:**
 - `tictactoe.html` — 2-player / vs-computer Tic Tac Toe (DOM-based, no canvas)
 - `shooter.html` — *Dead West*, a top-down western shooter (HTML5 Canvas)
-- `timeline.html` — daily timeline planner: type a task + time (e.g. `8-10 exjobb` or `exjobb 2h`) to place a block on a 24h timeline; alarms (beep + desktop notification) fire when each block ends
+- `timeline.html` — daily timeline planner: type a task name + duration, then drag the block onto a horizontal, always-visible 24h timeline (hold Shift while dragging to snap to the hour/half-hour); alarms (beep + desktop notification) fire when each block ends
 
 ## Running the games
 
@@ -68,7 +68,7 @@ The entire game lives in one `<script>` block, divided by labeled sections (visi
 
 ## timeline.html architecture
 
-Single `<script>` IIFE, no build step. `blocks[]` is the state array (`{id, start, end, label}`, times as minutes-from-midnight), persisted to `localStorage` under a date-scoped key (`claude-timeline-YYYY-MM-DD`) so the plan resets each new day. `parseInput()` handles two input styles: an explicit range (`8-10 exjobb`, tolerant of `HH:MM` and task-first ordering) or a duration (`exjobb 2h`, `exjobb 90m`) that starts right after the last block (or now, rounded up to 5 min). New blocks are rejected on overlap. `scheduleAlarms()` sets one `setTimeout` per unique block-end time; firing plays a 3-beep Web Audio tone, shows an in-page banner, and sends a `Notification` if permission was granted. The timeline itself is absolutely-positioned divs inside `#timelineTrack` (`PX_PER_HOUR = 70`), with a live "now" line and auto-scroll to the current time on load.
+Single `<script>` IIFE, no build step. `blocks[]` is the state array (`{id, start, end, label}`, times as minutes-from-midnight), persisted to `localStorage` under a date-scoped key (`claude-timeline-YYYY-MM-DD`) so the plan resets each new day. Adding a block takes a task name (`#taskInput`) and a duration (`#durationInput`, parsed by `parseDuration()` — `2h`, `45m`, `1h30m`); it's placed right after the last block (or now, rounded up to 5 min) via `nextFreeSlotStart()`. The timeline is horizontal and fills the remaining viewport height/width (`computeLayout()` derives `pxPerMin` from the track's actual pixel width, minimum `MIN_PX_PER_HOUR = 34`px/hour, so the full 24h is visible without scrolling on any normal desktop window). Blocks are dragged via Pointer Events (`attachDrag()`) to reposition them along the timeline; holding Shift while dragging snaps the start to the nearest 30-minute mark (`SNAP_MIN`), Escape cancels, and dropping onto an overlap reverts. `scheduleAlarms()` sets one `setTimeout` per unique block-end time; firing plays a 3-beep Web Audio tone, shows an in-page banner, and sends a `Notification` if permission was granted.
 
 ## tictactoe.html architecture
 
