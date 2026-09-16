@@ -410,6 +410,42 @@
 
   function overlaps(a, b) { return a.start < b.end && b.start < a.end; }
 
+  // Resolves where a dragged block should land: it may never overlap a
+  // locked block (it snaps to just after one it lands on), but unlocked
+  // blocks in its way get pushed later in a chain to make room.
+  function resolveDragPlacement(draggedId, desiredStart, duration) {
+    let finalStart = desiredStart;
+    for (let i = 0; i < 30; i++) {
+      const hit = blocks.find(
+        (b) => b.id !== draggedId && b.locked && b.start < finalStart + duration && finalStart < b.end
+      );
+      if (!hit) break;
+      if (hit.start <= finalStart) {
+        finalStart = hit.end;
+      } else {
+        return { error: `"${hit.label}" är låst i vägen.` };
+      }
+    }
+    const finalEnd = finalStart + duration;
+    if (finalEnd > 1440) return { error: "Får inte plats – dagen tar slut." };
+
+    const others = blocks.filter((b) => b.id !== draggedId).sort((a, b) => a.start - b.start);
+    let cursor = finalEnd;
+    const pushes = [];
+    for (const b of others) {
+      if (b.end <= finalStart) continue;
+      if (b.start >= cursor) break;
+      if (b.locked) return { error: `"${b.label}" är låst i vägen.` };
+      const dur = b.end - b.start;
+      const newStart = cursor;
+      const newEnd = newStart + dur;
+      if (newEnd > 1440) return { error: "Får inte plats – dagen tar slut." };
+      pushes.push({ id: b.id, start: newStart, end: newEnd });
+      cursor = newEnd;
+    }
+    return { start: finalStart, end: finalEnd, pushes };
+  }
+
   // ---------- layout ----------
   function computeLayout() {
     pxPerMin = trackOuter.clientWidth / 1440;
@@ -572,16 +608,20 @@
         if (cancelled) { render(); return; }
 
         const newStart = Math.round(pendingStart);
-        const newEnd = newStart + duration;
-        const conflict = blocks.find((b) => b.id !== block.id && overlaps(b, { start: newStart, end: newEnd }));
-        if (conflict) {
-          showInputError(`Kan inte placera där – överlappar med "${conflict.label}".`);
+        const result = resolveDragPlacement(block.id, newStart, duration);
+        if (result.error) {
+          showInputError(result.error);
           render();
           return;
         }
         const target = blocks.find((b) => b.id === block.id);
-        target.start = newStart;
-        target.end = newEnd;
+        target.start = result.start;
+        target.end = result.end;
+        for (const p of result.pushes) {
+          const pushed = blocks.find((b) => b.id === p.id);
+          pushed.start = p.start;
+          pushed.end = p.end;
+        }
         blocks.sort((a, b) => a.start - b.start);
         saveBlocks();
         render();
