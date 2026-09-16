@@ -4,11 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository overview
 
-A collection of self-contained browser games, each delivered as a **single HTML file** with all CSS and JavaScript inline. No build step, no dependencies, no server — open the file directly in a browser.
+A collection of self-contained browser apps and games, each delivered as a **single HTML file** with all CSS and JavaScript inline. No build step, no dependencies, no server — open the file directly in a browser.
 
-**Games:**
+**Apps:**
 - `tictactoe.html` — 2-player / vs-computer Tic Tac Toe (DOM-based, no canvas)
 - `shooter.html` — *Dead West*, a top-down western shooter (HTML5 Canvas)
+- `timeline.html` — daily timeline planner: type a task + time (e.g. `8-10 exjobb` or `exjobb 2h`) to place a block on a 24h timeline; alarms (beep + desktop notification) fire when each block ends
 
 ## Running the games
 
@@ -64,6 +65,10 @@ The entire game lives in one `<script>` block, divided by labeled sections (visi
 **Adding a new enemy type:** add a stat block to `EDEFS`, write a `draw*()` function in `SPRITE HELPERS`, add spawn entries to `LEVELS[]`.
 
 **Adding a new level:** append an object to `LEVELS[]` — `{ name: 'LOCATION', waves: [[{type, n}, …], …] }`.
+
+## timeline.html architecture
+
+Single `<script>` IIFE, no build step. `blocks[]` is the state array (`{id, start, end, label}`, times as minutes-from-midnight), persisted to `localStorage` under a date-scoped key (`claude-timeline-YYYY-MM-DD`) so the plan resets each new day. `parseInput()` handles two input styles: an explicit range (`8-10 exjobb`, tolerant of `HH:MM` and task-first ordering) or a duration (`exjobb 2h`, `exjobb 90m`) that starts right after the last block (or now, rounded up to 5 min). New blocks are rejected on overlap. `scheduleAlarms()` sets one `setTimeout` per unique block-end time; firing plays a 3-beep Web Audio tone, shows an in-page banner, and sends a `Notification` if permission was granted. The timeline itself is absolutely-positioned divs inside `#timelineTrack` (`PX_PER_HOUR = 70`), with a live "now" line and auto-scroll to the current time on load.
 
 ## tictactoe.html architecture
 
