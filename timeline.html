@@ -144,6 +144,7 @@
   }
 
   .timelineWrap {
+    position: relative;
     flex: 0 0 auto;
     width: 100%;
     height: 220px;
@@ -151,6 +152,28 @@
     border: 1px solid #262a35;
     border-radius: 10px;
   }
+  .dragTimeDisplay {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 10px;
+    background: #262a35;
+    border: 1px solid #4c7cf0;
+    border-radius: 8px;
+    padding: 7px 16px;
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #e8e8ec;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .1s;
+    z-index: 20;
+    box-shadow: 0 6px 18px rgba(0,0,0,.4);
+  }
+  .dragTimeDisplay.visible { opacity: 1; }
   .trackOuter {
     height: 100%;
     overflow: hidden;
@@ -313,6 +336,7 @@
 
   <div class="timelineCenter">
     <div class="timelineWrap">
+      <div class="dragTimeDisplay" id="dragTimeDisplay"></div>
       <div class="trackOuter" id="trackOuter">
         <div class="trackInner" id="trackInner">
           <div class="ticksRow" id="ticksRow"></div>
@@ -354,6 +378,7 @@
   const nowLine = el("nowLine");
   const nowLabel = el("nowLabel");
   const clockEl = el("clock");
+  const dragTimeDisplay = el("dragTimeDisplay");
 
   let pxPerMin = 1;
 
@@ -627,6 +652,8 @@
       let cancelled = false;
 
       div.classList.add("dragging");
+      dragTimeDisplay.textContent = fmtRange({ start: originalStart, end: originalStart + duration });
+      dragTimeDisplay.classList.add("visible");
 
       function clampStart(s) {
         return Math.max(0, Math.min(1440 - duration, s));
@@ -639,7 +666,9 @@
         s = clampStart(s);
         pendingStart = s;
         div.style.left = (s * pxPerMin) + "px";
-        div.querySelector(".blockTime").textContent = fmtRange({ start: s, end: s + duration });
+        const range = fmtRange({ start: s, end: s + duration });
+        div.querySelector(".blockTime").textContent = range;
+        dragTimeDisplay.textContent = range;
       }
 
       function onKeyDown(ev) {
@@ -652,6 +681,7 @@
         div.removeEventListener("pointerup", onUp);
         window.removeEventListener("keydown", onKeyDown);
         div.classList.remove("dragging");
+        dragTimeDisplay.classList.remove("visible");
 
         if (cancelled) { render(); return; }
 
