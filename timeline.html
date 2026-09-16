@@ -410,40 +410,88 @@
 
   function overlaps(a, b) { return a.start < b.end && b.start < a.end; }
 
-  // Resolves where a dragged block should land: it may never overlap a
-  // locked block (it snaps to just after one it lands on), but unlocked
-  // blocks in its way get pushed later in a chain to make room.
-  function resolveDragPlacement(draggedId, desiredStart, duration) {
-    let finalStart = desiredStart;
-    for (let i = 0; i < 30; i++) {
-      const hit = blocks.find(
-        (b) => b.id !== draggedId && b.locked && b.start < finalStart + duration && finalStart < b.end
-      );
-      if (!hit) break;
-      if (hit.start <= finalStart) {
-        finalStart = hit.end;
-      } else {
-        return { error: `"${hit.label}" är låst i vägen.` };
+  // Pushes blocks later (rightward) to make room, starting from start0.
+  // Any locked block hit along the way can't move, so the dragged block
+  // itself snaps to sit right after it and the whole sweep restarts.
+  function sweepRight(draggedId, start0, duration) {
+    let finalStart = start0;
+    for (let iter = 0; iter < 50; iter++) {
+      const finalEnd = finalStart + duration;
+      if (finalEnd > 1440) return { error: "Får inte plats – dagen tar slut." };
+      const others = blocks.filter((b) => b.id !== draggedId).sort((a, b) => a.start - b.start);
+      let cursor = finalEnd;
+      const pushes = [];
+      let restarted = false;
+      for (const b of others) {
+        if (b.end <= finalStart) continue;
+        if (b.start >= cursor) break;
+        if (b.locked) { finalStart = b.end; restarted = true; break; }
+        const dur = b.end - b.start;
+        const newStart = cursor;
+        const newEnd = newStart + dur;
+        if (newEnd > 1440) return { error: "Får inte plats – dagen tar slut." };
+        pushes.push({ id: b.id, start: newStart, end: newEnd });
+        cursor = newEnd;
       }
+      if (!restarted) return { start: finalStart, end: finalStart + duration, pushes };
     }
-    const finalEnd = finalStart + duration;
-    if (finalEnd > 1440) return { error: "Får inte plats – dagen tar slut." };
+    return { error: "Hittar ingen ledig plats." };
+  }
 
-    const others = blocks.filter((b) => b.id !== draggedId).sort((a, b) => a.start - b.start);
-    let cursor = finalEnd;
-    const pushes = [];
-    for (const b of others) {
-      if (b.end <= finalStart) continue;
-      if (b.start >= cursor) break;
-      if (b.locked) return { error: `"${b.label}" är låst i vägen.` };
-      const dur = b.end - b.start;
-      const newStart = cursor;
-      const newEnd = newStart + dur;
-      if (newEnd > 1440) return { error: "Får inte plats – dagen tar slut." };
-      pushes.push({ id: b.id, start: newStart, end: newEnd });
-      cursor = newEnd;
+  // Mirror of sweepRight: pushes blocks earlier (leftward) instead.
+  function sweepLeft(draggedId, start0, duration) {
+    let finalStart = start0;
+    for (let iter = 0; iter < 50; iter++) {
+      if (finalStart < 0) return { error: "Får inte plats – dagen har inte börjat." };
+      const finalEnd = finalStart + duration;
+      const others = blocks.filter((b) => b.id !== draggedId).sort((a, b) => b.start - a.start);
+      let cursor = finalStart;
+      const pushes = [];
+      let restarted = false;
+      for (const b of others) {
+        if (b.start >= finalEnd) continue;
+        if (b.end <= cursor) break;
+        if (b.locked) { finalStart = b.start - duration; restarted = true; break; }
+        const dur = b.end - b.start;
+        const newEnd = cursor;
+        const newStart = newEnd - dur;
+        if (newStart < 0) return { error: "Får inte plats – dagen har inte börjat." };
+        pushes.push({ id: b.id, start: newStart, end: newEnd });
+        cursor = newStart;
+      }
+      if (!restarted) return { start: finalStart, end: finalStart + duration, pushes };
     }
-    return { start: finalStart, end: finalEnd, pushes };
+    return { error: "Hittar ingen ledig plats." };
+  }
+
+  // Resolves where a dragged block should land. If it's dropped onto other
+  // blocks, the direction it pushes them depends on which side of the
+  // (most-overlapped) block's center it was dropped on – drop on its left
+  // half and it jumps right, drop on its right half and it jumps left.
+  // Locked blocks never move; the dragged block snaps around them instead.
+  // Pushed blocks always move the minimum amount needed – no overlap, no gap.
+  function resolveDragPlacement(draggedId, desiredStart, duration) {
+    desiredStart = Math.max(0, Math.min(1440 - duration, desiredStart));
+    const desiredEnd = desiredStart + duration;
+    const conflicts = blocks.filter(
+      (b) => b.id !== draggedId && overlaps(b, { start: desiredStart, end: desiredEnd })
+    );
+    if (conflicts.length === 0) {
+      return { start: desiredStart, end: desiredEnd, pushes: [] };
+    }
+
+    let primary = conflicts[0];
+    let bestOverlap = -1;
+    for (const c of conflicts) {
+      const ov = Math.min(desiredEnd, c.end) - Math.max(desiredStart, c.start);
+      if (ov > bestOverlap) { bestOverlap = ov; primary = c; }
+    }
+
+    const draggedCenter = desiredStart + duration / 2;
+    const conflictCenter = (primary.start + primary.end) / 2;
+    return draggedCenter <= conflictCenter
+      ? sweepRight(draggedId, desiredStart, duration)
+      : sweepLeft(draggedId, desiredStart, duration);
   }
 
   // ---------- layout ----------
