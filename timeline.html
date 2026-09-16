@@ -491,8 +491,9 @@
 
   // Resolves where a dragged block should land. If it's dropped onto other
   // blocks, the direction it pushes them depends on which side of the
-  // (most-overlapped) block's center it was dropped on – drop on its left
-  // half and it jumps right, drop on its right half and it jumps left.
+  // (most-overlapped) block's center the drop's START time falls on – start
+  // before that block's center and it jumps left (earlier); start at or
+  // after its center and it jumps right (later).
   // Locked blocks never move; the dragged block snaps around them instead.
   // Pushed blocks always move the minimum amount needed – no overlap, no gap.
   function resolveDragPlacement(draggedId, desiredStart, duration) {
@@ -512,11 +513,10 @@
       if (ov > bestOverlap) { bestOverlap = ov; primary = c; }
     }
 
-    const draggedCenter = desiredStart + duration / 2;
     const conflictCenter = (primary.start + primary.end) / 2;
-    return draggedCenter <= conflictCenter
-      ? sweepRight(draggedId, desiredStart, duration)
-      : sweepLeft(draggedId, desiredStart, duration);
+    return desiredStart < conflictCenter
+      ? sweepLeft(draggedId, desiredStart, duration)
+      : sweepRight(draggedId, desiredStart, duration);
   }
 
   // ---------- layout ----------
@@ -632,6 +632,26 @@
     updateNowNext();
   }
 
+  // While Shift is held, snap to the hour/half-hour grid, but prefer
+  // snapping flush against a neighboring block's edge when close enough.
+  function shiftSnap(s, duration, draggedId) {
+    const gridSnap = Math.round(s / SNAP_MIN) * SNAP_MIN;
+    let best = gridSnap;
+    let bestDist = Math.abs(s - gridSnap);
+    const thresholdMin = Math.max(4, 10 / pxPerMin);
+    for (const b of blocks) {
+      if (b.id === draggedId) continue;
+      for (const cand of [b.end, b.start - duration]) {
+        const dist = Math.abs(s - cand);
+        if (dist <= thresholdMin && dist < bestDist) {
+          best = cand;
+          bestDist = dist;
+        }
+      }
+    }
+    return best;
+  }
+
   // ---------- drag & drop ----------
   function attachDrag(div, block) {
     div.addEventListener("pointerdown", (e) => {
@@ -662,7 +682,7 @@
       function onMove(ev) {
         const dx = ev.clientX - startX;
         let s = originalStart + dx / pxPerMin;
-        if (ev.shiftKey) s = Math.round(s / SNAP_MIN) * SNAP_MIN;
+        if (ev.shiftKey) s = shiftSnap(s, duration, block.id);
         s = clampStart(s);
         pendingStart = s;
         div.style.left = (s * pxPerMin) + "px";
